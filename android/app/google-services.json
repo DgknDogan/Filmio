@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "640047605009",
+    "project_id": "filmio-74b41",
+    "storage_bucket": "filmio-74b41.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:640047605009:android:826779897f5c522d0d18b0",
+        "android_client_info": {
+          "package_name": "com.example.filmio"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC07RtO2wf7NfHNPe7hoLZR4Jw7-qJV9vI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
