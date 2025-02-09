@@ -12,7 +12,7 @@ class RegisterCubit extends Cubit<RegisterState> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
 
-  Future<void> createAccount({
+  Future<bool> createAccount({
     required String email,
     required String password,
   }) async {
@@ -23,8 +23,10 @@ class RegisterCubit extends Cubit<RegisterState> {
           "liked_movies": [],
         },
       );
+      return true;
     } catch (e) {
       log(e.toString());
     }
+    return false;
   }
 }

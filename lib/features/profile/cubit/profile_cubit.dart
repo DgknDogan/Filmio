@@ -1,37 +1,19 @@
-import 'dart:developer';
-
 import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 part '../states/profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
-  ProfileCubit() : super(ProfileInitial(stage: 0));
+  ProfileCubit() : super(ProfileSetName(stage: 0, hasError: false));
 
   final _auth = FirebaseAuth.instance;
 
   void next() {
-    final nextStage = state.stage + 1;
-    switch (nextStage) {
-      case 1:
-        emit(ProfileSetName(stage: nextStage));
-        break;
-      case 2:
-        emit(ProfileSetPhoto(stage: nextStage, option: true));
-        break;
-    }
+    emit(ProfileSetPhoto(stage: 1, option: true, hasError: false));
   }
 
   void previous() {
-    final previousStage = state.stage - 1;
-    switch (previousStage) {
-      case 0:
-        emit(ProfileInitial(stage: previousStage));
-        break;
-      case 1:
-        emit(ProfileSetName(stage: previousStage));
-        break;
-    }
+    emit(ProfileSetName(stage: 0, hasError: false));
   }
 
   List<String> getMaleImages() {
@@ -52,8 +34,7 @@ class ProfileCubit extends Cubit<ProfileState> {
 
   void selectProfilePicture({required String image}) {
     final currentState = state as ProfileSetPhoto;
-    log(image.toString());
-    emit(currentState.copyWith(selectedPhoto: image));
+    emit(currentState.copyWith(selectedPhoto: image, hasError: false));
   }
 
   void changeOption() {
@@ -63,18 +44,29 @@ class ProfileCubit extends Cubit<ProfileState> {
 
   void changeName({required String name}) {
     final currentState = state as ProfileSetName;
-    emit(currentState.copyWith(currentName: name));
+    emit(currentState.copyWith(currentName: name, hasError: false));
   }
 
-  Future<void> setUsername() async {
+  Future<bool> setUsername() async {
     final currentState = state as ProfileSetName;
+    if (currentState.currentName?.isEmpty ?? true) {
+      emit(currentState.copyWith(hasError: true));
+      return false;
+    }
     await _auth.currentUser!.updateDisplayName(currentState.currentName);
-    log(_auth.currentUser!.displayName!);
+    emit(currentState.copyWith(hasError: false));
+    return true;
   }
 
-  Future<void> setProfilePicture() async {
+  Future<bool> setProfilePicture() async {
     final currentState = state as ProfileSetPhoto;
+    if (currentState.selectedPhoto == null) {
+      emit(currentState.copyWith(hasError: true));
+
+      return false;
+    }
     await _auth.currentUser!.updatePhotoURL(currentState.selectedPhoto.toString());
-    log(_auth.currentUser!.photoURL!);
+    emit(currentState.copyWith(hasError: false));
+    return true;
   }
 }

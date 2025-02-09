@@ -10,15 +10,17 @@ class LoginCubit extends Cubit<LoginState> {
 
   final _auth = FirebaseAuth.instance;
 
-  Future<void> login({
+  Future<bool> login({
     required String email,
     required String password,
   }) async {
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      final cred = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      return cred.user != null;
     } catch (e) {
       log(e.toString());
     }
+    return false;
   }
 
   void changeCheckBox(bool value) {

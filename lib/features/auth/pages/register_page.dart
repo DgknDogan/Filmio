@@ -99,10 +99,15 @@ class _RegisterFormState extends State<_RegisterForm> {
                 text: "Register",
                 width: double.infinity,
                 onPressed: () async {
-                  await context.read<RegisterCubit>().createAccount(
+                  final isUserCreated = await context.read<RegisterCubit>().createAccount(
                         email: emailController.text,
                         password: passwordController.text,
                       );
+                  if (isUserCreated && context.mounted) {
+                    emailController.clear();
+                    passwordController.clear();
+                    context.router.maybePop();
+                  }
                 },
               ),
             ],

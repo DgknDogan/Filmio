@@ -17,12 +17,14 @@ class CustomForm extends StatelessWidget {
       child: Column(
         children: [
           CustomTextField(
+            hasError: false,
             text: "Email",
             isObsecure: false,
             controller: emailController,
           ),
           SizedBox(height: 20.h),
           CustomTextField(
+            hasError: false,
             text: "Password",
             isObsecure: true,
             controller: passwordController,

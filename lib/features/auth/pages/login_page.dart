@@ -100,14 +100,18 @@ class _LoginFormState extends State<_LoginForm> {
             text: "Log In",
             width: double.infinity,
             onPressed: () async {
-              await context.read<LoginCubit>().login(
+              final isLoggedin = await context.read<LoginCubit>().login(
                     email: emailController.text,
                     password: passwordController.text,
                   );
-              if (context.mounted && auth.currentUser != null && auth.currentUser!.displayName == null) {
-                await context.router.push(SetProfile());
-              } else if (context.mounted && auth.currentUser != null && auth.currentUser!.displayName != null) {
+              if (context.mounted && isLoggedin && auth.currentUser!.displayName == null) {
+                context.router.push(SetProfile());
+              } else if (context.mounted && isLoggedin && auth.currentUser!.displayName != null) {
                 context.router.push(FilmHomeRoute());
+              }
+              if (isLoggedin) {
+                emailController.clear();
+                passwordController.clear();
               }
             },
           ),

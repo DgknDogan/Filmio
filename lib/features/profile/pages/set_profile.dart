@@ -18,20 +18,20 @@ class SetProfile extends StatefulWidget {
 }
 
 class _SetProfileState extends State<SetProfile> with TickerProviderStateMixin {
-  late final AnimationController nameAnimationController;
-  late final AnimationController photoAnimationController;
+  late final AnimationController nameErrorAnimationController;
+  late final AnimationController photoErrorAnimationController;
 
   @override
   void initState() {
-    nameAnimationController = AnimationController(vsync: this, duration: 1000.ms, reverseDuration: 0.ms);
-    photoAnimationController = AnimationController(vsync: this, duration: 1000.ms, reverseDuration: 0.ms);
+    nameErrorAnimationController = AnimationController(vsync: this, duration: 1000.ms, reverseDuration: 0.ms);
+    photoErrorAnimationController = AnimationController(vsync: this, duration: 1000.ms, reverseDuration: 0.ms);
     super.initState();
   }
 
   @override
   void dispose() {
-    nameAnimationController.dispose();
-    photoAnimationController.dispose();
+    nameErrorAnimationController.dispose();
+    photoErrorAnimationController.dispose();
     super.dispose();
   }
 
@@ -39,20 +39,7 @@ class _SetProfileState extends State<SetProfile> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ProfileCubit(),
-      child: BlocConsumer<ProfileCubit, ProfileState>(
-        listener: (context, state) {
-          if (state is ProfileInitial) {
-            nameAnimationController.reverse();
-          }
-          if (state is ProfileSetName) {
-            nameAnimationController.forward();
-            photoAnimationController.reverse();
-          }
-          if (state is ProfileSetPhoto) {
-            photoAnimationController.forward();
-            nameAnimationController.reverse();
-          }
-        },
+      child: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
           return Scaffold(
             body: SafeArea(
@@ -61,13 +48,16 @@ class _SetProfileState extends State<SetProfile> with TickerProviderStateMixin {
                 child: Column(
                   children: [
                     _SetName(
-                      nameAnimationController: nameAnimationController,
+                      errorAnimationController: nameErrorAnimationController,
                     ),
                     _SetPhoto(
-                      photoAnimationController: photoAnimationController,
+                      errorAnimationController: photoErrorAnimationController,
                     ),
                     Spacer(),
-                    _Buttons(),
+                    _Buttons(
+                      nameError: nameErrorAnimationController,
+                      photoError: photoErrorAnimationController,
+                    ),
                     SizedBox(height: 30.h),
                   ],
                 ),
@@ -81,30 +71,41 @@ class _SetProfileState extends State<SetProfile> with TickerProviderStateMixin {
 }
 
 class _SetName extends StatefulWidget {
-  final AnimationController nameAnimationController;
-  const _SetName({required this.nameAnimationController});
+  final AnimationController errorAnimationController;
+  const _SetName({
+    required this.errorAnimationController,
+  });
 
   @override
   State<_SetName> createState() => _SetNameState();
 }
 
-class _SetNameState extends State<_SetName> {
+class _SetNameState extends State<_SetName> with TickerProviderStateMixin {
+  late final AnimationController nameAnimationController;
   late final TextEditingController textEditingController;
+
   @override
   void initState() {
+    nameAnimationController = AnimationController(vsync: this, duration: 1000.ms, reverseDuration: 0.ms);
     textEditingController = TextEditingController();
     super.initState();
   }
 
   @override
   void dispose() {
+    nameAnimationController.dispose();
     textEditingController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProfileCubit, ProfileState>(
+    return BlocConsumer<ProfileCubit, ProfileState>(
+      listener: (context, state) {
+        if (state is ProfileSetName) {
+          nameAnimationController.forward();
+        }
+      },
       builder: (context, state) {
         if (state is ProfileSetName) {
           return Column(
@@ -120,14 +121,23 @@ class _SetNameState extends State<_SetName> {
               ),
               SizedBox(height: 30.h),
               CustomTextField(
+                hasError: state.hasError,
                 maxLength: 10,
                 controller: textEditingController,
                 onChanged: (name) => context.read<ProfileCubit>().changeName(name: textEditingController.text),
                 isObsecure: false,
                 text: "Name",
-              ),
+              ).animate(controller: widget.errorAnimationController)
+                ..shakeX(
+                  amount: 5,
+                  hz: 5,
+                  duration: 500.ms,
+                  curve: Curves.easeInOut,
+                ),
             ],
-          ).animate(controller: widget.nameAnimationController)
+          ).animate(
+            controller: nameAnimationController,
+          )
             ..fadeIn(begin: 0, duration: 1000.ms, delay: 500.ms, curve: Curves.easeInOut)
             ..moveY(begin: 150, end: 200, duration: 1000.ms, delay: 500.ms, curve: Curves.easeInOut);
         } else {
@@ -138,22 +148,61 @@ class _SetNameState extends State<_SetName> {
   }
 }
 
-class _SetPhoto extends StatelessWidget {
-  final AnimationController photoAnimationController;
-  const _SetPhoto({required this.photoAnimationController});
+class _SetPhoto extends StatefulWidget {
+  final AnimationController errorAnimationController;
+  const _SetPhoto({
+    required this.errorAnimationController,
+  });
+
+  @override
+  State<_SetPhoto> createState() => _SetPhotoState();
+}
+
+class _SetPhotoState extends State<_SetPhoto> with TickerProviderStateMixin {
+  late final AnimationController photoAnimationController;
+
+  @override
+  void initState() {
+    photoAnimationController = AnimationController(vsync: this, duration: 1000.ms, reverseDuration: 0.ms);
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProfileCubit, ProfileState>(
+    return BlocConsumer<ProfileCubit, ProfileState>(
+      listener: (context, state) {
+        if (state is ProfileSetPhoto) {
+          photoAnimationController.forward();
+        }
+      },
       builder: (context, state) {
         if (state is ProfileSetPhoto) {
           return Column(
             children: [
-              CircleAvatar(
-                backgroundImage: state.selectedPhoto != null ? Image.asset(state.selectedPhoto!).image : null,
-                backgroundColor: Color(0xff606c38),
-                radius: 70.r,
-              ),
+              AnimatedContainer(
+                duration: 500.ms,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(90.r),
+                  border: state.hasError
+                      ? Border.all(
+                          color: Colors.red.shade600,
+                          width: 2.5.r,
+                        )
+                      : null,
+                ),
+                child: CircleAvatar(
+                  backgroundImage: state.selectedPhoto != null ? Image.asset(state.selectedPhoto!).image : null,
+                  backgroundColor: Color(0xff606c38),
+                  radius: 70.r,
+                ),
+              ).animate(controller: widget.errorAnimationController)
+                ..shakeX(
+                  amount: 5,
+                  hz: 5,
+                  duration: 500.ms,
+                  curve: Curves.easeInOut,
+                ),
               Text(
                 "Set a profile picture",
                 style: TextStyle(
@@ -235,38 +284,40 @@ class _SetPhoto extends StatelessWidget {
 }
 
 class _Buttons extends StatelessWidget {
-  const _Buttons();
+  final AnimationController nameError;
+  final AnimationController photoError;
+
+  const _Buttons({required this.nameError, required this.photoError});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            state.stage != 0
-                ? CustomButton(
-                    text: "Previous",
-                    width: 100.w,
-                    onPressed: () {
-                      context.read<ProfileCubit>().previous();
-                    },
-                  )
-                : SizedBox(),
             CustomButton(
-              text: state.stage != 2 ? "Next" : "Finish",
+              text: state.stage != 1 ? "Next" : "Finish",
               width: 100.w,
               onPressed: () async {
                 if (state is ProfileSetName) {
-                  await context.read<ProfileCubit>().setUsername();
+                  final isUsernameSelected = await context.read<ProfileCubit>().setUsername();
+                  if (!isUsernameSelected) {
+                    nameError.repeat(count: 1);
+                    return;
+                  }
+                  if (context.mounted) {
+                    context.read<ProfileCubit>().next();
+                  }
                 } else if (state is ProfileSetPhoto) {
-                  await context.read<ProfileCubit>().setProfilePicture();
+                  final isPhotoSelected = await context.read<ProfileCubit>().setProfilePicture();
+                  if (!isPhotoSelected) {
+                    photoError.repeat(count: 1);
+                    return;
+                  }
                   if (context.mounted) {
                     context.router.push(FilmHomeRoute());
                   }
-                }
-                if (context.mounted) {
-                  context.read<ProfileCubit>().next();
                 }
               },
             )
