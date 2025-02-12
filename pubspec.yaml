@@ -26,7 +26,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  dio: ^5.7.0
+  dio: ^5.8.0+1
   flutter_screenutil: ^5.9.3
   bloc: ^9.0.0
   flutter_bloc: ^9.0.0
@@ -41,6 +41,11 @@ dependencies:
   animations: ^2.0.11
   animate_do: ^3.3.4
   flutter_animate: ^4.5.2
+  equatable: ^2.0.7
+  json_annotation: ^4.9.0
+  json_serializable: ^6.9.3
+  cached_network_image: ^3.4.1
+  flutter_cache_manager: ^3.4.1
 
 dev_dependencies:
   flutter_test:

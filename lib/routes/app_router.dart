@@ -7,13 +7,13 @@ class AppRouter extends RootStackRouter {
   List<AutoRoute> get routes => [
         AutoRoute(
           page: LoginRoute.page,
-          initial: true,
         ),
         AutoRoute(
           page: RegisterRoute.page,
         ),
         AutoRoute(
           page: FilmHomeRoute.page,
+          initial: true,
         ),
         AutoRoute(
           page: SetProfile.page,

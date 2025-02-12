@@ -12,8 +12,8 @@
 import 'package:auto_route/auto_route.dart' as _i5;
 import 'package:filmio/features/auth/pages/login_page.dart' as _i2;
 import 'package:filmio/features/auth/pages/register_page.dart' as _i3;
+import 'package:filmio/features/auth/pages/set_profile_page.dart' as _i4;
 import 'package:filmio/features/film/pages/film_home_page.dart' as _i1;
-import 'package:filmio/features/profile/pages/set_profile.dart' as _i4;
 
 /// generated route for
 /// [_i1.FilmHomePage]

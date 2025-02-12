@@ -1,13 +1,13 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:filmio/features/profile/cubit/profile_cubit.dart';
 import 'package:filmio/routes/app_router.gr.dart';
-import 'package:filmio/utils/custom/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../utils/custom/custom_button.dart';
 import '../../../utils/custom/custom_text_field.dart';
+import '../cubit/profile_cubit.dart';
 
 @RoutePage()
 class SetProfile extends StatefulWidget {
@@ -23,8 +23,16 @@ class _SetProfileState extends State<SetProfile> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    nameErrorAnimationController = AnimationController(vsync: this, duration: 1000.ms, reverseDuration: 0.ms);
-    photoErrorAnimationController = AnimationController(vsync: this, duration: 1000.ms, reverseDuration: 0.ms);
+    nameErrorAnimationController = AnimationController(
+      vsync: this,
+      duration: 1000.ms,
+      reverseDuration: 0.ms,
+    );
+    photoErrorAnimationController = AnimationController(
+      vsync: this,
+      duration: 1000.ms,
+      reverseDuration: 0.ms,
+    );
     super.initState();
   }
 
