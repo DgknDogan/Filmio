@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:bloc/bloc.dart';
 
 import '../data/film_repository.dart';
@@ -14,6 +16,7 @@ class FilmHomePageCubit extends Cubit<FilmHomePageState> {
             isLoading: true,
           ),
         ) {
+    getRandomTopRatedMovie();
     getPopularMovies();
     getTopRatedMovies();
   }
@@ -30,11 +33,17 @@ class FilmHomePageCubit extends Cubit<FilmHomePageState> {
   }
 
   Future<void> getTopRatedMovies() async {
-    final topFilmsList = await _filmRepository.getTopRatedMovies();
+    final topFilmsList = await _filmRepository.getTopRatedMovies(page: 1);
     if (topFilmsList.isEmpty) {
       emit(state.copyWith(topFilmsList: topFilmsList));
       return;
     }
-    emit(state.copyWith(topFilmsList: topFilmsList));
+    emit(state.copyWith(topFilmsList: topFilmsList, isLoading: false));
+  }
+
+  Future<void> getRandomTopRatedMovie() async {
+    final topFilmsList = await _filmRepository.getTopRatedMovies(page: 2);
+    final randomSelectedFilm = topFilmsList[Random().nextInt(topFilmsList.length)];
+    emit(state.copyWith(recommendedFilm: randomSelectedFilm));
   }
 }

@@ -46,6 +46,7 @@ dependencies:
   json_serializable: ^6.9.3
   cached_network_image: ^3.4.1
   flutter_cache_manager: ^3.4.1
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,6 @@
-import 'package:auto_route/annotations.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:filmio/routes/app_router.gr.dart';
 import 'package:filmio/utils/extentions.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -22,10 +23,11 @@ class FilmHomePage extends StatelessWidget {
         create: (context) => FilmHomePageCubit(),
         child: BlocBuilder<FilmHomePageCubit, FilmHomePageState>(
           builder: (context, state) {
-            return SafeArea(
-              child: state.isLoading
+            return SingleChildScrollView(
+              child: !state.isLoading
                   ? Column(
                       children: [
+                        _RecommendedSection(),
                         SizedBox(height: 20.h),
                         _ScrollableFilmList(
                           title: "Popular Movies",
@@ -36,17 +38,66 @@ class FilmHomePage extends StatelessWidget {
                           title: "Top Movies",
                           filmList: state.topFilmsList,
                         ),
+                        SizedBox(height: 40.h),
                       ],
                     )
-                  : Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xff283618),
-                      ),
-                    ),
+                  : SizedBox(),
             );
           },
         ),
       ),
+    );
+  }
+}
+
+class _RecommendedSection extends StatelessWidget {
+  const _RecommendedSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<FilmHomePageCubit, FilmHomePageState>(
+      builder: (context, state) {
+        return Container(
+          padding: EdgeInsets.only(top: 40.h),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xff283618),
+                Color(0xffFEFAE0),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          height: 350.h,
+          width: double.infinity,
+          child: Column(
+            spacing: 25.h,
+            children: [
+              SizedBox(
+                height: 250.h,
+                child: GestureDetector(
+                  onTap: () => context.router.push(FilmDetailsRoute(film: state.recommendedFilm!, heroTag: "movie_poster")),
+                  child: Hero(
+                    tag: "movie_poster",
+                    child: CachedNetworkImage(
+                      imageUrl: state.recommendedFilm!.posterPath!.coverImage,
+                      memCacheHeight: 300,
+                    ),
+                  ),
+                ),
+              ),
+              Text(
+                "Recommended for you",
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -102,25 +153,26 @@ class _FilmCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 200.h,
+      // width: 133.w,
       clipBehavior: Clip.hardEdge,
       margin: EdgeInsets.only(right: 20.r),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.r),
       ),
-      child: Column(
-        children: [
-          CachedNetworkImage(
+      child: GestureDetector(
+        onTap: () => context.router.push(FilmDetailsRoute(film: film, heroTag: film.title!)),
+        child: Hero(
+          tag: film.title!,
+          child: CachedNetworkImage(
             imageUrl: film.posterPath!.coverImage,
             placeholder: (context, url) => Container(
-              height: 200,
-              width: 133,
               decoration: BoxDecoration(color: Colors.transparent),
             ),
             errorWidget: (context, url, error) => SizedBox(),
-            memCacheHeight: 200,
-            memCacheWidth: 133,
+            memCacheHeight: 300,
           ),
-        ],
+        ),
       ),
     );
   }

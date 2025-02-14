@@ -39,7 +39,7 @@ final class FilmRepository {
     return filmList;
   }
 
-  Future<List<FilmModel>> getTopRatedMovies() async {
+  Future<List<FilmModel>> getTopRatedMovies({required int page}) async {
     final List<FilmModel> filmList = [];
     final headers = {
       "accept": "application/json",
@@ -47,7 +47,7 @@ final class FilmRepository {
     };
     final queryParameters = {
       "language": "en-US",
-      "page": 1,
+      "page": page,
     };
     try {
       final response = await _dio.get(
