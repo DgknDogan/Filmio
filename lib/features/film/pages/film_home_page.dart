@@ -1,12 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:filmio/routes/app_router.gr.dart';
 import 'package:filmio/utils/extentions.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../routes/app_router.gr.dart';
 import '../cubit/film_home_page_cubit.dart';
 import '../models/film_model.dart';
 
@@ -19,32 +18,29 @@ class FilmHomePage extends StatelessWidget {
     // final auth = FirebaseAuth.instance;
 
     return Scaffold(
-      body: BlocProvider(
-        create: (context) => FilmHomePageCubit(),
-        child: BlocBuilder<FilmHomePageCubit, FilmHomePageState>(
-          builder: (context, state) {
-            return SingleChildScrollView(
-              child: !state.isLoading
-                  ? Column(
-                      children: [
-                        _RecommendedSection(),
-                        SizedBox(height: 20.h),
-                        _ScrollableFilmList(
-                          title: "Popular Movies",
-                          filmList: state.popularFilmsList,
-                        ),
-                        SizedBox(height: 20.h),
-                        _ScrollableFilmList(
-                          title: "Top Movies",
-                          filmList: state.topFilmsList,
-                        ),
-                        SizedBox(height: 40.h),
-                      ],
-                    )
-                  : SizedBox(),
-            );
-          },
-        ),
+      body: BlocBuilder<FilmHomePageCubit, FilmHomePageState>(
+        builder: (context, state) {
+          return SingleChildScrollView(
+            child: !state.isLoading
+                ? Column(
+                    children: [
+                      _RecommendedSection(),
+                      SizedBox(height: 20.h),
+                      _ScrollableFilmList(
+                        title: "Popular Movies",
+                        filmList: state.popularFilmsList,
+                      ),
+                      SizedBox(height: 20.h),
+                      _ScrollableFilmList(
+                        title: "Top Movies",
+                        filmList: state.topFilmsList,
+                      ),
+                      SizedBox(height: 40.h),
+                    ],
+                  )
+                : SizedBox(),
+          );
+        },
       ),
     );
   }

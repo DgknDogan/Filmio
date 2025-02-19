@@ -107,7 +107,7 @@ class _LoginFormState extends State<_LoginForm> {
               if (context.mounted && isLoggedin && auth.currentUser!.displayName == null) {
                 context.router.push(SetProfile());
               } else if (context.mounted && isLoggedin && auth.currentUser!.displayName != null) {
-                context.router.push(FilmHomeRoute());
+                context.router.push(SplashRoute());
               }
               if (isLoggedin) {
                 emailController.clear();

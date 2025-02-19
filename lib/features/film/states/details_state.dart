@@ -1,4 +1,4 @@
-part of 'details_cubit.dart';
+part of '../cubit/details_cubit.dart';
 
 class DetailsState {
   final bool isMovieLiked;

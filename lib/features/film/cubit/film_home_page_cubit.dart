@@ -16,12 +16,17 @@ class FilmHomePageCubit extends Cubit<FilmHomePageState> {
             isLoading: true,
           ),
         ) {
-    getRandomTopRatedMovie();
-    getPopularMovies();
-    getTopRatedMovies();
+    _init();
   }
 
   final _filmRepository = FilmRepository();
+
+  Future<void> _init() async {
+    await getRandomTopRatedMovie();
+    await getPopularMovies();
+    await getTopRatedMovies();
+    emit(state.copyWith(isLoading: false));
+  }
 
   Future<void> getPopularMovies() async {
     final popularFilmsList = await _filmRepository.getPopularMovies();
@@ -38,7 +43,7 @@ class FilmHomePageCubit extends Cubit<FilmHomePageState> {
       emit(state.copyWith(topFilmsList: topFilmsList));
       return;
     }
-    emit(state.copyWith(topFilmsList: topFilmsList, isLoading: false));
+    emit(state.copyWith(topFilmsList: topFilmsList));
   }
 
   Future<void> getRandomTopRatedMovie() async {

@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:filmio/routes/app_router.gr.dart';
 import 'package:flutter/material.dart';
+
+import 'app_router.gr.dart';
 
 @AutoRouterConfig()
 class AppRouter extends RootStackRouter {
@@ -16,8 +17,28 @@ class AppRouter extends RootStackRouter {
           page: SetProfile.page,
         ),
         CustomRoute(
-          page: FilmHomeRoute.page,
+          page: SplashRoute.page,
           initial: true,
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+        ),
+        CustomRoute(
+          page: HomeRoute.page,
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          children: [
+            CustomRoute(
+              page: FilmHomeRoute.page,
+              transitionsBuilder: TransitionsBuilders.fadeIn,
+              initial: true,
+            ),
+            CustomRoute(
+              page: SeriesHomeRoute.page,
+              transitionsBuilder: TransitionsBuilders.fadeIn,
+            ),
+            CustomRoute(
+              page: AccountRoute.page,
+              transitionsBuilder: TransitionsBuilders.fadeIn,
+            )
+          ],
         ),
         CustomRoute(
           page: FilmDetailsRoute.page,

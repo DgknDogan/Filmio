@@ -324,7 +324,7 @@ class _Buttons extends StatelessWidget {
                     return;
                   }
                   if (context.mounted) {
-                    context.router.push(FilmHomeRoute());
+                    context.router.push(SplashRoute());
                   }
                 }
               },

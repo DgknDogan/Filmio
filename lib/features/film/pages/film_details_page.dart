@@ -22,7 +22,7 @@ class FilmDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => DetailsCubit(),
+      create: (context) => DetailsCubit(film: film),
       child: BlocBuilder<DetailsCubit, DetailsState>(
         builder: (context, state) {
           return Scaffold(
@@ -39,7 +39,7 @@ class FilmDetailsPage extends StatelessWidget {
                   ),
                   actions: [
                     IconButton(
-                      onPressed: () => context.read<DetailsCubit>().likeMovie(),
+                      onPressed: () => !state.isMovieLiked ? context.read<DetailsCubit>().likeMovie() : context.read<DetailsCubit>().dislikeMovie(),
                       icon: Icon(
                         Icons.star_outlined,
                         color: state.isMovieLiked ? Colors.green.shade500 : Colors.white70,
@@ -49,6 +49,7 @@ class FilmDetailsPage extends StatelessWidget {
                   backgroundColor: Color(0xff283618),
                 ),
                 SliverFillRemaining(
+                  hasScrollBody: false,
                   child: Column(
                     spacing: 20.h,
                     children: [
