@@ -18,8 +18,8 @@ class AppRouter extends RootStackRouter {
         ),
         CustomRoute(
           page: SplashRoute.page,
-          initial: true,
           transitionsBuilder: TransitionsBuilders.fadeIn,
+          initial: true,
         ),
         CustomRoute(
           page: HomeRoute.page,

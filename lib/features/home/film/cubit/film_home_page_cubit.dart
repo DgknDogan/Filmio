@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:bloc/bloc.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../data/film_repository.dart';
 import '../models/film_model.dart';
@@ -25,7 +26,12 @@ class FilmHomePageCubit extends Cubit<FilmHomePageState> {
     await getRandomTopRatedMovie();
     await getPopularMovies();
     await getTopRatedMovies();
-    emit(state.copyWith(isLoading: false));
+    Future.delayed(
+      1.seconds,
+      () {
+        emit(state.copyWith(isLoading: false));
+      },
+    );
   }
 
   Future<void> getPopularMovies() async {

@@ -1,25 +1,16 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:filmio/features/film/cubit/film_home_page_cubit.dart';
+import 'package:filmio/features/home/film/cubit/film_home_page_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../routes/app_router.gr.dart';
-import '../../account/cubit/account_cubit.dart';
-import '../../series/cubit/series_home_page_cubit.dart';
+import '../account/cubit/account_cubit.dart';
+import '../series/cubit/series_home_page_cubit.dart';
 
 @RoutePage()
 class HomePage extends StatefulWidget {
-  final FilmHomePageCubit filmHomePageCubit;
-  final SeriesHomePageCubit seriesHomePageCubit;
-  final AccountCubit accountCubit;
-
-  const HomePage({
-    super.key,
-    required this.filmHomePageCubit,
-    required this.seriesHomePageCubit,
-    required this.accountCubit,
-  });
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -30,9 +21,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider.value(value: widget.filmHomePageCubit),
-        BlocProvider.value(value: widget.seriesHomePageCubit),
-        BlocProvider.value(value: widget.accountCubit),
+        BlocProvider<FilmHomePageCubit>(create: (context) => FilmHomePageCubit()),
+        BlocProvider<SeriesHomePageCubit>(create: (context) => SeriesHomePageCubit()),
+        BlocProvider<AccountCubit>(create: (context) => AccountCubit()),
       ],
       child: AutoTabsRouter(
         homeIndex: 0,
@@ -46,15 +37,14 @@ class _HomePageState extends State<HomePage> {
           return Scaffold(
             body: child,
             bottomNavigationBar: BottomNavigationBar(
-              elevation: 0,
-              unselectedItemColor: Color(0xff283618),
-              selectedItemColor: Colors.white,
-              backgroundColor: Color(0xff606c38),
               iconSize: 26.r,
               selectedFontSize: 18.sp,
               unselectedFontSize: 16.sp,
               currentIndex: tabsRouter.activeIndex,
               onTap: (index) {
+                if (context.read<FilmHomePageCubit>().state.isLoading) {
+                  return;
+                }
                 tabsRouter.setActiveIndex(index);
               },
               items: [

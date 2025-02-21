@@ -10,20 +10,16 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i10;
-import 'package:filmio/features/account/cubit/account_cubit.dart' as _i15;
-import 'package:filmio/features/account/pages/account_page.dart' as _i1;
 import 'package:filmio/features/auth/pages/login_page.dart' as _i5;
 import 'package:filmio/features/auth/pages/register_page.dart' as _i6;
 import 'package:filmio/features/auth/pages/set_profile_page.dart' as _i8;
-import 'package:filmio/features/film/cubit/film_home_page_cubit.dart' as _i13;
-import 'package:filmio/features/film/models/film_model.dart' as _i12;
-import 'package:filmio/features/film/pages/film_details_page.dart' as _i2;
-import 'package:filmio/features/film/pages/film_home_page.dart' as _i3;
+import 'package:filmio/features/home/account/pages/account_page.dart' as _i1;
+import 'package:filmio/features/home/film/models/film_model.dart' as _i12;
+import 'package:filmio/features/home/film/pages/film_details_page.dart' as _i2;
+import 'package:filmio/features/home/film/pages/film_home_page.dart' as _i3;
 import 'package:filmio/features/home/pages/home_page.dart' as _i4;
 import 'package:filmio/features/home/pages/splash_page.dart' as _i9;
-import 'package:filmio/features/series/cubit/series_home_page_cubit.dart'
-    as _i14;
-import 'package:filmio/features/series/pages/series_home_page.dart' as _i7;
+import 'package:filmio/features/home/series/pages/series_home_page.dart' as _i7;
 import 'package:flutter/material.dart' as _i11;
 
 /// generated route for
@@ -108,60 +104,18 @@ class FilmHomeRoute extends _i10.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i4.HomePage]
-class HomeRoute extends _i10.PageRouteInfo<HomeRouteArgs> {
-  HomeRoute({
-    _i11.Key? key,
-    required _i13.FilmHomePageCubit filmHomePageCubit,
-    required _i14.SeriesHomePageCubit seriesHomePageCubit,
-    required _i15.AccountCubit accountCubit,
-    List<_i10.PageRouteInfo>? children,
-  }) : super(
-         HomeRoute.name,
-         args: HomeRouteArgs(
-           key: key,
-           filmHomePageCubit: filmHomePageCubit,
-           seriesHomePageCubit: seriesHomePageCubit,
-           accountCubit: accountCubit,
-         ),
-         initialChildren: children,
-       );
+class HomeRoute extends _i10.PageRouteInfo<void> {
+  const HomeRoute({List<_i10.PageRouteInfo>? children})
+    : super(HomeRoute.name, initialChildren: children);
 
   static const String name = 'HomeRoute';
 
   static _i10.PageInfo page = _i10.PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<HomeRouteArgs>();
-      return _i4.HomePage(
-        key: args.key,
-        filmHomePageCubit: args.filmHomePageCubit,
-        seriesHomePageCubit: args.seriesHomePageCubit,
-        accountCubit: args.accountCubit,
-      );
+      return const _i4.HomePage();
     },
   );
-}
-
-class HomeRouteArgs {
-  const HomeRouteArgs({
-    this.key,
-    required this.filmHomePageCubit,
-    required this.seriesHomePageCubit,
-    required this.accountCubit,
-  });
-
-  final _i11.Key? key;
-
-  final _i13.FilmHomePageCubit filmHomePageCubit;
-
-  final _i14.SeriesHomePageCubit seriesHomePageCubit;
-
-  final _i15.AccountCubit accountCubit;
-
-  @override
-  String toString() {
-    return 'HomeRouteArgs{key: $key, filmHomePageCubit: $filmHomePageCubit, seriesHomePageCubit: $seriesHomePageCubit, accountCubit: $accountCubit}';
-  }
 }
 
 /// generated route for

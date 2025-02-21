@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 
-import '../../auth/data/user_repository.dart';
+import '../../../auth/data/user_repository.dart';
 import '../models/film_model.dart';
 
 part '../states/details_state.dart';

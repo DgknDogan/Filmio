@@ -30,11 +30,11 @@ class CustomTextField extends StatelessWidget {
         ),
         border: Border(
           bottom: BorderSide(
-            color: !hasError ? Colors.black : Colors.red.shade600,
+            color: !hasError ? Colors.white : Colors.red.shade600,
             width: 2.5.w,
           ),
           right: BorderSide(
-            color: !hasError ? Colors.black : Colors.red.shade600,
+            color: !hasError ? Colors.white : Colors.red.shade600,
             width: 2.5.w,
           ),
         ),

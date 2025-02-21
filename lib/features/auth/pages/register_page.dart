@@ -26,6 +26,7 @@ class RegisterPage extends StatelessWidget {
                 Image.asset(
                   "assets/logo.png",
                   height: 200.h,
+                  color: Colors.white,
                 ),
                 SizedBox(height: 20.h),
                 _RegisterForm(),
@@ -69,7 +70,7 @@ class _RegisterFormState extends State<_RegisterForm> {
       builder: (context, state) {
         return Container(
           decoration: BoxDecoration(
-            color: Color(0xffCCD5AE),
+            color: Color(0xff2a2a2a),
             borderRadius: BorderRadius.all(
               Radius.circular(20.r),
             ),
@@ -80,12 +81,7 @@ class _RegisterFormState extends State<_RegisterForm> {
             children: [
               Text(
                 "REGISTER",
-                style: TextStyle(
-                  color: Color(0xff283618),
-                  fontSize: 24.sp,
-                  letterSpacing: 2,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               SizedBox(height: 20.h),
               CustomForm(
@@ -132,7 +128,7 @@ class _FormSubTexts extends StatelessWidget {
           },
           child: Text(
             "Have an account?",
-            style: TextStyle(color: Color(0xff283618)),
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
       ],

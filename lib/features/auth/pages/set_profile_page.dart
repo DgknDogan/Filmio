@@ -120,12 +120,7 @@ class _SetNameState extends State<_SetName> with TickerProviderStateMixin {
             children: [
               Text(
                 "Your name is ${state.currentName ?? ""}",
-                style: TextStyle(
-                  color: Color(0xff283618),
-                  fontSize: 24.sp,
-                  letterSpacing: 2,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               SizedBox(height: 30.h),
               CustomTextField(
@@ -201,7 +196,7 @@ class _SetPhotoState extends State<_SetPhoto> with TickerProviderStateMixin {
                 ),
                 child: CircleAvatar(
                   backgroundImage: state.selectedPhoto != null ? Image.asset(state.selectedPhoto!).image : null,
-                  backgroundColor: Color(0xff606c38),
+                  backgroundColor: Color(0xff2a2a2a),
                   radius: 70.r,
                 ),
               ).animate(controller: widget.errorAnimationController)
@@ -211,14 +206,10 @@ class _SetPhotoState extends State<_SetPhoto> with TickerProviderStateMixin {
                   duration: 500.ms,
                   curve: Curves.easeInOut,
                 ),
+              SizedBox(height: 10.h),
               Text(
                 "Set a profile picture",
-                style: TextStyle(
-                  color: Color(0xff283618),
-                  fontSize: 24.sp,
-                  letterSpacing: 2,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               SizedBox(height: 20.h),
               Stack(
@@ -261,7 +252,7 @@ class _SetPhotoState extends State<_SetPhoto> with TickerProviderStateMixin {
                       child: Icon(
                         Icons.arrow_back_ios_rounded,
                         size: 25.r,
-                        color: Color(0xff283618),
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -272,7 +263,7 @@ class _SetPhotoState extends State<_SetPhoto> with TickerProviderStateMixin {
                       child: Icon(
                         Icons.arrow_forward_ios_rounded,
                         size: 25.r,
-                        color: Color(0xff283618),
+                        color: Colors.white,
                       ),
                     ),
                   ),

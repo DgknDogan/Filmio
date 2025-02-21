@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../utils/custom/custom_button.dart';
 import '../../../utils/custom/custom_form.dart';
 import '../cubit/login_cubit.dart';
+import '../widgets/form_container.dart';
 
 @RoutePage()
 class LoginPage extends StatelessWidget {
@@ -28,6 +29,7 @@ class LoginPage extends StatelessWidget {
                 Image.asset(
                   "assets/logo.png",
                   height: 200.h,
+                  color: Colors.white,
                 ),
                 SizedBox(height: 20.h),
                 _LoginForm(),
@@ -68,25 +70,12 @@ class _LoginFormState extends State<_LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Color(0xffCCD5AE),
-        borderRadius: BorderRadius.all(
-          Radius.circular(20.r),
-        ),
-      ),
-      margin: EdgeInsets.symmetric(horizontal: 20.w),
-      padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
+    return FormContainer(
       child: Column(
         children: [
           Text(
             "LOGIN",
-            style: TextStyle(
-              color: Color(0xff283618),
-              fontSize: 24.sp,
-              letterSpacing: 2,
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           SizedBox(height: 20.h),
           CustomForm(
@@ -135,7 +124,7 @@ class _FormSubTexts extends StatelessWidget {
               children: [
                 Checkbox(
                   splashRadius: 0,
-                  activeColor: Color(0xff283618),
+                  activeColor: Color(0xff1a1a1a),
                   visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   value: state.isChecked,
@@ -146,7 +135,7 @@ class _FormSubTexts extends StatelessWidget {
                 SizedBox(width: 5.w),
                 Text(
                   "Remember Me",
-                  style: TextStyle(color: Color(0xff283618)),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
             ),
@@ -156,9 +145,7 @@ class _FormSubTexts extends StatelessWidget {
               },
               child: Text(
                 "Create an account",
-                style: TextStyle(
-                  color: Color(0xff283618),
-                ),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
           ],

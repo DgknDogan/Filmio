@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../film/models/film_model.dart';
+import '../../home/film/models/film_model.dart';
 
 final class UserRepository {
   final _db = FirebaseFirestore.instance;

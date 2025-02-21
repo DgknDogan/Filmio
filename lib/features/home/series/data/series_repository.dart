@@ -2,15 +2,15 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 
-import '../../../utils/api_key.dart';
-import '../../../utils/constants.dart';
-import '../models/film_model.dart';
+import '../../../../utils/api_key.dart';
+import '../../../../utils/constants.dart';
+import '../models/series_model.dart';
 
-final class FilmRepository {
+class SeriesRepository {
   final _dio = Dio();
 
-  Future<List<FilmModel>> getPopularMovies() async {
-    final List<FilmModel> filmList = [];
+  Future<List<SeriesModel>> getPopularSeries() async {
+    final List<SeriesModel> seriesList = [];
     final headers = {
       "accept": "application/json",
       "Authorization": "Bearer $apiKey",
@@ -21,7 +21,7 @@ final class FilmRepository {
     };
     try {
       final response = await _dio.get(
-        popularMoviesUrl,
+        popularSeriesUrl,
         queryParameters: queryParameters,
         options: Options(
           headers: headers,
@@ -29,18 +29,18 @@ final class FilmRepository {
       );
       final resultList = response.data["results"] as List<dynamic>;
       for (var result in resultList) {
-        final film = FilmModel.fromJson(result);
-        filmList.add(film);
+        final film = SeriesModel.fromJson(result);
+        seriesList.add(film);
       }
-      return filmList;
+      return seriesList;
     } catch (e) {
       log(e.toString());
     }
-    return filmList;
+    return seriesList;
   }
 
-  Future<List<FilmModel>> getTopRatedMovies({required int page}) async {
-    final List<FilmModel> filmList = [];
+  Future<List<SeriesModel>> getTopRatedSeries({required int page}) async {
+    final List<SeriesModel> seriesList = [];
     final headers = {
       "accept": "application/json",
       "Authorization": "Bearer $apiKey",
@@ -51,7 +51,7 @@ final class FilmRepository {
     };
     try {
       final response = await _dio.get(
-        topRatedMoviesUrl,
+        topRatedSeriesUrl,
         queryParameters: queryParameters,
         options: Options(
           headers: headers,
@@ -59,13 +59,13 @@ final class FilmRepository {
       );
       final resultList = response.data["results"] as List<dynamic>;
       for (var result in resultList) {
-        final film = FilmModel.fromJson(result);
-        filmList.add(film);
+        final film = SeriesModel.fromJson(result);
+        seriesList.add(film);
       }
-      return filmList;
+      return seriesList;
     } catch (e) {
       log(e.toString());
     }
-    return filmList;
+    return seriesList;
   }
 }
