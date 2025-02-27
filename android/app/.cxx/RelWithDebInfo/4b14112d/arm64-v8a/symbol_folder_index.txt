@@ -1,0 +1,1 @@
+C:\dev\apps\filmio\build\app\intermediates\cxx\RelWithDebInfo\4b14112d\obj\arm64-v8a

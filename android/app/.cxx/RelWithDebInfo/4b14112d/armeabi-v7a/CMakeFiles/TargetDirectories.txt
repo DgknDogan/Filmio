@@ -1,0 +1,2 @@
+C:/dev/apps/filmio/android/app/.cxx/RelWithDebInfo/4b14112d/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/dev/apps/filmio/android/app/.cxx/RelWithDebInfo/4b14112d/armeabi-v7a/CMakeFiles/rebuild_cache.dir

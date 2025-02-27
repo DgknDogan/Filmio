@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../utils/custom/custom_button.dart';
 import '../../../utils/custom/custom_form.dart';
 import '../cubit/register_cubit.dart';
+import '../widgets/form_container.dart';
 
 @RoutePage()
 class RegisterPage extends StatelessWidget {
@@ -18,20 +19,20 @@ class RegisterPage extends StatelessWidget {
       body: BlocProvider(
         create: (context) => RegisterCubit(),
         child: SafeArea(
-          child: SingleChildScrollView(
-            physics: NeverScrollableScrollPhysics(),
-            child: Column(
-              children: [
-                SizedBox(height: 20.h),
-                Image.asset(
-                  "assets/logo.png",
-                  height: 200.h,
-                  color: Colors.white,
-                ),
-                SizedBox(height: 20.h),
-                _RegisterForm(),
-              ],
-            ),
+          child: Stack(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    "assets/logo.png",
+                    height: 200.h,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+              _RegisterForm(),
+            ],
           ),
         ),
       ),
@@ -68,45 +69,40 @@ class _RegisterFormState extends State<_RegisterForm> {
   Widget build(BuildContext context) {
     return BlocBuilder<RegisterCubit, RegisterState>(
       builder: (context, state) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Color(0xff2a2a2a),
-            borderRadius: BorderRadius.all(
-              Radius.circular(20.r),
+        return Center(
+          child: FormContainer(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "REGISTER",
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                SizedBox(height: 20.h),
+                CustomForm(
+                  emailController: emailController,
+                  passwordController: passwordController,
+                ),
+                SizedBox(height: 10.h),
+                _FormSubTexts(),
+                SizedBox(height: 30.h),
+                CustomButton(
+                  text: "Register",
+                  width: double.infinity,
+                  onPressed: () async {
+                    final isUserCreated = await context.read<RegisterCubit>().createAccount(
+                          email: emailController.text,
+                          password: passwordController.text,
+                        );
+                    if (isUserCreated && context.mounted) {
+                      emailController.clear();
+                      passwordController.clear();
+                      context.router.maybePop();
+                    }
+                  },
+                ),
+              ],
             ),
-          ),
-          margin: EdgeInsets.symmetric(horizontal: 20.w),
-          padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
-          child: Column(
-            children: [
-              Text(
-                "REGISTER",
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              SizedBox(height: 20.h),
-              CustomForm(
-                emailController: emailController,
-                passwordController: passwordController,
-              ),
-              SizedBox(height: 10.h),
-              _FormSubTexts(),
-              SizedBox(height: 30.h),
-              CustomButton(
-                text: "Register",
-                width: double.infinity,
-                onPressed: () async {
-                  final isUserCreated = await context.read<RegisterCubit>().createAccount(
-                        email: emailController.text,
-                        password: passwordController.text,
-                      );
-                  if (isUserCreated && context.mounted) {
-                    emailController.clear();
-                    passwordController.clear();
-                    context.router.maybePop();
-                  }
-                },
-              ),
-            ],
           ),
         );
       },

@@ -1,5 +1,5 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:filmio/routes/app_router.gr.dart';
+import 'package:filmio/config/routes/app_router.gr.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -19,22 +19,21 @@ class LoginPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => LoginCubit(),
       child: Scaffold(
-        resizeToAvoidBottomInset: true,
         body: SafeArea(
-          child: SingleChildScrollView(
-            physics: NeverScrollableScrollPhysics(),
-            child: Column(
-              children: [
-                SizedBox(height: 20.h),
-                Image.asset(
-                  "assets/logo.png",
-                  height: 200.h,
-                  color: Colors.white,
-                ),
-                SizedBox(height: 20.h),
-                _LoginForm(),
-              ],
-            ),
+          child: Stack(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    "assets/logo.png",
+                    height: 200.h,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+              _LoginForm(),
+            ],
           ),
         ),
       ),
@@ -70,41 +69,44 @@ class _LoginFormState extends State<_LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    return FormContainer(
-      child: Column(
-        children: [
-          Text(
-            "LOGIN",
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          SizedBox(height: 20.h),
-          CustomForm(
-            emailController: emailController,
-            passwordController: passwordController,
-          ),
-          SizedBox(height: 10.h),
-          _FormSubTexts(),
-          SizedBox(height: 30.h),
-          CustomButton(
-            text: "Log In",
-            width: double.infinity,
-            onPressed: () async {
-              final isLoggedin = await context.read<LoginCubit>().login(
-                    email: emailController.text,
-                    password: passwordController.text,
-                  );
-              if (context.mounted && isLoggedin && auth.currentUser!.displayName == null) {
-                context.router.push(SetProfile());
-              } else if (context.mounted && isLoggedin && auth.currentUser!.displayName != null) {
-                context.router.push(SplashRoute());
-              }
-              if (isLoggedin) {
-                emailController.clear();
-                passwordController.clear();
-              }
-            },
-          ),
-        ],
+    return Center(
+      child: FormContainer(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "LOGIN",
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            SizedBox(height: 20.h),
+            CustomForm(
+              emailController: emailController,
+              passwordController: passwordController,
+            ),
+            SizedBox(height: 10.h),
+            _FormSubTexts(),
+            SizedBox(height: 30.h),
+            CustomButton(
+              text: "Log In",
+              width: double.infinity,
+              onPressed: () async {
+                final isLoggedin = await context.read<LoginCubit>().login(
+                      email: emailController.text,
+                      password: passwordController.text,
+                    );
+                if (context.mounted && isLoggedin && auth.currentUser!.displayName == null) {
+                  context.router.push(SetProfile());
+                } else if (context.mounted && isLoggedin && auth.currentUser!.displayName != null) {
+                  context.router.push(SplashRoute());
+                }
+                if (isLoggedin) {
+                  emailController.clear();
+                  passwordController.clear();
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

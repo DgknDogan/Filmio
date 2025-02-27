@@ -14,7 +14,7 @@ class FormContainer extends StatelessWidget {
           Radius.circular(20.r),
         ),
       ),
-      margin: EdgeInsets.symmetric(horizontal: 20.w),
+      margin: EdgeInsets.symmetric(horizontal: 20.w).add(EdgeInsets.only(top: 100.h)),
       padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
       child: child,
     );
