@@ -9,6 +9,7 @@ class AppRouter extends RootStackRouter {
   List<AutoRoute> get routes => [
         AutoRoute(
           page: LoginRoute.page,
+          initial: true,
         ),
         AutoRoute(
           page: RegisterRoute.page,
@@ -19,7 +20,6 @@ class AppRouter extends RootStackRouter {
         CustomRoute(
           page: SplashRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
-          initial: true,
         ),
         CustomRoute(
           page: HomeRoute.page,

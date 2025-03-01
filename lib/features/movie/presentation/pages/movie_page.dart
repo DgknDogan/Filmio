@@ -138,7 +138,7 @@ class _MovieCard extends StatelessWidget {
               decoration: BoxDecoration(color: Colors.transparent),
             ),
             errorWidget: (context, url, error) => SizedBox(),
-            memCacheHeight: 300,
+            memCacheHeight: 1000,
           ),
         ),
       ),

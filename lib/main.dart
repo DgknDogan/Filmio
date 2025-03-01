@@ -8,8 +8,8 @@ import 'config/theme/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  initDependencies();
   await Firebase.initializeApp();
+  initDependencies();
   runApp(const MyApp());
 }
 

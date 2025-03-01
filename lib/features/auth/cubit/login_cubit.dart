@@ -6,7 +6,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 part '../states/login_state.dart';
 
 class LoginCubit extends Cubit<LoginState> {
-  LoginCubit() : super(LoginState(isChecked: false));
+  LoginCubit()
+      : super(
+          LoginState(
+            isChecked: false,
+            isRemembered: false,
+          ),
+        );
 
   final _auth = FirebaseAuth.instance;
 
@@ -16,7 +22,9 @@ class LoginCubit extends Cubit<LoginState> {
   }) async {
     try {
       final cred = await _auth.signInWithEmailAndPassword(email: email, password: password);
-      return cred.user != null;
+      if (cred.user != null) {
+        return true;
+      }
     } catch (e) {
       log(e.toString());
     }

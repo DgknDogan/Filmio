@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../injection_container.dart';
 import '../../domain/entities/movie.dart';
 import '../cubit/details_cubit.dart';
 
@@ -23,67 +24,69 @@ class MovieDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocProvider(
-        create: (context) => DetailsCubit(),
-        child: BlocBuilder<DetailsCubit, DetailsState>(
-          builder: (context, state) {
-            return CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  scrolledUnderElevation: 0,
-                  leading: IconButton(
-                    onPressed: () => context.router.maybePop(),
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: Colors.white70,
-                    ),
-                  ),
-                  actions: [
-                    GestureDetector(
-                      // onTap: () => !state.isMovieLiked ? context.read<DetailsCubit>().likeMovie() : context.read<DetailsCubit>().dislikeMovie(),
+        create: (context) => DetailsCubit(getIt(), getIt(), movie, getIt()),
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              scrolledUnderElevation: 0,
+              leading: IconButton(
+                onPressed: () => context.router.maybePop(),
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: Colors.white70,
+                ),
+              ),
+              actions: [
+                BlocBuilder<DetailsCubit, DetailsState>(
+                  builder: (context, state) {
+                    return GestureDetector(
+                      onTap: () => !state.isMovieLiked
+                          ? context.read<DetailsCubit>().likeMovie(movie: movie)
+                          : context.read<DetailsCubit>().dislikeMovie(movie: movie),
                       child: Container(
                         margin: EdgeInsets.only(right: 15.w),
                         child: Icon(
                           Icons.star_outlined,
-                          color: state.isMovieLiked ? Colors.white : Colors.grey,
+                          color: state.isMovieLiked ? Colors.green : Colors.grey,
                         ),
                       ),
-                    ),
-                  ],
-                  backgroundColor: Color(0xff1c1c1c),
-                ),
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Column(
-                    spacing: 20.h,
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xff1c1c1c),
-                              Color(0xff3a3a3a),
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
-                        ),
-                        child: Hero(
-                          tag: heroTag,
-                          child: CachedNetworkImage(
-                            imageUrl: movie.posterPath!.coverImage,
-                            height: 300.h,
-                            memCacheHeight: 1000,
-                          ),
-                        ),
-                      ),
-                      _FilmDescription(movie: movie),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ],
-            );
-          },
+              backgroundColor: Color(0xff1c1c1c),
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Column(
+                spacing: 20.h,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xff1c1c1c),
+                          Color(0xff3a3a3a),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                    child: Hero(
+                      tag: heroTag,
+                      child: CachedNetworkImage(
+                        imageUrl: movie.posterPath!.coverImage,
+                        height: 300.h,
+                        memCacheHeight: 1000,
+                      ),
+                    ),
+                  ),
+                  _FilmDescription(movie: movie),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
