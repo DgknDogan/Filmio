@@ -1,5 +1,5 @@
 *.h linguist-detectable=false
-*.cc linguist-detectable=false
+*.c linguist-detectable=false
 *.cpp linguist-detectable=false
 *.kt linguist-detectable=false
 *.rb linguist-detectable=false
