@@ -2,6 +2,10 @@ import 'package:auto_route/auto_route.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../config/routes/app_router.gr.dart';
+import '../../../injection_container.dart';
 
 final _auth = FirebaseAuth.instance;
 
@@ -16,11 +20,35 @@ class AccountPage extends StatelessWidget {
         child: Column(
           children: [
             SizedBox(height: 20.h),
-            Center(
-              child: CircleAvatar(
-                maxRadius: 45.r,
-                child: Image.asset(_auth.currentUser!.photoURL!),
-              ),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(left: 20.w),
+                  child: GestureDetector(
+                    onTap: () async {
+                      await getIt<SharedPreferences>().clear();
+                      if (context.mounted) {
+                        context.router.replace(LoginRoute());
+                      }
+                    },
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Icon(
+                        Icons.exit_to_app,
+                        size: 40.r,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: CircleAvatar(
+                    maxRadius: 45.r,
+                    child: Image.asset(_auth.currentUser!.photoURL!),
+                  ),
+                ),
+              ],
             ),
             SizedBox(height: 20.h),
             Divider(

@@ -9,7 +9,7 @@ class LikeMovieUseCase extends UseCase<FirebaseState<bool>, MovieEntity> {
 
   LikeMovieUseCase(this._firebaseRepository);
   @override
-  Future<FirebaseState<bool>> call({required MovieEntity params}) {
-    return _firebaseRepository.likeMovie(movie: params);
+  Future<FirebaseState<bool>> call({MovieEntity? params}) {
+    return _firebaseRepository.likeMovie(movie: params!);
   }
 }

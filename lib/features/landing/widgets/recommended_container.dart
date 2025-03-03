@@ -38,7 +38,7 @@ class RecommendedContainer extends StatelessWidget {
                     child: CachedNetworkImage(
                       height: 250.h,
                       imageUrl: imageUrl,
-                      memCacheHeight: 300,
+                      memCacheHeight: 1000,
                     ),
                   ),
                 )

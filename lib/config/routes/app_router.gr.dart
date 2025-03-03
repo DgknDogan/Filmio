@@ -21,8 +21,10 @@ import 'package:filmio/features/movie/presentation/pages/movie_details_page.dart
     as _i4;
 import 'package:filmio/features/movie/presentation/pages/movie_page.dart'
     as _i5;
-import 'package:filmio/features/series/pages/series_deatails_page.dart' as _i7;
-import 'package:filmio/features/series/pages/series_home_page.dart' as _i8;
+import 'package:filmio/features/series/presentation/pages/series_deatails_page.dart'
+    as _i7;
+import 'package:filmio/features/series/presentation/pages/series_page.dart'
+    as _i8;
 import 'package:flutter/material.dart' as _i12;
 
 /// generated route for

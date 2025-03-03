@@ -4,36 +4,67 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../injection_container.dart';
 import '../../../utils/custom/custom_button.dart';
 import '../../../utils/custom/custom_form.dart';
 import '../cubit/login_cubit.dart';
 import '../widgets/form_container.dart';
 
 @RoutePage()
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  late final String? _cachedEmail;
+  late final String? _cachedPassword;
+  @override
+  void initState() {
+    final cubit = getIt<LoginCubit>();
+    _cachedEmail = getIt<SharedPreferences>().getString("email");
+    _cachedPassword = getIt<SharedPreferences>().getString("password");
+    cubit.isAccountRemembered(email: _cachedEmail, password: _cachedPassword);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => LoginCubit(),
-      child: Scaffold(
-        body: SafeArea(
-          child: Stack(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    "assets/logo.png",
-                    height: 200.h,
-                    color: Colors.white,
-                  ),
-                ],
-              ),
-              _LoginForm(),
-            ],
+    return BlocProvider<LoginCubit>(
+      create: (context) => getIt<LoginCubit>(),
+      child: BlocListener<LoginCubit, LoginState>(
+        listenWhen: (previous, current) {
+          return previous.isRemembered != current.isRemembered;
+        },
+        listener: (context, state) async {
+          if (state.isRemembered) {
+            final isLoggedIn = await context.read<LoginCubit>().login(email: _cachedEmail!, password: _cachedPassword!);
+            if (context.mounted && isLoggedIn) {
+              context.router.push(SplashRoute());
+            }
+          }
+        },
+        child: Scaffold(
+          body: SafeArea(
+            child: Stack(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      "assets/logo.png",
+                      height: 200.h,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
+                _LoginForm(),
+              ],
+            ),
           ),
         ),
       ),

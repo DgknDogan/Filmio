@@ -15,12 +15,12 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
   final GetPopularMoviesUseCase _getPopularMoviesUseCase;
   final GetTopRatedMoviesUseCase _getTopRatedMoviesUseCase;
   MovieBloc(this._getPopularMoviesUseCase, this._getTopRatedMoviesUseCase) : super(MovieLoading()) {
-    on<MovieEvent>((event, emit) async {
-      await getMovies(event as GetMovies, emit);
+    on<GetMovies>((event, emit) async {
+      await onGetMovies(event, emit);
     });
   }
 
-  Future<void> getMovies(GetMovies event, Emitter<MovieState> emit) async {
+  Future<void> onGetMovies(GetMovies event, Emitter<MovieState> emit) async {
     final popularMoviesDataState = await _getPopularMoviesUseCase.call();
     final topRatedMoviesDataState = await _getTopRatedMoviesUseCase.call();
 

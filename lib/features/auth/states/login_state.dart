@@ -15,7 +15,7 @@ class LoginState {
   }) {
     return LoginState(
       isChecked: isChecked ?? this.isChecked,
-      isRemembered: isChecked ?? this.isRemembered,
+      isRemembered: isRemembered ?? this.isRemembered,
     );
   }
 }

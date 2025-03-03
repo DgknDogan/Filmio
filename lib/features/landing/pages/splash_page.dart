@@ -12,7 +12,7 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
+class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateMixin {
   late final AnimationController _firstAnimaitonController;
   final List<Effect> _firstAnimation = [
     FadeEffect(
@@ -33,7 +33,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   void initState() {
     _firstAnimaitonController = AnimationController(
       vsync: this,
-      duration: 3000.ms,
+      duration: 2000.ms,
     )..forward();
     super.initState();
   }
@@ -46,35 +46,37 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Builder(builder: (context) {
-      return Scaffold(
-        body: Column(
-          children: [
-            Center(
-              child: Image.asset(
-                "assets/logo.png",
-                height: 250.h,
-                color: Colors.white,
-              ).animate(
-                controller: _firstAnimaitonController,
-                effects: _firstAnimation,
-                onComplete: (controller) {
-                  Future.delayed(
-                    1.seconds,
-                    () {
-                      if (context.mounted) {
-                        context.router.replace(
-                          HomeRoute(),
-                        );
-                      }
-                    },
-                  );
-                },
+    return Builder(
+      builder: (context) {
+        return Scaffold(
+          body: Column(
+            children: [
+              Center(
+                child: Image.asset(
+                  "assets/logo.png",
+                  height: 250.h,
+                  color: Colors.white,
+                ).animate(
+                  controller: _firstAnimaitonController,
+                  effects: _firstAnimation,
+                  onComplete: (controller) {
+                    Future.delayed(
+                      1.seconds,
+                      () {
+                        if (context.mounted) {
+                          context.router.replace(
+                            HomeRoute(),
+                          );
+                        }
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
-        ),
-      );
-    });
+            ],
+          ),
+        );
+      },
+    );
   }
 }

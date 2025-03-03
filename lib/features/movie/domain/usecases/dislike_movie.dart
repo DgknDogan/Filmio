@@ -9,7 +9,7 @@ class DislikeMovieUseCase extends UseCase<FirebaseState<bool>, MovieEntity> {
 
   DislikeMovieUseCase(this._firebaseRepository);
   @override
-  Future<FirebaseState<bool>> call({required MovieEntity params}) {
-    return _firebaseRepository.dislikeMovie(movie: params);
+  Future<FirebaseState<bool>> call({MovieEntity? params}) {
+    return _firebaseRepository.dislikeMovie(movie: params!);
   }
 }

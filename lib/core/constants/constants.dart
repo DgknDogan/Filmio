@@ -11,3 +11,5 @@ const popularSeriesUrl = "https://api.themoviedb.org/3/tv/popular";
 const tmdbMovieBaseUrl = "https://api.themoviedb.org/3/movie";
 
 const userCollection = "User";
+
+const tmdbSeriesBaseUrl = "https://api.themoviedb.org/3/tv";
