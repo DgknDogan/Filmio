@@ -9,7 +9,7 @@ import 'config/theme/theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  initDependencies();
+  await initDependencies();
   runApp(const MyApp());
 }
 
@@ -30,14 +30,5 @@ class MyApp extends StatelessWidget {
         );
       },
     );
-  }
-}
-
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold();
   }
 }

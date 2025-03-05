@@ -3,7 +3,12 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'features/auth/cubit/login_cubit.dart';
+import 'features/auth/data/repository/auth_repository_impl.dart';
+import 'features/auth/domain/repository/auth_repository.dart';
+import 'features/auth/domain/usecase/login.dart';
+import 'features/auth/domain/usecase/logout.dart';
+import 'features/auth/domain/usecase/register.dart';
+import 'features/auth/presentation/cubit/login_cubit.dart';
 import 'features/movie/data/data_sources/firebase/firebase_service.dart';
 import 'features/movie/data/data_sources/remote/movie_api_service.dart';
 import 'features/movie/data/repository/firebase_repository_impl.dart';
@@ -23,7 +28,7 @@ import 'features/series/domain/usecases/get_top_rated_series.dart';
 
 final getIt = GetIt.instance;
 
-void initDependencies() async {
+Future<void> initDependencies() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   // Dio
   getIt.registerSingleton<Dio>(Dio());
@@ -41,6 +46,8 @@ void initDependencies() async {
   getIt.registerSingleton<SeriesApiService>(SeriesApiService(getIt()));
   getIt.registerSingleton<SeriesRepository>(SeriesRepositoryImpl(getIt()));
 
+  getIt.registerSingleton<AuthRepository>(AuthRepositoryImpl());
+
   // Use Cases
   getIt.registerSingleton<GetTopRatedMoviesUseCase>(GetTopRatedMoviesUseCase(getIt()));
   getIt.registerSingleton<GetPopularMoviesUseCase>(GetPopularMoviesUseCase(getIt()));
@@ -51,6 +58,10 @@ void initDependencies() async {
   getIt.registerSingleton<GetTopRatedSeriesUseCase>(GetTopRatedSeriesUseCase(getIt()));
   getIt.registerSingleton<GetPopularSeriesUseCase>(GetPopularSeriesUseCase(getIt()));
 
+  getIt.registerSingleton<LoginUseCase>(LoginUseCase(getIt()));
+  getIt.registerSingleton<RegisterUseCase>(RegisterUseCase(getIt()));
+  getIt.registerSingleton<LogoutUseCase>(LogoutUseCase(getIt()));
+
   // Cubit
-  getIt.registerSingleton<LoginCubit>(LoginCubit());
+  getIt.registerFactory<LoginCubit>(() => LoginCubit(getIt()));
 }

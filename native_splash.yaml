@@ -1,0 +1,7 @@
+flutter_native_splash:
+  android: true
+  ios: true
+  web: false
+
+  color: "#3A3A3A"
+  background_image: "android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png"

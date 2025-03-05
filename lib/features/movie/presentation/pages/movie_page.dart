@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../injection_container.dart';
-import '../../../landing/widgets/recommended_container.dart';
+import '../../../../core/utils/custom/recommended_container.dart';
 import '../../domain/entities/movie.dart';
 import '../bloc/movie_bloc.dart';
 
@@ -27,7 +27,6 @@ class MoviePage extends StatelessWidget {
                 child: Column(
                   children: [
                     RecommendedContainer(
-                      isLoading: false,
                       imageUrl: state.recommendedMovie?.posterPath!.coverImage ?? "",
                       tag: "movie_poster",
                       onTap: () => context.router.push(
@@ -38,11 +37,13 @@ class MoviePage extends StatelessWidget {
                     _ScrollableFilmList(
                       title: "Popular Movies",
                       movieList: state.popularFilmsList!,
+                      storageKey: PageStorageKey("popular_movies"),
                     ),
                     SizedBox(height: 20.h),
                     _ScrollableFilmList(
                       title: "Top Movies",
                       movieList: state.topFilmsList!,
+                      storageKey: PageStorageKey("top_movies"),
                     ),
                     SizedBox(height: 40.h),
                   ],
@@ -63,10 +64,12 @@ class MoviePage extends StatelessWidget {
 class _ScrollableFilmList extends StatelessWidget {
   final String title;
   final List<MovieEntity> movieList;
+  final PageStorageKey<String> storageKey;
 
   const _ScrollableFilmList({
     required this.title,
     required this.movieList,
+    required this.storageKey,
   });
 
   @override
@@ -94,18 +97,18 @@ class _ScrollableFilmList extends StatelessWidget {
                   ),
                 ],
               ),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    ...movieList.map(
-                      (movie) {
-                        return _MovieCard(movie: movie);
-                      },
-                    )
-                  ],
+              SizedBox(
+                height: 200.h,
+                child: ListView.builder(
+                  key: storageKey,
+                  itemCount: movieList.length,
+                  scrollDirection: Axis.horizontal,
+                  cacheExtent: 500,
+                  itemBuilder: (context, index) {
+                    return _MovieCard(movie: movieList[index]);
+                  },
                 ),
-              )
+              ),
             ],
           ),
         );

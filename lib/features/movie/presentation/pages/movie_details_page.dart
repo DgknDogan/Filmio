@@ -28,6 +28,7 @@ class MovieDetailsPage extends StatelessWidget {
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
+              backgroundColor: Color(0xff080808),
               scrolledUnderElevation: 0,
               leading: IconButton(
                 onPressed: () => context.router.maybePop(),
@@ -54,7 +55,6 @@ class MovieDetailsPage extends StatelessWidget {
                   },
                 ),
               ],
-              backgroundColor: Color(0xff1c1c1c),
             ),
             SliverFillRemaining(
               hasScrollBody: false,
@@ -66,7 +66,7 @@ class MovieDetailsPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Color(0xff1c1c1c),
+                          Color(0xff080808),
                           Color(0xff3a3a3a),
                         ],
                         begin: Alignment.topCenter,

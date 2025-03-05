@@ -51,6 +51,8 @@ dependencies:
   retrofit: ^4.4.2
   get_it: ^8.0.3
   shared_preferences: ^2.5.2
+  flutter_native_splash: ^2.4.5
+  extract_colors_from_image: ^0.0.1
 
 dev_dependencies:
   flutter_test:

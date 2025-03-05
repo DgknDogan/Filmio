@@ -7,19 +7,19 @@ import 'app_router.gr.dart';
 class AppRouter extends RootStackRouter {
   @override
   List<AutoRoute> get routes => [
+        CustomRoute(
+          page: SplashRoute.page,
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          initial: true,
+        ),
         AutoRoute(
           page: LoginRoute.page,
-          initial: true,
         ),
         AutoRoute(
           page: RegisterRoute.page,
         ),
         AutoRoute(
           page: SetProfile.page,
-        ),
-        CustomRoute(
-          page: SplashRoute.page,
-          transitionsBuilder: TransitionsBuilders.fadeIn,
         ),
         CustomRoute(
           page: HomeRoute.page,
@@ -37,7 +37,7 @@ class AppRouter extends RootStackRouter {
             CustomRoute(
               page: AccountRoute.page,
               transitionsBuilder: TransitionsBuilders.fadeIn,
-            )
+            ),
           ],
         ),
         CustomRoute(
@@ -52,5 +52,8 @@ class AppRouter extends RootStackRouter {
             return FadeTransition(opacity: animation, child: child);
           },
         ),
+        AutoRoute(
+          page: LikedMoviesRoute.page,
+        )
       ];
 }
