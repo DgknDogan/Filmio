@@ -12,7 +12,7 @@ class RecommendedContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(top: 50.h),
+      padding: EdgeInsets.only(top: 20.h),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [

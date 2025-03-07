@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../utils/custom/custom_text_field.dart';
+import 'custom_text_field.dart';
 
 class CustomForm extends StatelessWidget {
   final TextEditingController emailController;

@@ -1,11 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:filmio/config/routes/app_router.gr.dart';
-import 'package:filmio/utils/extentions.dart';
+import 'package:filmio/core/extensions/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/utils/custom/custom_searchbar.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/utils/custom/recommended_container.dart';
 import '../../domain/entities/movie.dart';
@@ -23,31 +24,85 @@ class MoviePage extends StatelessWidget {
         body: BlocBuilder<MovieBloc, MovieState>(
           builder: (context, state) {
             if (state is MovieSuccess) {
-              return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    RecommendedContainer(
-                      imageUrl: state.recommendedMovie?.posterPath!.coverImage ?? "",
-                      tag: "movie_poster",
-                      onTap: () => context.router.push(
-                        MovieDetailsRoute(movie: state.recommendedMovie!, heroTag: "movie_poster"),
+              return CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    title: Container(
+                      margin: EdgeInsets.only(left: 10.w),
+                      child: Text(
+                        "Movies",
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
-                    SizedBox(height: 20.h),
-                    _ScrollableFilmList(
-                      title: "Popular Movies",
-                      movieList: state.popularFilmsList!,
-                      storageKey: PageStorageKey("popular_movies"),
+                    actions: [
+                      Container(
+                        margin: EdgeInsets.only(right: 20.w),
+                        child: GestureDetector(
+                          onTap: () => context.router.push(MovieSearchRoute(heroTag: "movie_search", hintText: "Search a movie")),
+                          child: Hero(
+                            tag: "movie_search",
+                            createRectTween: (begin, end) => RectTween(begin: begin, end: end),
+                            flightShuttleBuilder: (flightContext, animation, direction, fromContext, toContext) {
+                              if (direction == HeroFlightDirection.push) {
+                                return Material(
+                                  color: Colors.transparent,
+                                  child: CustomSearchbar(
+                                    isEnabled: false,
+                                    hintText: "Search a movie",
+                                  ),
+                                );
+                              } else {
+                                return Material(
+                                  color: Colors.transparent,
+                                  child: CustomSearchbar(
+                                    isEnabled: false,
+                                    hintText: "Search a movie",
+                                  ),
+                                );
+                              }
+                            },
+                            child: SizedBox(
+                              width: 200.w,
+                              height: 40.h,
+                              child: GestureDetector(
+                                child: CustomSearchbar(
+                                  isEnabled: false,
+                                  hintText: "Search a movie",
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Column(
+                      children: [
+                        RecommendedContainer(
+                          imageUrl: state.recommendedMovie?.posterPath!.coverImage ?? "",
+                          tag: "movie_poster",
+                          onTap: () => context.router.push(
+                            MovieDetailsRoute(movie: state.recommendedMovie!, heroTag: "movie_poster"),
+                          ),
+                        ),
+                        _ScrollableFilmList(
+                          title: "Popular Movies",
+                          movieList: state.popularFilmsList!,
+                          storageKey: PageStorageKey("popular_movies"),
+                        ),
+                        SizedBox(height: 20.h),
+                        _ScrollableFilmList(
+                          title: "Top Movies",
+                          movieList: state.topFilmsList!,
+                          storageKey: PageStorageKey("top_movies"),
+                        ),
+                        SizedBox(height: 40.h),
+                      ],
                     ),
-                    SizedBox(height: 20.h),
-                    _ScrollableFilmList(
-                      title: "Top Movies",
-                      movieList: state.topFilmsList!,
-                      storageKey: PageStorageKey("top_movies"),
-                    ),
-                    SizedBox(height: 40.h),
-                  ],
-                ),
+                  ),
+                ],
               );
             } else {
               return Center(

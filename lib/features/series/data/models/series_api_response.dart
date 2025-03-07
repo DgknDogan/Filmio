@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
-import 'series_model.dart';
+import '../../../../core/models/series_model.dart';
 
 part 'series_api_response.g.dart';
 

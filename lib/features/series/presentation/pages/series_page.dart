@@ -1,11 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:filmio/config/routes/app_router.gr.dart';
-import 'package:filmio/utils/extentions.dart';
+import 'package:filmio/core/extensions/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/utils/custom/custom_searchbar.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/utils/custom/recommended_container.dart';
 import '../../domain/entities/series_entity.dart';
@@ -23,31 +24,86 @@ class SeriesHomePage extends StatelessWidget {
         child: BlocBuilder<SeriesBloc, SeriesState>(
           builder: (context, state) {
             if (state is SeriesSuccess) {
-              return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    RecommendedContainer(
-                      imageUrl: state.recommendedSeries?.posterPath!.coverImage ?? "",
-                      tag: "series_poster",
-                      onTap: () => context.router.push(
-                        SeriesDeatailsRoute(series: state.recommendedSeries!, heroTag: "series_poster"),
+              return CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    title: Container(
+                      margin: EdgeInsets.only(left: 10.w),
+                      child: Text(
+                        "Series",
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
-                    SizedBox(height: 20.h),
-                    _ScrollableFilmList(
-                      title: "Popular Series",
-                      seriesList: state.popularSeriesList!,
-                      storageKey: PageStorageKey("popular_series"),
+                    actions: [
+                      Container(
+                        margin: EdgeInsets.only(right: 20.w),
+                        child: GestureDetector(
+                          onTap: () => context.router.push(SeriesSearchRoute(heroTag: "series_search", hintText: "Search a series")),
+                          child: Hero(
+                            tag: "series_search",
+                            createRectTween: (begin, end) => RectTween(begin: begin, end: end),
+                            flightShuttleBuilder: (flightContext, animation, direction, fromContext, toContext) {
+                              if (direction == HeroFlightDirection.push) {
+                                return Material(
+                                  color: Colors.transparent,
+                                  child: CustomSearchbar(
+                                    isEnabled: false,
+                                    hintText: "Search a series",
+                                  ),
+                                );
+                              } else {
+                                return Material(
+                                  color: Colors.transparent,
+                                  child: CustomSearchbar(
+                                    isEnabled: false,
+                                    hintText: "Search a series",
+                                  ),
+                                );
+                              }
+                            },
+                            child: SizedBox(
+                              width: 200.w,
+                              height: 40.h,
+                              child: GestureDetector(
+                                child: CustomSearchbar(
+                                  isEnabled: false,
+                                  hintText: "Search a series",
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Column(
+                      children: [
+                        RecommendedContainer(
+                          imageUrl: state.recommendedSeries?.posterPath!.coverImage ?? "",
+                          tag: "series_poster",
+                          onTap: () => context.router.push(
+                            SeriesDeatailsRoute(series: state.recommendedSeries!, heroTag: "series_poster"),
+                          ),
+                        ),
+                        SizedBox(height: 20.h),
+                        _ScrollableFilmList(
+                          title: "Popular Series",
+                          seriesList: state.popularSeriesList!,
+                          storageKey: PageStorageKey("popular_series"),
+                        ),
+                        SizedBox(height: 20.h),
+                        _ScrollableFilmList(
+                          title: "Top Series",
+                          seriesList: state.topSeriesList!,
+                          storageKey: PageStorageKey("top_series"),
+                        ),
+                        SizedBox(height: 40.h),
+                      ],
                     ),
-                    SizedBox(height: 20.h),
-                    _ScrollableFilmList(
-                      title: "Top Series",
-                      seriesList: state.topSeriesList!,
-                      storageKey: PageStorageKey("top_series"),
-                    ),
-                    SizedBox(height: 40.h),
-                  ],
-                ),
+                  )
+                ],
               );
             } else {
               return Center(

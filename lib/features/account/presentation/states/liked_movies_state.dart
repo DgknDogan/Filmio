@@ -1,10 +1,7 @@
 part of '../cubit/liked_movies_cubit.dart';
 
-sealed class LikedMoviesState extends Equatable {
-  const LikedMoviesState();
+class LikedMoviesState {
+  final List<MovieEntity> list;
 
-  @override
-  List<Object> get props => [];
+  LikedMoviesState({required this.list});
 }
-
-final class LikedMoviesInitial extends LikedMoviesState {}

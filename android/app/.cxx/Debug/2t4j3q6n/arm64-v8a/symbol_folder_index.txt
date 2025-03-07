@@ -1,0 +1,1 @@
+C:\dev\apps\Filmio\build\app\intermediates\cxx\Debug\2t4j3q6n\obj\arm64-v8a

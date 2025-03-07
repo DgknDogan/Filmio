@@ -5,8 +5,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../utils/custom/custom_button.dart';
-import '../../../../utils/custom/custom_text_field.dart';
+import '../../../../core/utils/custom/custom_button.dart';
+import '../../../../core/utils/custom/custom_text_field.dart';
 import '../cubit/profile_cubit.dart';
 
 @RoutePage()

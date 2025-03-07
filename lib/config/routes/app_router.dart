@@ -21,22 +21,18 @@ class AppRouter extends RootStackRouter {
         AutoRoute(
           page: SetProfile.page,
         ),
-        CustomRoute(
+        AutoRoute(
           page: HomeRoute.page,
-          transitionsBuilder: TransitionsBuilders.fadeIn,
           children: [
-            CustomRoute(
+            AutoRoute(
               page: MovieRoute.page,
-              transitionsBuilder: TransitionsBuilders.fadeIn,
               initial: true,
             ),
-            CustomRoute(
+            AutoRoute(
               page: SeriesHomeRoute.page,
-              transitionsBuilder: TransitionsBuilders.fadeIn,
             ),
-            CustomRoute(
+            AutoRoute(
               page: AccountRoute.page,
-              transitionsBuilder: TransitionsBuilders.fadeIn,
             ),
           ],
         ),
@@ -54,6 +50,14 @@ class AppRouter extends RootStackRouter {
         ),
         AutoRoute(
           page: LikedMoviesRoute.page,
+        ),
+        CustomRoute(
+          page: MovieSearchRoute.page,
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+        ),
+        CustomRoute(
+          page: SeriesSearchRoute.page,
+          transitionsBuilder: TransitionsBuilders.fadeIn,
         )
       ];
 }

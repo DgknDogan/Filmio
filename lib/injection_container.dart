@@ -9,7 +9,6 @@ import 'features/auth/domain/usecase/login.dart';
 import 'features/auth/domain/usecase/logout.dart';
 import 'features/auth/domain/usecase/register.dart';
 import 'features/auth/presentation/cubit/login_cubit.dart';
-import 'features/movie/data/data_sources/firebase/firebase_service.dart';
 import 'features/movie/data/data_sources/remote/movie_api_service.dart';
 import 'features/movie/data/repository/firebase_repository_impl.dart';
 import 'features/movie/data/repository/movie_repository_impl.dart';
@@ -40,8 +39,7 @@ Future<void> initDependencies() async {
   getIt.registerSingleton<MovieApiService>(MovieApiService(getIt()));
   getIt.registerSingleton<MovieRepository>(MovieRepositoryImpl(getIt()));
 
-  getIt.registerSingleton<FirebaseService>(FirebaseService());
-  getIt.registerSingleton<FirebaseRepository>(FirebaseRepositoryImpl(getIt()));
+  getIt.registerSingleton<FirebaseRepository>(FirebaseRepositoryImpl());
 
   getIt.registerSingleton<SeriesApiService>(SeriesApiService(getIt()));
   getIt.registerSingleton<SeriesRepository>(SeriesRepositoryImpl(getIt()));

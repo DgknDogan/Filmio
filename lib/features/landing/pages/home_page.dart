@@ -14,23 +14,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
-  late final AnimationController controller;
+  late final AnimationController _splashController;
   @override
   void initState() {
-    controller = AnimationController(vsync: this, duration: 2000.ms);
+    _splashController = AnimationController(vsync: this, duration: 2000.ms);
     super.initState();
   }
 
   @override
+  void dispose() {
+    _splashController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return AutoTabsRouter(
+    return AutoTabsRouter.pageView(
       homeIndex: 0,
       routes: [
         MovieRoute(),
         SeriesHomeRoute(),
         AccountRoute(),
       ],
-      builder: (context, child) {
+      physics: NeverScrollableScrollPhysics(),
+      builder: (context, child, animation) {
         final tabsRouter = AutoTabsRouter.of(context);
         return Stack(
           children: [
@@ -65,7 +72,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
               ),
             ).animate(
-              controller: controller,
+              controller: _splashController,
               effects: [
                 MoveEffect(
                   begin: Offset(0, 0),

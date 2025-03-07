@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-final lightTheme = ThemeData(
+final theme = ThemeData(
   textTheme: TextTheme(
     titleLarge: TextStyle(
       fontSize: 20.sp,
@@ -48,5 +48,11 @@ final lightTheme = ThemeData(
       borderRadius: BorderRadius.circular(15.r),
       borderSide: BorderSide.none,
     ),
+  ),
+  appBarTheme: AppBarTheme(
+    elevation: 0,
+    scrolledUnderElevation: 0,
+    toolbarHeight: 70.h,
+    backgroundColor: Color(0xff101010),
   ),
 );

@@ -1,15 +1,14 @@
-import '../../../movie/data/models/movie.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:filmio/core/extensions/firebase_firestore_extension.dart';
+
+import '../../../../core/models/movie.dart';
 import '../../domain/repository/account_repository.dart';
-import '../data_sources/firebase_account_service.dart';
 
 class AccountRepositoryImpl extends AccountRepository {
-  final FirebaseAccountService _firebaseAccountService;
-
-  AccountRepositoryImpl(this._firebaseAccountService);
-
   @override
   Future<List<MovieModel>> getLikedMovies() async {
-    final docSnapshot = await _firebaseAccountService.getUserDocumentSnapshot();
+    final userDocumentRef = FirebaseFirestore.instance.getUserDocRef();
+    final docSnapshot = await userDocumentRef.get();
     final likedMoviesDataList = docSnapshot.data()!["liked_movies"] as List<Map<String, dynamic>>;
     final List<MovieModel> likedMovieList = [];
     for (var movieData in likedMoviesDataList) {
