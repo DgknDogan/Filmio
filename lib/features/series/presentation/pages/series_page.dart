@@ -27,6 +27,7 @@ class SeriesHomePage extends StatelessWidget {
               return CustomScrollView(
                 slivers: [
                   SliverAppBar(
+                    automaticallyImplyLeading: false,
                     title: Container(
                       margin: EdgeInsets.only(left: 10.w),
                       child: Text(
@@ -44,31 +45,17 @@ class SeriesHomePage extends StatelessWidget {
                             createRectTween: (begin, end) => RectTween(begin: begin, end: end),
                             flightShuttleBuilder: (flightContext, animation, direction, fromContext, toContext) {
                               if (direction == HeroFlightDirection.push) {
-                                return Material(
-                                  color: Colors.transparent,
-                                  child: CustomSearchbar(
-                                    isEnabled: false,
-                                    hintText: "Search a series",
-                                  ),
-                                );
+                                return Material(color: Colors.transparent, child: fromContext.widget);
                               } else {
-                                return Material(
-                                  color: Colors.transparent,
-                                  child: CustomSearchbar(
-                                    isEnabled: false,
-                                    hintText: "Search a series",
-                                  ),
-                                );
+                                return Material(color: Colors.transparent, child: toContext.widget);
                               }
                             },
-                            child: SizedBox(
-                              width: 200.w,
-                              height: 40.h,
-                              child: GestureDetector(
-                                child: CustomSearchbar(
-                                  isEnabled: false,
-                                  hintText: "Search a series",
-                                ),
+                            child: GestureDetector(
+                              child: CustomSearchbar(
+                                width: 200.w,
+                                height: 40.h,
+                                isEnabled: false,
+                                hintText: "Search a series",
                               ),
                             ),
                           ),

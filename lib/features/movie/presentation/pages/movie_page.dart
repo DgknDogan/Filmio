@@ -27,6 +27,7 @@ class MoviePage extends StatelessWidget {
               return CustomScrollView(
                 slivers: [
                   SliverAppBar(
+                    automaticallyImplyLeading: false,
                     title: Container(
                       margin: EdgeInsets.only(left: 10.w),
                       child: Text(
@@ -44,31 +45,17 @@ class MoviePage extends StatelessWidget {
                             createRectTween: (begin, end) => RectTween(begin: begin, end: end),
                             flightShuttleBuilder: (flightContext, animation, direction, fromContext, toContext) {
                               if (direction == HeroFlightDirection.push) {
-                                return Material(
-                                  color: Colors.transparent,
-                                  child: CustomSearchbar(
-                                    isEnabled: false,
-                                    hintText: "Search a movie",
-                                  ),
-                                );
+                                return Material(color: Colors.transparent, child: fromContext.widget);
                               } else {
-                                return Material(
-                                  color: Colors.transparent,
-                                  child: CustomSearchbar(
-                                    isEnabled: false,
-                                    hintText: "Search a movie",
-                                  ),
-                                );
+                                return Material(color: Colors.transparent, child: toContext.widget);
                               }
                             },
-                            child: SizedBox(
-                              width: 200.w,
-                              height: 40.h,
-                              child: GestureDetector(
-                                child: CustomSearchbar(
-                                  isEnabled: false,
-                                  hintText: "Search a movie",
-                                ),
+                            child: GestureDetector(
+                              child: CustomSearchbar(
+                                height: 40.h,
+                                width: 200.w,
+                                isEnabled: false,
+                                hintText: "Search a movie",
                               ),
                             ),
                           ),
@@ -181,22 +168,25 @@ class _MovieCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 200.h,
-      clipBehavior: Clip.hardEdge,
       margin: EdgeInsets.only(right: 20.r),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.r),
-      ),
       child: GestureDetector(
         onTap: () => context.router.push(MovieDetailsRoute(movie: movie, heroTag: movie.title!)),
         child: Hero(
+          createRectTween: (begin, end) => RectTween(begin: begin, end: end),
           tag: movie.title!,
-          child: CachedNetworkImage(
-            imageUrl: movie.posterPath!.coverImage,
-            placeholder: (context, url) => Container(
-              decoration: BoxDecoration(color: Colors.transparent),
+          child: Container(
+            clipBehavior: Clip.hardEdge,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.r),
             ),
-            errorWidget: (context, url, error) => SizedBox(),
-            memCacheHeight: 1000,
+            child: CachedNetworkImage(
+              imageUrl: movie.posterPath!.coverImage,
+              placeholder: (context, url) => Container(
+                decoration: BoxDecoration(color: Colors.transparent),
+              ),
+              errorWidget: (context, url, error) => SizedBox(),
+              memCacheHeight: 1000,
+            ),
           ),
         ),
       ),

@@ -19,7 +19,12 @@ class DetailsCubit extends Cubit<DetailsState> {
     this._movie,
     this._dislikeMovieUseCase,
   ) : super(
-          DetailsState(isMovieLiked: false),
+          DetailsState(
+            isMovieLiked: false,
+            isPageShrinked: true,
+            isOpacityAnimating: false,
+            isPageShrinking: false,
+          ),
         ) {
     init();
   }
@@ -56,5 +61,17 @@ class DetailsCubit extends Cubit<DetailsState> {
     if (likeMovieState is FirebaseError) {
       emit(state.copyWith(isMovieLiked: state.isMovieLiked));
     }
+  }
+
+  void changePageView() {
+    emit(state.copyWith(isPageShrinked: !state.isPageShrinked, isOpacityAnimating: true, isPageShrinking: true));
+  }
+
+  void finishAnimation() {
+    emit(state.copyWith(isOpacityAnimating: false));
+  }
+
+  void finishShrinking() {
+    emit(state.copyWith(isPageShrinking: false));
   }
 }

@@ -19,6 +19,7 @@ import 'features/movie/domain/usecases/get_liked_movies.dart';
 import 'features/movie/domain/usecases/get_popular_movies.dart';
 import 'features/movie/domain/usecases/get_top_rated_movies.dart';
 import 'features/movie/domain/usecases/like_movie.dart';
+import 'features/movie/domain/usecases/search_movies.dart';
 import 'features/series/data/data_sources/remote/series_api_service.dart';
 import 'features/series/data/repository/series_repository_impl.dart';
 import 'features/series/domain/repository/series_repository.dart';
@@ -52,6 +53,7 @@ Future<void> initDependencies() async {
   getIt.registerSingleton<GetLikedMoviesUseCase>(GetLikedMoviesUseCase(getIt()));
   getIt.registerSingleton<LikeMovieUseCase>(LikeMovieUseCase(getIt()));
   getIt.registerSingleton<DislikeMovieUseCase>(DislikeMovieUseCase(getIt()));
+  getIt.registerSingleton<SearchMoviesUseCase>(SearchMoviesUseCase(getIt()));
 
   getIt.registerSingleton<GetTopRatedSeriesUseCase>(GetTopRatedSeriesUseCase(getIt()));
   getIt.registerSingleton<GetPopularSeriesUseCase>(GetPopularSeriesUseCase(getIt()));

@@ -31,11 +31,23 @@ class RecommendedContainer extends StatelessWidget {
           GestureDetector(
             onTap: onTap,
             child: Hero(
+              createRectTween: (begin, end) => RectTween(begin: begin, end: end),
+              flightShuttleBuilder: (flightContext, animation, direction, fromHeroContext, toHeroContext) {
+                if (direction == HeroFlightDirection.push) {
+                  return Material(color: Colors.transparent, child: fromHeroContext.widget);
+                } else {
+                  return Material(color: Colors.transparent, child: toHeroContext.widget);
+                }
+              },
               tag: tag,
-              child: CachedNetworkImage(
-                height: 250.h,
-                imageUrl: imageUrl,
-                memCacheHeight: 1000,
+              child: ClipRRect(
+                clipBehavior: Clip.hardEdge,
+                borderRadius: BorderRadius.circular(15.r),
+                child: CachedNetworkImage(
+                  height: 250.h,
+                  imageUrl: imageUrl,
+                  memCacheHeight: 1000,
+                ),
               ),
             ),
           ),

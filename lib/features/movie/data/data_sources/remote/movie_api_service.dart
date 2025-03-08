@@ -10,7 +10,7 @@ part 'movie_api_service.g.dart';
 abstract class MovieApiService {
   factory MovieApiService(Dio dio, {String? baseUrl, ParseErrorLogger? errorLogger}) = _MovieApiService;
 
-  @GET("/popular")
+  @GET("/movie/popular")
   Future<HttpResponse<MovieApiResponse>> getPopularMovies({
     @Header("accept") String? accept,
     @Header("Authorization") String? apiKey,
@@ -18,10 +18,20 @@ abstract class MovieApiService {
     @Query("page") int? page,
   });
 
-  @GET("/top_rated")
+  @GET("/movie/top_rated")
   Future<HttpResponse<MovieApiResponse>> getTopRatedMovies({
     @Header("accept") String? accept,
     @Header("Authorization") String? apiKey,
+    @Query("language") String? language,
+    @Query("page") int? page,
+  });
+
+  @GET("/search/movie")
+  Future<HttpResponse<MovieApiResponse>> searchMoviesByTitle({
+    @Header("accept") String? accept,
+    @Header("Authorization") String? apiKey,
+    @Query("query") required String? query,
+    @Query("include_adult") bool? includeAdult,
     @Query("language") String? language,
     @Query("page") int? page,
   });

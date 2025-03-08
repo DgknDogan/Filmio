@@ -10,7 +10,7 @@ part of 'movie_api_service.dart';
 
 class _MovieApiService implements MovieApiService {
   _MovieApiService(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'https://api.themoviedb.org/3/movie';
+    baseUrl ??= 'https://api.themoviedb.org/3';
   }
 
   final Dio _dio;
@@ -42,7 +42,7 @@ class _MovieApiService implements MovieApiService {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/popular',
+            '/movie/popular',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -83,7 +83,52 @@ class _MovieApiService implements MovieApiService {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/top_rated',
+            '/movie/top_rated',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late MovieApiResponse _value;
+    try {
+      _value = MovieApiResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
+  }
+
+  @override
+  Future<HttpResponse<MovieApiResponse>> searchMoviesByTitle({
+    String? accept,
+    String? apiKey,
+    String? query,
+    bool? includeAdult,
+    String? language,
+    int? page,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'query': query,
+      r'include_adult': includeAdult,
+      r'language': language,
+      r'page': page,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{
+      r'accept': accept,
+      r'Authorization': apiKey,
+    };
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<HttpResponse<MovieApiResponse>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/search/movie',
             queryParameters: queryParameters,
             data: _data,
           )
