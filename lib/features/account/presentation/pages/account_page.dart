@@ -1,13 +1,10 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:filmio/core/extensions/firebase_auth_extension.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../config/routes/app_router.gr.dart';
-import '../../../../injection_container.dart';
-
-final _auth = FirebaseAuth.instance;
 
 @RoutePage()
 class AccountPage extends StatelessWidget {
@@ -26,18 +23,17 @@ class AccountPage extends StatelessWidget {
                 Container(
                   margin: EdgeInsets.only(left: 20.w),
                   child: GestureDetector(
-                    onTap: () async {
-                      await getIt<SharedPreferences>().clear();
-                      if (context.mounted) {
-                        context.router.replace(LoginRoute());
-                      }
-                    },
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: Icon(
-                        Icons.exit_to_app,
-                        size: 40.r,
-                        color: Colors.white,
+                      child: GestureDetector(
+                        onTap: () {
+                          context.router.push(SettingsRoute());
+                        },
+                        child: Icon(
+                          Icons.settings,
+                          size: 40.r,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -45,7 +41,7 @@ class AccountPage extends StatelessWidget {
                 Center(
                   child: CircleAvatar(
                     maxRadius: 45.r,
-                    child: Image.asset(_auth.currentUser!.photoURL!),
+                    child: Image.asset(FirebaseAuth.instance.userPhoto),
                   ),
                 ),
               ],

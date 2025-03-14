@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:filmio/config/routes/app_router.gr.dart';
+import 'package:filmio/core/extensions/double_extension.dart';
 import 'package:filmio/core/extensions/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -50,32 +52,28 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> with SingleTickerPr
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => DetailsCubit(getIt(), getIt(), widget.movie, getIt()),
+      create: (context) => DetailsCubit(getIt(), getIt(), widget.movie, getIt(), getIt()),
       child: Stack(
         children: [
           _Backgorund(movie: widget.movie),
-          BlocBuilder<DetailsCubit, DetailsState>(
-            builder: (context, state) {
-              return AnimatedBuilder(
-                animation: _animation,
-                builder: (BuildContext context, Widget? child) {
-                  return ClipRRect(
-                    clipBehavior: Clip.hardEdge,
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: _animation.value.w, sigmaY: _animation.value.h),
-                      child: Scaffold(
-                        extendBodyBehindAppBar: true,
-                        extendBody: true,
-                        backgroundColor: Colors.transparent,
-                        body: _ScrollBody(
-                          movie: widget.movie,
-                          heroTag: widget.heroTag,
-                          controller: _controller,
-                        ),
-                      ),
+          AnimatedBuilder(
+            animation: _animation,
+            builder: (BuildContext context, Widget? child) {
+              return ClipRRect(
+                clipBehavior: Clip.hardEdge,
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: _animation.value.w, sigmaY: _animation.value.h),
+                  child: Scaffold(
+                    extendBodyBehindAppBar: true,
+                    extendBody: true,
+                    backgroundColor: Colors.transparent,
+                    body: _ScrollBody(
+                      movie: widget.movie,
+                      heroTag: widget.heroTag,
+                      controller: _controller,
                     ),
-                  );
-                },
+                  ),
+                ),
               );
             },
           ),
@@ -104,7 +102,7 @@ class _Backgorund extends StatelessWidget {
         child: CachedNetworkImage(
           imageUrl: movie.posterPath!.coverImage,
           fit: BoxFit.fitHeight,
-          memCacheHeight: 1000,
+          memCacheHeight: 500,
         ),
       ),
     );
@@ -157,59 +155,19 @@ class _ScrollBody extends StatelessWidget {
         ),
         SliverFillRemaining(
           hasScrollBody: false,
-          child: BlocBuilder<DetailsCubit, DetailsState>(
-            builder: (context, state) {
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  _InformationContainer(
-                    movie: movie,
-                    controller: controller,
-                  ),
-                  _Image(heroTag: heroTag, movie: movie),
-                ],
-              );
-            },
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              _InformationContainer(
+                movie: movie,
+                controller: controller,
+                heroTag: heroTag,
+              ),
+              // _Image(heroTag: heroTag, movie: movie),
+            ],
           ),
         ),
       ],
-    );
-  }
-}
-
-class _Image extends StatelessWidget {
-  const _Image({
-    required this.heroTag,
-    required this.movie,
-  });
-
-  final String heroTag;
-  final MovieEntity movie;
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<DetailsCubit, DetailsState>(
-      builder: (context, state) {
-        return AnimatedOpacity(
-          duration: 500.ms,
-          curve: Curves.easeInOut,
-          opacity: !state.isOpacityAnimating ? 1 : 0,
-          child: !state.isPageShrinking
-              ? Container(
-                  margin: state.isPageShrinked ? EdgeInsets.only(bottom: 250.h) : EdgeInsets.only(bottom: 420.h, right: 120.w),
-                  clipBehavior: Clip.hardEdge,
-                  height: state.isPageShrinked ? 300.h : 200.h,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15.r),
-                  ),
-                  child: HeroImage(
-                    tag: heroTag,
-                    imageUrl: movie.posterPath!.coverImage,
-                  ),
-                )
-              : SizedBox(),
-        );
-      },
     );
   }
 }
@@ -218,10 +176,12 @@ class _InformationContainer extends StatelessWidget {
   const _InformationContainer({
     required this.movie,
     required this.controller,
+    required this.heroTag,
   });
 
   final MovieEntity movie;
   final AnimationController controller;
+  final String heroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -232,11 +192,8 @@ class _InformationContainer extends StatelessWidget {
           curve: Curves.easeInOut,
           margin: state.isPageShrinked ? EdgeInsets.only(top: 150.h, right: 20.w, left: 20.w) : EdgeInsets.only(top: 150.h),
           padding: EdgeInsets.symmetric(horizontal: 20.w),
-          onEnd: () {
-            context.read<DetailsCubit>().finishShrinking();
-          },
           width: double.infinity,
-          height: state.isPageShrinked ? 400.h : 600.h,
+          height: state.isPageShrinked ? 400.h : 800.h,
           decoration: BoxDecoration(
             color: Theme.of(context).scaffoldBackgroundColor,
             borderRadius: BorderRadius.only(
@@ -260,71 +217,173 @@ class _InformationContainer extends StatelessWidget {
                 },
               );
             },
-            child: !state.isPageShrinking
-                ? Container(
-                    margin: state.isPageShrinked ? EdgeInsets.only(top: 120.h) : EdgeInsets.only(top: 10.h),
+            child: state.isPageShrinked
+                ? _ShrinkedView(
+                    movie: movie,
+                    heroTag: heroTag,
+                    controller: controller,
+                  )
+                : _ExpandedView(
+                    movie: movie,
+                    heroTag: heroTag,
+                    controller: controller,
+                  ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ShrinkedView extends StatelessWidget {
+  final MovieEntity movie;
+  final String heroTag;
+  final AnimationController controller;
+  const _ShrinkedView({required this.movie, required this.heroTag, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<DetailsCubit, DetailsState>(
+      builder: (context, state) {
+        return !state.isOpacityAnimating
+            ? Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.topCenter,
+                children: [
+                  Positioned(
+                    top: -160.h,
+                    child: _Image(
+                      heroTag: heroTag,
+                      movie: movie,
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 150.h),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 15.h,
                       children: [
-                        if (!state.isPageShrinked) _ExpandedTypeCards(movie: movie) else SizedBox(),
-                        Container(height: state.isPageShrinked ? 40.h : 0),
-                        Center(
-                          child: Text(
-                            movie.title!,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ),
-                        SizedBox(height: 10.h),
-                        if (state.isPageShrinked) _ShrinkedTypeCards(movie: movie) else SizedBox(),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Director",
-                              style: TextStyle(color: Colors.black),
-                            ),
-                            Text(
-                              "Writers",
-                              style: TextStyle(color: Colors.black),
-                            ),
-                            Text(
-                              "Stars",
-                              style: TextStyle(color: Colors.black),
-                            ),
-                            !state.isPageShrinked
-                                ? Text(
-                                    movie.overview!,
-                                    style: TextStyle(color: Colors.black),
-                                  )
-                                : SizedBox()
-                          ],
-                        ),
                         Text(
-                          "Release Date ${movie.releaseDate!.formattedTime}",
-                          style: TextStyle(color: Colors.black),
+                          movie.title!,
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
+                        _ShrinkedTypeCards(movie: movie),
                         Spacer(),
                         GestureDetector(
                           onTap: () {
                             context.read<DetailsCubit>().changePageView();
-                            if (state.isPageShrinked) {
-                              controller.forward();
-                              return;
-                            }
+                            controller.forward();
+                          },
+                          child: Align(
+                            child: Icon(Icons.keyboard_arrow_down_outlined, size: 30.r),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              )
+            : SizedBox();
+      },
+    );
+  }
+}
+
+class _ExpandedView extends StatelessWidget {
+  final MovieEntity movie;
+  final String heroTag;
+  final AnimationController controller;
+
+  const _ExpandedView({required this.movie, required this.heroTag, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<DetailsCubit, DetailsState>(
+      builder: (context, state) {
+        return !state.isOpacityAnimating
+            ? Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned(
+                    top: -80.h,
+                    left: 30.w,
+                    child: _Image(heroTag: heroTag, movie: movie),
+                  ),
+                  _ExpandedTypeCards(movie: movie),
+                  Container(
+                    margin: EdgeInsets.only(top: 140.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              movie.title!,
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                ),
+                                Text(movie.voteAverage!.roundNumber.rateNumber)
+                              ],
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 20.h),
+                        SizedBox(
+                          height: 135.h,
+                          child: Text(
+                            movie.overview!,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 7,
+                          ),
+                        ),
+                        SizedBox(height: 20.h),
+                        Text("Similar movies", style: Theme.of(context).textTheme.titleLarge),
+                        SizedBox(height: 10.h),
+                        BlocBuilder<DetailsCubit, DetailsState>(
+                          builder: (context, state) {
+                            return SizedBox(
+                              height: 150.h,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                separatorBuilder: (context, index) => SizedBox(width: 15.w),
+                                itemCount: state.similarsList.length,
+                                itemBuilder: (context, index) {
+                                  return GestureDetector(
+                                    onTap: () => context.router
+                                        .push(MovieDetailsRoute(movie: state.similarsList[index], heroTag: state.similarsList[index].title!)),
+                                    child: HeroImage(
+                                      imageUrl: state.similarsList[index].posterPath!.coverImage,
+                                      tag: state.similarsList[index].title!,
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                        SizedBox(height: 20.h),
+                        Text("User comments", style: Theme.of(context).textTheme.titleLarge),
+                        Spacer(),
+                        GestureDetector(
+                          onTap: () {
+                            context.read<DetailsCubit>().changePageView();
                             controller.reverse();
                           },
                           child: Align(
-                            child: Icon(state.isPageShrinked ? Icons.keyboard_arrow_down_outlined : Icons.keyboard_arrow_up_outlined, size: 30.r),
+                            child: Icon(Icons.keyboard_arrow_up_outlined, size: 30.r),
                           ),
                         ),
-                        SizedBox(height: 10.h)
                       ],
                     ),
-                  )
-                : SizedBox(),
-          ),
-        );
+                  ),
+                ],
+              )
+            : SizedBox();
       },
     );
   }
@@ -352,7 +411,6 @@ class _ShrinkedTypeCards extends StatelessWidget {
               ),
               child: Text(
                 MovieType.getEnumById(id: id),
-                style: TextStyle(color: Colors.black),
               ),
             ),
           ),
@@ -375,7 +433,7 @@ class _ExpandedTypeCards extends StatelessWidget {
       children: [
         Container(
           height: 130.h,
-          margin: EdgeInsets.only(left: 180.w),
+          margin: EdgeInsets.only(left: 180.w, top: 10.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 10,
@@ -389,7 +447,6 @@ class _ExpandedTypeCards extends StatelessWidget {
                   ),
                   child: Text(
                     MovieType.getEnumById(id: id),
-                    style: TextStyle(color: Colors.black),
                   ),
                 ),
               ),
@@ -397,6 +454,41 @@ class _ExpandedTypeCards extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _Image extends StatelessWidget {
+  const _Image({
+    required this.heroTag,
+    required this.movie,
+  });
+
+  final String heroTag;
+  final MovieEntity movie;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<DetailsCubit, DetailsState>(
+      builder: (context, state) {
+        return AnimatedOpacity(
+          duration: 500.ms,
+          curve: Curves.easeInOut,
+          opacity: !state.isOpacityAnimating ? 1 : 0,
+          child: Container(
+            margin: state.isPageShrinked ? EdgeInsets.only(bottom: 250.h) : EdgeInsets.only(bottom: 420.h, right: 120.w),
+            clipBehavior: Clip.hardEdge,
+            height: state.isPageShrinked ? 300.h : 200.h,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15.r),
+            ),
+            child: HeroImage(
+              tag: heroTag,
+              imageUrl: movie.posterPath!.coverImage,
+            ),
+          ),
+        );
+      },
     );
   }
 }

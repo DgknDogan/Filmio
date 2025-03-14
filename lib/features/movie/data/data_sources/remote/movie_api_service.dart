@@ -35,4 +35,13 @@ abstract class MovieApiService {
     @Query("language") String? language,
     @Query("page") int? page,
   });
+
+  @GET("/movie/{movie_id}/similar")
+  Future<HttpResponse<MovieApiResponse>> getSimilarMovies({
+    @Header("accept") String? accept,
+    @Header("Authorization") String? apiKey,
+    @Path("movie_id") required int movieId,
+    @Query("language") String? language,
+    @Query("page") int? page,
+  });
 }

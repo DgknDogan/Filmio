@@ -25,6 +25,9 @@ class LikedMoviesPage extends StatelessWidget {
               slivers: [
                 SliverAppBar(
                   floating: true,
+                  title: Text("Liked Movies"),
+                  centerTitle: true,
+                  titleTextStyle: Theme.of(context).textTheme.titleLarge,
                   leading: GestureDetector(
                     onTap: () => context.router.maybePop(),
                     child: Icon(
@@ -38,7 +41,7 @@ class LikedMoviesPage extends StatelessWidget {
                   separatorBuilder: (context, index) => SizedBox(height: 0.h),
                   itemBuilder: (context, index) {
                     return GestureDetector(
-                      onTap: () => context.router.push(MovieDetailsRoute(movie: state.list[index], heroTag: state.list[index].originalTitle!)),
+                      onTap: () => context.router.push(MovieDetailsRoute(movie: state.list[index], heroTag: state.list[index].id.toString())),
                       child: Container(
                         margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
                         padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 5.h),
@@ -55,7 +58,7 @@ class LikedMoviesPage extends StatelessWidget {
                               height: 140.h,
                               width: 100.w,
                               child: HeroImage(
-                                tag: state.list[index].originalTitle!,
+                                tag: state.list[index].id.toString(),
                                 imageUrl: state.list[index].posterPath!.coverImage,
                               ),
                             ),
@@ -65,7 +68,7 @@ class LikedMoviesPage extends StatelessWidget {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Row(
+                                      Column(
                                         children: [
                                           ...state.list[index].genreIds!.map(
                                             (genreId) {

@@ -4,26 +4,26 @@ class DetailsState {
   final bool isMovieLiked;
   final bool isPageShrinked;
   final bool isOpacityAnimating;
-  final bool isPageShrinking;
+  final List<MovieEntity> similarsList;
 
   DetailsState({
     required this.isMovieLiked,
     required this.isPageShrinked,
     required this.isOpacityAnimating,
-    required this.isPageShrinking,
+    required this.similarsList,
   });
 
   DetailsState copyWith({
     bool? isMovieLiked,
     bool? isPageShrinked,
     bool? isOpacityAnimating,
-    bool? isPageShrinking,
+    List<MovieEntity>? similarsList,
   }) {
     return DetailsState(
       isMovieLiked: isMovieLiked ?? this.isMovieLiked,
       isPageShrinked: isPageShrinked ?? this.isPageShrinked,
       isOpacityAnimating: isOpacityAnimating ?? this.isOpacityAnimating,
-      isPageShrinking: isPageShrinking ?? this.isPageShrinking,
+      similarsList: similarsList ?? this.similarsList,
     );
   }
 }

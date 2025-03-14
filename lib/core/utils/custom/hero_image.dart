@@ -34,8 +34,7 @@ class HeroImage extends StatelessWidget {
           ),
           height: 250.h,
           imageUrl: imageUrl,
-          memCacheHeight: 1000,
-          fit: BoxFit.contain,
+          memCacheHeight: 500,
         ),
       ),
     );

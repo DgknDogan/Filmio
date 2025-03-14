@@ -58,6 +58,22 @@ class AppRouter extends RootStackRouter {
         CustomRoute(
           page: SeriesSearchRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
+        ),
+        CustomRoute(
+          page: SettingsRoute.page,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final curve = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            );
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(1.0, 0.0),
+                end: Offset.zero,
+              ).animate(curve),
+              child: child,
+            );
+          },
         )
       ];
 }

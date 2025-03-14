@@ -5,4 +5,5 @@ abstract class MovieRepository {
   Future<DataState<List<MovieEntity>>> getPopularMovies();
   Future<DataState<List<MovieEntity>>> getTopRatedMovies();
   Future<DataState<List<MovieEntity>>> searchMoviesByTitle({required String query});
+  Future<DataState<List<MovieEntity>>> getSimilarMovies({required int movieId});
 }

@@ -110,4 +110,36 @@ class MovieRepositoryImpl extends MovieRepository {
       },
     );
   }
+
+  @override
+  Future<DataState<List<MovieEntity>>> getSimilarMovies({required int movieId}) async {
+    return await Isolate.run(
+      debugName: "getSimilarMovies() running",
+      () async {
+        try {
+          final httpResponse = await _movieApiService.getSimilarMovies(
+            accept: "application/json",
+            apiKey: "Bearer $apiKey",
+            movieId: movieId,
+            language: "en-US",
+            page: 1,
+          );
+          if (httpResponse.response.statusCode == HttpStatus.ok) {
+            return DataSuccess(data: httpResponse.data.results!);
+          } else {
+            return DataError(
+              error: DioException(
+                requestOptions: httpResponse.response.requestOptions,
+                error: httpResponse.response.statusMessage,
+                type: DioExceptionType.badResponse,
+                response: httpResponse.response,
+              ),
+            );
+          }
+        } on DioException catch (e) {
+          return DataError(error: e);
+        }
+      },
+    );
+  }
 }
