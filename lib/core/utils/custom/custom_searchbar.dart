@@ -8,6 +8,7 @@ class CustomSearchbar extends StatelessWidget {
   final double? height;
   final double? width;
   final void Function(String)? onChanged;
+  final TextEditingController? controller;
   const CustomSearchbar({
     super.key,
     required this.isEnabled,
@@ -16,6 +17,7 @@ class CustomSearchbar extends StatelessWidget {
     this.height,
     this.width,
     this.onChanged,
+    this.controller,
   });
 
   @override
@@ -24,6 +26,7 @@ class CustomSearchbar extends StatelessWidget {
       height: height ?? 50.h,
       width: width,
       child: TextField(
+        controller: controller,
         onChanged: onChanged,
         focusNode: focusNode,
         enabled: isEnabled,

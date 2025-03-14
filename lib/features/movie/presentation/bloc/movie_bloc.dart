@@ -26,7 +26,6 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
 
     if (popularMoviesDataState is DataSuccess && topRatedMoviesDataState is DataSuccess) {
       final recommendedMovie = topRatedMoviesDataState.data![Random().nextInt(topRatedMoviesDataState.data!.length)];
-
       emit(
         MovieSuccess(
           popularMoviesDataState.data!,

@@ -9,12 +9,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/enums/movie_type.dart';
+import '../../../../core/utils/custom/hero_image.dart';
 import '../../../../injection_container.dart';
 import '../../domain/entities/movie.dart';
 import '../cubit/details_cubit.dart';
 
 @RoutePage()
-class MovieDetailsPage extends StatelessWidget {
+class MovieDetailsPage extends StatefulWidget {
   final MovieEntity movie;
   final String heroTag;
 
@@ -25,26 +26,61 @@ class MovieDetailsPage extends StatelessWidget {
   });
 
   @override
+  State<MovieDetailsPage> createState() => _MovieDetailsPageState();
+}
+
+class _MovieDetailsPageState extends State<MovieDetailsPage> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+  @override
+  void initState() {
+    final tween = Tween<double>(begin: 15, end: 0);
+    _controller = AnimationController(vsync: this, duration: 500.ms, reverseDuration: 500.ms);
+    _animation = tween.animate(_controller);
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        _Backgorund(movie: movie),
-        ClipRRect(
-          clipBehavior: Clip.hardEdge,
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-            child: Scaffold(
-              extendBodyBehindAppBar: true,
-              extendBody: true,
-              backgroundColor: Colors.transparent,
-              body: BlocProvider(
-                create: (context) => DetailsCubit(getIt(), getIt(), movie, getIt()),
-                child: _ScrollBody(movie: movie, heroTag: heroTag),
-              ),
-            ),
+    return BlocProvider(
+      create: (context) => DetailsCubit(getIt(), getIt(), widget.movie, getIt()),
+      child: Stack(
+        children: [
+          _Backgorund(movie: widget.movie),
+          BlocBuilder<DetailsCubit, DetailsState>(
+            builder: (context, state) {
+              return AnimatedBuilder(
+                animation: _animation,
+                builder: (BuildContext context, Widget? child) {
+                  return ClipRRect(
+                    clipBehavior: Clip.hardEdge,
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: _animation.value.w, sigmaY: _animation.value.h),
+                      child: Scaffold(
+                        extendBodyBehindAppBar: true,
+                        extendBody: true,
+                        backgroundColor: Colors.transparent,
+                        body: _ScrollBody(
+                          movie: widget.movie,
+                          heroTag: widget.heroTag,
+                          controller: _controller,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -60,10 +96,16 @@ class _Backgorund extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: double.infinity,
-      child: CachedNetworkImage(
-        imageUrl: movie.posterPath!.coverImage,
-        fit: BoxFit.fitHeight,
-        memCacheHeight: 1000,
+      child: ColorFiltered(
+        colorFilter: ColorFilter.mode(
+          Colors.grey.withValues(alpha: 0.7),
+          BlendMode.saturation,
+        ),
+        child: CachedNetworkImage(
+          imageUrl: movie.posterPath!.coverImage,
+          fit: BoxFit.fitHeight,
+          memCacheHeight: 1000,
+        ),
       ),
     );
   }
@@ -73,10 +115,12 @@ class _ScrollBody extends StatelessWidget {
   const _ScrollBody({
     required this.movie,
     required this.heroTag,
+    required this.controller,
   });
 
   final MovieEntity movie;
   final String heroTag;
+  final AnimationController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +162,10 @@ class _ScrollBody extends StatelessWidget {
               return Stack(
                 alignment: Alignment.center,
                 children: [
-                  _InformationContainer(movie: movie),
+                  _InformationContainer(
+                    movie: movie,
+                    controller: controller,
+                  ),
                   _Image(heroTag: heroTag, movie: movie),
                 ],
               );
@@ -154,23 +201,10 @@ class _Image extends StatelessWidget {
                   height: state.isPageShrinked ? 300.h : 200.h,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15.r),
-                    boxShadow: state.isPageShrinked
-                        ? []
-                        : [
-                            BoxShadow(
-                              color: Colors.black,
-                              blurRadius: 10.r,
-                              offset: Offset(-5.w, 10.h),
-                            )
-                          ],
                   ),
-                  child: Hero(
+                  child: HeroImage(
                     tag: heroTag,
-                    child: CachedNetworkImage(
-                      imageUrl: movie.posterPath!.coverImage,
-                      memCacheHeight: 1000,
-                      fit: BoxFit.contain,
-                    ),
+                    imageUrl: movie.posterPath!.coverImage,
                   ),
                 )
               : SizedBox(),
@@ -183,9 +217,11 @@ class _Image extends StatelessWidget {
 class _InformationContainer extends StatelessWidget {
   const _InformationContainer({
     required this.movie,
+    required this.controller,
   });
 
   final MovieEntity movie;
+  final AnimationController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -202,21 +238,13 @@ class _InformationContainer extends StatelessWidget {
           width: double.infinity,
           height: state.isPageShrinked ? 400.h : 600.h,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).scaffoldBackgroundColor,
             borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(state.isPageShrinked ? 15.r : 0.r),
               bottomRight: Radius.circular(state.isPageShrinked ? 15.r : 0.r),
               topLeft: Radius.circular(state.isPageShrinked ? 15.r : 60.r),
               topRight: Radius.circular(state.isPageShrinked ? 15.r : 60.r),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black,
-                blurRadius: 20.r,
-                offset: Offset(0, 20.h),
-                spreadRadius: 6.r,
-              ),
-            ],
           ),
           child: AnimatedOpacity(
             duration: 500.ms,
@@ -278,7 +306,14 @@ class _InformationContainer extends StatelessWidget {
                         ),
                         Spacer(),
                         GestureDetector(
-                          onTap: () => context.read<DetailsCubit>().changePageView(),
+                          onTap: () {
+                            context.read<DetailsCubit>().changePageView();
+                            if (state.isPageShrinked) {
+                              controller.forward();
+                              return;
+                            }
+                            controller.reverse();
+                          },
                           child: Align(
                             child: Icon(state.isPageShrinked ? Icons.keyboard_arrow_down_outlined : Icons.keyboard_arrow_up_outlined, size: 30.r),
                           ),

@@ -12,7 +12,7 @@ class SearchCubit extends Cubit<SearchState> {
   void searchMovies({required String query}) async {
     final dataState = await _searchMoviesUseCase.call(params: query);
 
-    if (dataState.data != null) {
+    if (dataState.data != null && !isClosed) {
       emit(
         SearchState(
           searchedMovies: dataState.data!

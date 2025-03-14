@@ -1,9 +1,9 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:filmio/core/extensions/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/utils/custom/hero_image.dart';
 import '../../domain/entities/series_entity.dart';
 
 @RoutePage()
@@ -59,13 +59,9 @@ class SeriesDeatailsPage extends StatelessWidget {
                       end: Alignment.bottomCenter,
                     ),
                   ),
-                  child: Hero(
+                  child: HeroImage(
+                    imageUrl: series.posterPath!.coverImage,
                     tag: heroTag,
-                    child: CachedNetworkImage(
-                      imageUrl: series.posterPath!.coverImage,
-                      height: 300.h,
-                      memCacheHeight: 1000,
-                    ),
                   ),
                 ),
                 // _FilmDescription(movie: movie),

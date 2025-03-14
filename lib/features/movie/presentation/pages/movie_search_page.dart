@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:filmio/config/routes/app_router.gr.dart';
 import 'package:filmio/core/extensions/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -23,9 +24,12 @@ class MovieSearchPage extends StatefulWidget {
 }
 
 class _MovieSearchPageState extends State<MovieSearchPage> {
-  final _focus = FocusNode();
+  late final FocusNode _focus;
+  late final TextEditingController _controller;
   @override
   void initState() {
+    _controller = TextEditingController();
+    _focus = FocusNode();
     Future.delayed(
       250.milliseconds,
       () {
@@ -57,6 +61,7 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
                   child: BlocBuilder<SearchCubit, SearchState>(
                     builder: (context, state) {
                       return CustomSearchbar(
+                        controller: _controller,
                         onChanged: (query) {
                           context.read<SearchCubit>().searchMovies(query: query);
                         },
@@ -70,7 +75,10 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
                 ),
                 SizedBox(width: 10.w),
                 GestureDetector(
-                  onTap: () => context.router.maybePop(),
+                  onTap: () {
+                    _controller.clear();
+                    context.router.maybePop();
+                  },
                   child: Center(
                     child: Text(
                       "Cancel",
@@ -101,21 +109,28 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
                     borderRadius: BorderRadius.circular(10.r),
                   ),
                   clipBehavior: Clip.hardEdge,
-                  child: CachedNetworkImage(
-                    placeholder: (context, url) {
-                      return Shimmer.fromColors(
-                        baseColor: Colors.grey.shade600,
-                        highlightColor: Colors.grey.shade500,
-                        child: Container(
-                          width: 300.w,
-                          height: 300.h,
-                          decoration: BoxDecoration(color: Colors.amber),
-                        ),
-                      );
-                    },
-                    imageUrl: state.searchedMovies[index].posterPath!.coverImage,
-                    memCacheHeight: 1000,
-                    fit: BoxFit.cover,
+                  child: GestureDetector(
+                    onTap: () =>
+                        context.router.push(MovieDetailsRoute(movie: state.searchedMovies[index], heroTag: state.searchedMovies[index].title!)),
+                    child: Hero(
+                      tag: state.searchedMovies[index].title!,
+                      child: CachedNetworkImage(
+                        placeholder: (context, url) {
+                          return Shimmer.fromColors(
+                            baseColor: Colors.grey.shade600,
+                            highlightColor: Colors.grey.shade500,
+                            child: Container(
+                              width: 300.w,
+                              height: 300.h,
+                              decoration: BoxDecoration(color: Colors.amber),
+                            ),
+                          );
+                        },
+                        imageUrl: state.searchedMovies[index].posterPath!.coverImage,
+                        memCacheHeight: 1000,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                 );
               },

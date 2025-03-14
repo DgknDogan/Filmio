@@ -19,19 +19,9 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<LoginCubit>(
       create: (context) => getIt<LoginCubit>(),
-      child: Scaffold(
+      child: const Scaffold(
         body: SafeArea(
-          child: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                invertColors: true,
-                alignment: Alignment.topCenter,
-                scale: 9.r,
-                image: AssetImage("assets/logo.png"),
-              ),
-            ),
-            child: Center(child: _LoginForm()),
-          ),
+          child: Center(child: _LoginForm()),
         ),
       ),
     );

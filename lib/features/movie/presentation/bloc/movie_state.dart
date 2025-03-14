@@ -15,7 +15,7 @@ sealed class MovieState {
 }
 
 final class MovieLoading extends MovieState {
-  const MovieLoading();
+  MovieLoading();
 }
 
 final class MovieError extends MovieState {
@@ -24,12 +24,24 @@ final class MovieError extends MovieState {
 
 final class MovieSuccess extends MovieState {
   const MovieSuccess(
-    List<MovieEntity> popularFilmsList,
-    List<MovieEntity> topFilmsList,
-    MovieEntity recommendedMovie,
+    List<MovieEntity>? popularFilmsList,
+    List<MovieEntity>? topFilmsList,
+    MovieEntity? recommendedMovie,
   ) : super(
           popularFilmsList: popularFilmsList,
           topFilmsList: topFilmsList,
           recommendedMovie: recommendedMovie,
         );
+
+  MovieSuccess copyWith({
+    List<MovieEntity>? popularFilmsList,
+    List<MovieEntity>? topFilmsList,
+    MovieEntity? recommendedMovie,
+  }) {
+    return MovieSuccess(
+      popularFilmsList ?? super.popularFilmsList!,
+      topFilmsList ?? super.topFilmsList!,
+      recommendedMovie ?? super.recommendedMovie!,
+    );
+  }
 }

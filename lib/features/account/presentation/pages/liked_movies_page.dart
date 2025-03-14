@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:filmio/config/routes/app_router.gr.dart';
 import 'package:filmio/core/extensions/double_extension.dart';
 import 'package:filmio/core/extensions/string_extension.dart';
@@ -8,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/enums/movie_type.dart';
+import '../../../../core/utils/custom/hero_image.dart';
 import '../cubit/liked_movies_cubit.dart';
 
 @RoutePage()
@@ -54,24 +54,9 @@ class LikedMoviesPage extends StatelessWidget {
                             SizedBox(
                               height: 140.h,
                               width: 100.w,
-                              child: Hero(
-                                createRectTween: (begin, end) => RectTween(begin: begin, end: end),
-                                flightShuttleBuilder: (flightContext, animation, direction, fromHeroContext, toHeroContext) {
-                                  if (direction == HeroFlightDirection.push) {
-                                    return Material(color: Colors.transparent, child: fromHeroContext.widget);
-                                  } else {
-                                    return Material(color: Colors.transparent, child: toHeroContext.widget);
-                                  }
-                                },
+                              child: HeroImage(
                                 tag: state.list[index].originalTitle!,
-                                child: ClipRRect(
-                                  clipBehavior: Clip.hardEdge,
-                                  borderRadius: BorderRadius.circular(15.r),
-                                  child: CachedNetworkImage(
-                                    imageUrl: state.list[index].posterPath!.coverImage,
-                                    memCacheHeight: 1000,
-                                  ),
-                                ),
+                                imageUrl: state.list[index].posterPath!.coverImage,
                               ),
                             ),
                             Expanded(

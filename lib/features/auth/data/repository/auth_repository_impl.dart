@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:filmio/core/extensions/firebase_firestore_extension.dart';
 import 'package:filmio/core/resources/firebase_state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -6,16 +7,10 @@ import '../../domain/repository/auth_repository.dart';
 
 class AuthRepositoryImpl extends AuthRepository {
   final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
   @override
   Future<FirebaseState<UserCredential>> login({required String email, required String password}) async {
     try {
       final userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
-      await _firestore.collection("User").doc(userCredential.user!.uid).set(
-        {
-          "liked_movies": [],
-        },
-      );
       return FirebaseSuccess(data: userCredential);
     } on FirebaseAuthException catch (e) {
       return FirebaseError(error: e);
@@ -26,6 +21,11 @@ class AuthRepositoryImpl extends AuthRepository {
   Future<FirebaseState<UserCredential>> register({required String email, required String password}) async {
     try {
       final userCredential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      FirebaseFirestore.instance.getUserDocRef().set(
+        {
+          "liked_movies": [],
+        },
+      );
       return FirebaseSuccess(data: userCredential);
     } on FirebaseAuthException catch (e) {
       return FirebaseError(error: e);

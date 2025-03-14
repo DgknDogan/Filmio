@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:filmio/config/routes/app_router.gr.dart';
 import 'package:filmio/core/extensions/string_extension.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/utils/custom/custom_searchbar.dart';
-import '../../../../injection_container.dart';
+import '../../../../core/utils/custom/hero_image.dart';
 import '../../../../core/utils/custom/recommended_container.dart';
 import '../../domain/entities/movie.dart';
 import '../bloc/movie_bloc.dart';
@@ -18,8 +17,8 @@ class MoviePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => MovieBloc(getIt(), getIt())..add(GetMovies()),
+    return BlocProvider.value(
+      value: context.read<MovieBloc>(),
       child: Scaffold(
         body: BlocBuilder<MovieBloc, MovieState>(
           builder: (context, state) {
@@ -39,9 +38,9 @@ class MoviePage extends StatelessWidget {
                       Container(
                         margin: EdgeInsets.only(right: 20.w),
                         child: GestureDetector(
-                          onTap: () => context.router.push(MovieSearchRoute(heroTag: "movie_search", hintText: "Search a movie")),
+                          onTap: () => context.router.push(MovieSearchRoute(heroTag: "movie_searchbar", hintText: "Search a movie")),
                           child: Hero(
-                            tag: "movie_search",
+                            tag: "movie_searchbar",
                             createRectTween: (begin, end) => RectTween(begin: begin, end: end),
                             flightShuttleBuilder: (flightContext, animation, direction, fromContext, toContext) {
                               if (direction == HeroFlightDirection.push) {
@@ -91,9 +90,13 @@ class MoviePage extends StatelessWidget {
                   ),
                 ],
               );
-            } else {
+            } else if (state is MovieLoading) {
               return Center(
                 child: CircularProgressIndicator(color: Colors.white),
+              );
+            } else {
+              return Center(
+                child: Text(state.error!.message!),
               );
             }
           },
@@ -145,7 +148,6 @@ class _ScrollableFilmList extends StatelessWidget {
                   key: storageKey,
                   itemCount: movieList.length,
                   scrollDirection: Axis.horizontal,
-                  cacheExtent: 500,
                   itemBuilder: (context, index) {
                     return _MovieCard(movie: movieList[index]);
                   },
@@ -166,30 +168,21 @@ class _MovieCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 200.h,
-      margin: EdgeInsets.only(right: 20.r),
-      child: GestureDetector(
-        onTap: () => context.router.push(MovieDetailsRoute(movie: movie, heroTag: movie.title!)),
-        child: Hero(
-          createRectTween: (begin, end) => RectTween(begin: begin, end: end),
-          tag: movie.title!,
-          child: Container(
-            clipBehavior: Clip.hardEdge,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: CachedNetworkImage(
+    return BlocBuilder<MovieBloc, MovieState>(
+      builder: (context, state) {
+        state as MovieSuccess;
+        return Container(
+          height: 200.h,
+          margin: EdgeInsets.only(right: 20.r),
+          child: GestureDetector(
+            onTap: () => context.router.push(MovieDetailsRoute(movie: movie, heroTag: movie.title!)),
+            child: HeroImage(
+              tag: movie.title!,
               imageUrl: movie.posterPath!.coverImage,
-              placeholder: (context, url) => Container(
-                decoration: BoxDecoration(color: Colors.transparent),
-              ),
-              errorWidget: (context, url, error) => SizedBox(),
-              memCacheHeight: 1000,
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

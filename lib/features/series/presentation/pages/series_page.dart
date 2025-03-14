@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:filmio/config/routes/app_router.gr.dart';
 import 'package:filmio/core/extensions/string_extension.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/utils/custom/custom_searchbar.dart';
-import '../../../../injection_container.dart';
+import '../../../../core/utils/custom/hero_image.dart';
 import '../../../../core/utils/custom/recommended_container.dart';
 import '../../domain/entities/series_entity.dart';
 import '../bloc/series_bloc.dart';
@@ -19,8 +18,8 @@ class SeriesHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocProvider(
-        create: (context) => SeriesBloc(getIt(), getIt())..add(GetSeries()),
+      body: BlocProvider.value(
+        value: context.read<SeriesBloc>(),
         child: BlocBuilder<SeriesBloc, SeriesState>(
           builder: (context, state) {
             if (state is SeriesSuccess) {
@@ -178,16 +177,9 @@ class _SeriesCard extends StatelessWidget {
       ),
       child: GestureDetector(
         onTap: () => context.router.push(SeriesDeatailsRoute(series: series, heroTag: series.name!)),
-        child: Hero(
+        child: HeroImage(
           tag: series.name!,
-          child: CachedNetworkImage(
-            imageUrl: series.posterPath!.coverImage,
-            placeholder: (context, url) => Container(
-              decoration: BoxDecoration(color: Colors.transparent),
-            ),
-            errorWidget: (context, url, error) => SizedBox(),
-            memCacheHeight: 1000,
-          ),
+          imageUrl: series.posterPath!.coverImage,
         ),
       ),
     );
