@@ -1,12 +1,12 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:filmio/config/routes/app_router.gr.dart';
-import 'package:filmio/core/extensions/double_extension.dart';
-import 'package:filmio/core/extensions/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../config/routes/app_router.gr.dart';
 import '../../../../core/enums/movie_type.dart';
+import '../../../../core/extensions/double_extension.dart';
+import '../../../../core/extensions/string_extension.dart';
 import '../../../../core/utils/custom/hero_image.dart';
 import '../cubit/liked_movies_cubit.dart';
 
@@ -25,14 +25,16 @@ class LikedMoviesPage extends StatelessWidget {
               slivers: [
                 SliverAppBar(
                   floating: true,
+                  toolbarHeight: 70.h,
                   title: Text("Liked Movies"),
                   centerTitle: true,
-                  titleTextStyle: Theme.of(context).textTheme.titleLarge,
+                  titleTextStyle: Theme.of(context).textTheme.headlineLarge,
                   leading: GestureDetector(
                     onTap: () => context.router.maybePop(),
                     child: Icon(
                       Icons.arrow_back,
                       color: Colors.white,
+                      size: 26.r,
                     ),
                   ),
                 ),

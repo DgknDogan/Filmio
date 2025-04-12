@@ -28,8 +28,8 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       final recommendedMovie = topRatedMoviesDataState.data![Random().nextInt(topRatedMoviesDataState.data!.length)];
       emit(
         MovieSuccess(
-          popularMoviesDataState.data!,
-          topRatedMoviesDataState.data!,
+          popularMoviesDataState.data!.where((movie) => movie.posterPath != null).toList(),
+          topRatedMoviesDataState.data!.where((movie) => movie.posterPath != null).toList(),
           recommendedMovie,
         ),
       );

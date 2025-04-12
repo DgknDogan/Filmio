@@ -1,11 +1,13 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:filmio/config/routes/app_router.gr.dart';
-import 'package:filmio/core/extensions/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../config/routes/app_router.gr.dart';
+import '../../../../core/extensions/brightness_extension.dart';
+import '../../../../core/extensions/string_extension.dart';
 import '../../../../core/utils/custom/custom_searchbar.dart';
+import '../../../../core/utils/custom/custom_sliver_app_bar.dart';
 import '../../../../core/utils/custom/hero_image.dart';
 import '../../../../core/utils/custom/recommended_container.dart';
 import '../../domain/entities/series_entity.dart';
@@ -25,14 +27,9 @@ class SeriesHomePage extends StatelessWidget {
             if (state is SeriesSuccess) {
               return CustomScrollView(
                 slivers: [
-                  SliverAppBar(
-                    automaticallyImplyLeading: false,
-                    title: Container(
-                      margin: EdgeInsets.only(left: 10.w),
-                      child: Text(
-                        "Series",
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
+                  CustomSliverAppBar(
+                    title: Text(
+                      "Series",
                     ),
                     actions: [
                       Container(
@@ -73,7 +70,6 @@ class SeriesHomePage extends StatelessWidget {
                             SeriesDeatailsRoute(series: state.recommendedSeries!, heroTag: "series_poster"),
                           ),
                         ),
-                        SizedBox(height: 20.h),
                         _ScrollableFilmList(
                           title: "Popular Series",
                           seriesList: state.popularSeriesList!,
@@ -92,11 +88,7 @@ class SeriesHomePage extends StatelessWidget {
                 ],
               );
             } else {
-              return Center(
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                ),
-              );
+              return Center(child: CircularProgressIndicator(color: Theme.of(context).isLight ? Colors.black : Colors.white));
             }
           },
         ),

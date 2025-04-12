@@ -23,18 +23,22 @@ class CustomSearchbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: height ?? 50.h,
       width: width,
       child: TextField(
+        onTapOutside: (event) {
+          focusNode!.unfocus();
+        },
         controller: controller,
         onChanged: onChanged,
         focusNode: focusNode,
         enabled: isEnabled,
+        cursorColor: Colors.black,
+        style: TextStyle(color: Colors.black),
         decoration: InputDecoration(
           prefixIcon: Icon(
             Icons.search,
             color: Colors.black,
-            size: isEnabled ? 26.r : 20.r,
+            size: 26.r,
           ),
           disabledBorder: OutlineInputBorder(
             borderSide: BorderSide(color: Colors.white),

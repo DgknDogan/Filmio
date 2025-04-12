@@ -1,15 +1,16 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:filmio/config/routes/app_router.gr.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../config/routes/app_router.gr.dart';
+import '../../../../core/extensions/brightness_extension.dart';
+import '../../../../core/utils/custom/custom_button.dart';
+import '../../../../core/utils/custom/custom_clipper.dart';
 import '../../../../core/utils/custom/custom_form.dart';
 import '../../../../injection_container.dart';
-import '../../../../core/utils/custom/custom_button.dart';
 import '../cubit/login_cubit.dart';
-import '../widgets/form_container.dart';
 
 @RoutePage()
 class LoginPage extends StatelessWidget {
@@ -19,9 +20,63 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<LoginCubit>(
       create: (context) => getIt<LoginCubit>(),
-      child: const Scaffold(
-        body: SafeArea(
-          child: Center(child: _LoginForm()),
+      child: Scaffold(
+        extendBody: true,
+        resizeToAvoidBottomInset: true,
+        body: Column(
+          children: [
+            _LoginHeader(),
+            _LoginForm(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LoginHeader extends StatelessWidget {
+  const _LoginHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipPath(
+      clipper: CustomBorderClipper(),
+      child: Container(
+        height: 170.h,
+        width: double.infinity,
+        decoration: Theme.of(context).isLight
+            ? BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xff6a5acd),
+                    Color(0xff3700b3),
+                  ],
+                ),
+              )
+            : BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xff252525),
+                    Colors.black,
+                  ],
+                ),
+              ),
+        child: Container(
+          margin: EdgeInsets.only(left: 20.w, top: 50.h),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Hello, Welcome back to",
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: Colors.white, fontSize: 26.sp),
+              ),
+              Text(
+                "Filmio",
+                style: Theme.of(context).textTheme.headlineLarge!.copyWith(fontSize: 28.sp),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -56,16 +111,11 @@ class _LoginFormState extends State<_LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    return FormContainer(
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "LOGIN",
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          SizedBox(height: 20.h),
           CustomForm(
             emailController: emailController,
             passwordController: passwordController,
@@ -82,13 +132,11 @@ class _LoginFormState extends State<_LoginForm> {
                     password: passwordController.text,
                   );
               if (context.mounted && isLoggedin && auth.currentUser!.displayName == null) {
-                context.router.push(SetProfile());
+                FocusManager.instance.primaryFocus?.unfocus();
+                context.router.replace(SetProfile());
               } else if (context.mounted && isLoggedin && auth.currentUser!.displayName != null) {
-                context.router.push(HomeRoute());
-              }
-              if (isLoggedin) {
-                emailController.clear();
-                passwordController.clear();
+                FocusManager.instance.primaryFocus?.unfocus();
+                context.router.replace(HomeRoute());
               }
             },
           ),
@@ -109,18 +157,15 @@ class _FormSubTexts extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
+              spacing: 5.w,
               children: [
                 Checkbox(
-                  splashRadius: 0,
-                  activeColor: Color(0xff1a1a1a),
-                  visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  activeColor: Theme.of(context).isLight ? Color(0xff3700b3) : Colors.white,
                   value: state.isChecked,
                   onChanged: (value) {
                     context.read<LoginCubit>().changeCheckBox(value!);
                   },
                 ),
-                SizedBox(width: 5.w),
                 Text(
                   "Remember Me",
                   style: Theme.of(context).textTheme.bodyMedium,

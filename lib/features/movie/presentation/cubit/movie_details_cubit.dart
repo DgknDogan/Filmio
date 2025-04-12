@@ -8,22 +8,22 @@ import '../../domain/usecases/get_liked_movies.dart';
 import '../../domain/usecases/get_similar_movies.dart';
 import '../../domain/usecases/like_movie.dart';
 
-part '../states/details_state.dart';
+part '../states/movie_details_state.dart';
 
-class DetailsCubit extends Cubit<DetailsState> {
+class MovieDetailsCubit extends Cubit<MovieDetailsState> {
   final LikeMovieUseCase _likeMovieUseCase;
   final DislikeMovieUseCase _dislikeMovieUseCase;
   final GetLikedMoviesUseCase _getLikedMoviesUseCase;
   final GetSimilarMoviesUseCase _getSimilarMoviesUseCase;
   final MovieEntity _movie;
-  DetailsCubit(
+  MovieDetailsCubit(
     this._likeMovieUseCase,
     this._getLikedMoviesUseCase,
     this._movie,
     this._dislikeMovieUseCase,
     this._getSimilarMoviesUseCase,
   ) : super(
-          DetailsState(
+          MovieDetailsState(
             isMovieLiked: false,
             isPageShrinked: true,
             isOpacityAnimating: false,
@@ -39,6 +39,9 @@ class DetailsCubit extends Cubit<DetailsState> {
   }
 
   Future<void> _isMovieLiked() async {
+    if (!isClosed) {
+      return;
+    }
     final getLikedMoviesState = await _getLikedMoviesUseCase.call();
     if (getLikedMoviesState is FirebaseSuccess && getLikedMoviesState.data != null && getLikedMoviesState.data!.contains(_movie)) {
       emit(state.copyWith(isMovieLiked: true));
@@ -49,15 +52,12 @@ class DetailsCubit extends Cubit<DetailsState> {
   }
 
   Future<void> _getSimilarMovies() async {
+    if (!isClosed) {
+      return;
+    }
     final similarMoviesState = await _getSimilarMoviesUseCase.call(params: _movie.id!);
     if (similarMoviesState is DataSuccess && similarMoviesState.data != null) {
-      emit(state.copyWith(
-          similarsList: similarMoviesState.data!
-              .sublist(0, 5)
-              .where(
-                (element) => element.posterPath != null,
-              )
-              .toList()));
+      emit(state.copyWith(similarsList: similarMoviesState.data!));
     }
   }
 

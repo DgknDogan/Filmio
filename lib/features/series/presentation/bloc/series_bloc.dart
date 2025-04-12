@@ -10,7 +10,7 @@ import '../../domain/usecases/get_popular_series.dart';
 import '../../domain/usecases/get_top_rated_series.dart';
 
 part 'series_event.dart';
-part 'series_state.dart';
+part '../../states/series_state.dart';
 
 class SeriesBloc extends Bloc<SeriesEvent, SeriesState> {
   final GetTopRatedSeriesUseCase _getTopRatedSeriesUseCase;

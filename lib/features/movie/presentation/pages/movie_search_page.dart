@@ -1,13 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:filmio/config/routes/app_router.gr.dart';
-import 'package:filmio/core/extensions/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../config/routes/app_router.gr.dart';
+import '../../../../core/extensions/string_extension.dart';
 import '../../../../core/utils/custom/custom_searchbar.dart';
 import '../../../../injection_container.dart';
 import '../cubit/search_cubit.dart';
@@ -55,6 +55,7 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
           actionsPadding: EdgeInsets.only(right: 20.w),
           actions: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Hero(
                   tag: widget.heroTag,
@@ -62,13 +63,14 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
                     builder: (context, state) {
                       return CustomSearchbar(
                         controller: _controller,
-                        onChanged: (query) {
-                          context.read<SearchCubit>().searchMovies(query: query);
-                        },
                         width: 260.w,
+                        height: 40.h,
                         isEnabled: true,
                         focusNode: _focus,
                         hintText: widget.hintText,
+                        onChanged: (query) {
+                          context.read<SearchCubit>().searchMovies(query: query);
+                        },
                       );
                     },
                   ),
@@ -79,11 +81,9 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
                     _controller.clear();
                     context.router.maybePop();
                   },
-                  child: Center(
-                    child: Text(
-                      "Cancel",
-                      style: TextStyle(color: Colors.white),
-                    ),
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(color: Colors.white),
                   ),
                 )
               ],

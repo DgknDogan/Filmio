@@ -1,11 +1,12 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:filmio/config/routes/app_router.gr.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../config/routes/app_router.gr.dart';
+import '../../../core/extensions/brightness_extension.dart';
 import '../../../injection_container.dart';
 import '../../auth/presentation/cubit/login_cubit.dart';
 
@@ -63,7 +64,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
           child: Image.asset(
             "assets/logo.png",
             height: 250.h,
-            color: Colors.white,
+            color: Theme.of(context).isLight ? Colors.black : Colors.white,
           ).animate(
             controller: _firstAnimaitonController,
             effects: _firstAnimation,

@@ -1,29 +1,26 @@
-part of '../cubit/details_cubit.dart';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+part of '../presentation/cubit/series_details_cubit.dart';
 
-class DetailsState {
+class SeriesDetailsState {
   final bool isMovieLiked;
   final bool isPageShrinked;
   final bool isOpacityAnimating;
-  final List<MovieEntity> similarsList;
 
-  DetailsState({
+  SeriesDetailsState({
     required this.isMovieLiked,
     required this.isPageShrinked,
     required this.isOpacityAnimating,
-    required this.similarsList,
   });
 
-  DetailsState copyWith({
+  SeriesDetailsState copyWith({
     bool? isMovieLiked,
     bool? isPageShrinked,
     bool? isOpacityAnimating,
-    List<MovieEntity>? similarsList,
   }) {
-    return DetailsState(
+    return SeriesDetailsState(
       isMovieLiked: isMovieLiked ?? this.isMovieLiked,
       isPageShrinked: isPageShrinked ?? this.isPageShrinked,
       isOpacityAnimating: isOpacityAnimating ?? this.isOpacityAnimating,
-      similarsList: similarsList ?? this.similarsList,
     );
   }
 }

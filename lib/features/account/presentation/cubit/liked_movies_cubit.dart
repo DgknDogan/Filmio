@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:filmio/core/extensions/firebase_firestore_extension.dart';
+import '../../../../core/extensions/firebase_firestore_extension.dart';
 
 import '../../../../core/models/movie.dart';
 import '../../../movie/domain/entities/movie.dart';

@@ -2,11 +2,10 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:dio/dio.dart';
-import 'package:filmio/core/resources/data_state.dart';
 
-import 'package:filmio/features/series/domain/entities/series_entity.dart';
-
+import '../../../../core/resources/data_state.dart';
 import '../../../../core/utils/api_key.dart';
+import '../../domain/entities/series_entity.dart';
 import '../../domain/repository/series_repository.dart';
 import '../data_sources/remote/series_api_service.dart';
 

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../extensions/brightness_extension.dart';
+
 class CustomTextField extends StatelessWidget {
   final String text;
   final bool isObsecure;
@@ -30,11 +32,11 @@ class CustomTextField extends StatelessWidget {
         ),
         border: Border(
           bottom: BorderSide(
-            color: !hasError ? Colors.white : Colors.red.shade600,
+            color: !hasError ? Colors.black : Colors.red.shade600,
             width: 2.5.w,
           ),
           right: BorderSide(
-            color: !hasError ? Colors.white : Colors.red.shade600,
+            color: !hasError ? Colors.black : Colors.red.shade600,
             width: 2.5.w,
           ),
         ),
@@ -52,10 +54,7 @@ class CustomTextField extends StatelessWidget {
           hintText: text,
         ),
         obscureText: isObsecure,
-        cursorColor: Color(0xfffefae0),
-        style: TextStyle(
-          color: Color(0xfffefae0),
-        ),
+        cursorColor: Theme.of(context).isLight ? Colors.black : Color(0xfffefae0),
       ),
     );
   }

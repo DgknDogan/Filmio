@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:filmio/core/extensions/firebase_firestore_extension.dart';
-import 'package:filmio/core/resources/firebase_state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../../core/extensions/firebase_firestore_extension.dart';
+import '../../../../core/resources/firebase_state.dart';
 import '../../domain/repository/auth_repository.dart';
 
 class AuthRepositoryImpl extends AuthRepository {

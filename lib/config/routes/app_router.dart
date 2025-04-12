@@ -7,9 +7,8 @@ import 'app_router.gr.dart';
 class AppRouter extends RootStackRouter {
   @override
   List<AutoRoute> get routes => [
-        CustomRoute(
+        AutoRoute(
           page: SplashRoute.page,
-          transitionsBuilder: TransitionsBuilders.fadeIn,
           initial: true,
         ),
         AutoRoute(
@@ -21,7 +20,9 @@ class AppRouter extends RootStackRouter {
         AutoRoute(
           page: SetProfile.page,
         ),
-        AutoRoute(
+        CustomRoute(
+          transitionsBuilder: (context, animation, secondaryAnimation, child) => slideLeftTransition(context, animation, secondaryAnimation, child),
+          durationInMilliseconds: 1000,
           page: HomeRoute.page,
           children: [
             AutoRoute(
@@ -61,19 +62,21 @@ class AppRouter extends RootStackRouter {
         ),
         CustomRoute(
           page: SettingsRoute.page,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            final curve = CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeInOut,
-            );
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(1.0, 0.0),
-                end: Offset.zero,
-              ).animate(curve),
-              child: child,
-            );
-          },
+          transitionsBuilder: (context, animation, secondaryAnimation, child) => slideLeftTransition(context, animation, secondaryAnimation, child),
         )
       ];
+}
+
+SlideTransition slideLeftTransition(context, animation, secondaryAnimation, child) {
+  final curve = CurvedAnimation(
+    parent: animation,
+    curve: Curves.easeInOutCubic,
+  );
+  return SlideTransition(
+    position: Tween<Offset>(
+      begin: const Offset(1.0, 0.0),
+      end: Offset.zero,
+    ).animate(curve),
+    child: child,
+  );
 }

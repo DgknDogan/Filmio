@@ -1,4 +1,4 @@
-import 'package:filmio/features/movie/domain/entities/movie.dart';
+import '../entities/movie.dart';
 
 import '../../../../core/resources/firebase_state.dart';
 import '../../../../core/usecases/usecase.dart';

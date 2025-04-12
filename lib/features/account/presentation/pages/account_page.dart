@@ -1,10 +1,11 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:filmio/core/extensions/firebase_auth_extension.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../config/routes/app_router.gr.dart';
+import '../../../../core/extensions/brightness_extension.dart';
+import '../../../../core/extensions/firebase_auth_extension.dart';
 
 @RoutePage()
 class AccountPage extends StatelessWidget {
@@ -32,7 +33,7 @@ class AccountPage extends StatelessWidget {
                         child: Icon(
                           Icons.settings,
                           size: 40.r,
-                          color: Colors.white,
+                          color: Theme.of(context).isLight ? Color(0xff353839) : Colors.white,
                         ),
                       ),
                     ),
@@ -41,7 +42,15 @@ class AccountPage extends StatelessWidget {
                 Center(
                   child: CircleAvatar(
                     maxRadius: 45.r,
-                    child: Image.asset(FirebaseAuth.instance.userPhoto),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context).isLight ? Color(0xff353839) : Colors.white,
+                        ),
+                        borderRadius: BorderRadius.circular(45.r),
+                      ),
+                      child: Image.asset(FirebaseAuth.instance.userPhoto),
+                    ),
                   ),
                 ),
               ],

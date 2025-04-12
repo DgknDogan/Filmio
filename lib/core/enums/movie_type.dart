@@ -1,4 +1,4 @@
-import 'package:filmio/core/extensions/string_extension.dart';
+import '../extensions/string_extension.dart';
 
 enum MovieType {
   action(id: 28),

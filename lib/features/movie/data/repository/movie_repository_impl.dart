@@ -2,8 +2,8 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:dio/dio.dart';
-import 'package:filmio/core/resources/data_state.dart';
-import 'package:filmio/features/movie/domain/entities/movie.dart';
+import '../../../../core/resources/data_state.dart';
+import '../../domain/entities/movie.dart';
 
 import '../../../../core/utils/api_key.dart';
 import '../../domain/repository/movie_repository.dart';

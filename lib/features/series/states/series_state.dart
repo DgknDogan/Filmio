@@ -1,4 +1,4 @@
-part of 'series_bloc.dart';
+part of '../presentation/bloc/series_bloc.dart';
 
 sealed class SeriesState {
   final List<SeriesEntity>? popularSeriesList;

@@ -19,20 +19,6 @@ class RecommendedContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(top: 20.h),
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          colors: [
-            Color(0xff3a3a3a),
-            Color(0xff101010),
-          ],
-          stops: [
-            0.6.r,
-            1.5.r,
-          ],
-          center: Alignment.bottomCenter,
-          radius: 0.8.r,
-        ),
-      ),
       height: 350.h,
       width: double.infinity,
       child: Column(

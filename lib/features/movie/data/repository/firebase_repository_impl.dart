@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:filmio/core/extensions/firebase_firestore_extension.dart';
-import 'package:filmio/core/models/movie.dart';
-import 'package:filmio/features/movie/domain/entities/movie.dart';
+import '../../../../core/extensions/firebase_firestore_extension.dart';
+import '../../../../core/models/movie.dart';
+import '../../domain/entities/movie.dart';
 
 import '../../../../core/resources/firebase_state.dart';
 import '../../domain/repository/firebase_repository.dart';

@@ -1,4 +1,4 @@
-import 'package:filmio/core/models/movie.dart' show MovieModel;
+import '../../../../core/models/movie.dart' show MovieModel;
 import 'package:json_annotation/json_annotation.dart';
 
 part 'movie_api_response.g.dart';

@@ -1,13 +1,16 @@
-import 'package:filmio/injection_container.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'config/routes/app_router.dart';
+import 'config/theme/cubit/theme_cubit.dart';
 import 'config/theme/theme.dart';
+import 'injection_container.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await ScreenUtil.ensureScreenSize();
   await Firebase.initializeApp();
   await initDependencies();
   runApp(const MyApp());
@@ -21,12 +24,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: Size(360, 690),
+      minTextAdapt: true,
       builder: (context, child) {
-        return MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          theme: theme,
-          routerConfig: _appRouter.config(),
-          title: 'Filmio',
+        return BlocProvider(
+          create: (context) => ThemeCubit(),
+          child: BlocBuilder<ThemeCubit, ThemeState>(
+            builder: (context, state) {
+              return MaterialApp.router(
+                debugShowCheckedModeBanner: false,
+                theme: lightTheme,
+                darkTheme: darkTheme,
+                themeMode: state.mode,
+                routerConfig: _appRouter.config(),
+                title: 'Filmio',
+              );
+            },
+          ),
         );
       },
     );

@@ -1,0 +1,2 @@
+C:/dev/apps/Filmio/android/app/.cxx/RelWithDebInfo/462ol960/x86/CMakeFiles/edit_cache.dir
+C:/dev/apps/Filmio/android/app/.cxx/RelWithDebInfo/462ol960/x86/CMakeFiles/rebuild_cache.dir
