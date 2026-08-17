@@ -34,9 +34,3 @@ After changing anything annotated (`@RoutePage`, `@RestApi`, `@JsonSerializable`
 ```bash
 dart run build_runner build --delete-conflicting-outputs
 ```
-
-## Conventions
-
-Architecture, layering, and testing rules live in
-`.claude/skills/flutter-conventions/`. The migration plan tracking this
-codebase against them is in [docs/conventions-migration.md](docs/conventions-migration.md).
