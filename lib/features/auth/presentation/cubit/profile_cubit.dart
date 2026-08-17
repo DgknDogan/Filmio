@@ -1,36 +1,32 @@
 import 'package:bloc/bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:equatable/equatable.dart';
 
-part '../states/profile_state.dart';
+import '../../../../gen/assets.gen.dart';
+import '../../domain/usecases/update_profile.dart';
+
+part 'profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
-  ProfileCubit() : super(ProfileSetName(stage: 0, hasError: false));
+  final UpdateDisplayNameUseCase _updateDisplayNameUseCase;
+  final UpdateProfilePhotoUseCase _updateProfilePhotoUseCase;
 
-  final _auth = FirebaseAuth.instance;
+  ProfileCubit(this._updateDisplayNameUseCase, this._updateProfilePhotoUseCase)
+      : super(const ProfileSetName(hasError: false));
 
   void next() {
-    emit(ProfileSetPhoto(stage: 1, option: true, hasError: false));
+    emit(const ProfileSetPhoto(option: true, hasError: false));
   }
 
   void previous() {
-    emit(ProfileSetName(stage: 0, hasError: false));
+    emit(const ProfileSetName(hasError: false));
   }
 
-  List<String> getMaleImages() {
-    List<String> pathList = [];
-    for (int i = 1; i < 7; i++) {
-      pathList.add("assets/male/male$i.png");
-    }
-    return pathList;
-  }
+  /// The generator knows what is actually in `assets/` — the old version built
+  /// these paths with string interpolation, so a renamed or missing file was a
+  /// runtime crash with no compile-time signal.
+  List<AssetGenImage> getMaleImages() => Assets.male.values;
 
-  List<String> getFemaleImages() {
-    List<String> pathList = [];
-    for (int i = 1; i < 7; i++) {
-      pathList.add("assets/female/female$i.png");
-    }
-    return pathList;
-  }
+  List<AssetGenImage> getFemaleImages() => Assets.female.values;
 
   void selectProfilePicture({required String image}) {
     final currentState = state as ProfileSetPhoto;
@@ -53,9 +49,19 @@ class ProfileCubit extends Cubit<ProfileState> {
       emit(currentState.copyWith(hasError: true));
       return false;
     }
-    await _auth.currentUser!.updateDisplayName(currentState.currentName);
-    emit(currentState.copyWith(hasError: false));
-    return true;
+    final result = await _updateDisplayNameUseCase.call(params: currentState.currentName!);
+    if (isClosed) return false;
+
+    return result.fold(
+      (failure) {
+        emit(currentState.copyWith(hasError: true));
+        return false;
+      },
+      (_) {
+        emit(currentState.copyWith(hasError: false));
+        return true;
+      },
+    );
   }
 
   Future<bool> setProfilePicture() async {
@@ -65,8 +71,18 @@ class ProfileCubit extends Cubit<ProfileState> {
 
       return false;
     }
-    await _auth.currentUser!.updatePhotoURL(currentState.selectedPhoto.toString());
-    emit(currentState.copyWith(hasError: false));
-    return true;
+    final result = await _updateProfilePhotoUseCase.call(params: currentState.selectedPhoto!);
+    if (isClosed) return false;
+
+    return result.fold(
+      (failure) {
+        emit(currentState.copyWith(hasError: true));
+        return false;
+      },
+      (_) {
+        emit(currentState.copyWith(hasError: false));
+        return true;
+      },
+    );
   }
 }

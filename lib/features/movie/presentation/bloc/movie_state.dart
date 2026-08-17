@@ -1,47 +1,32 @@
 part of 'movie_bloc.dart';
 
-sealed class MovieState {
-  final List<MovieEntity>? popularFilmsList;
-  final List<MovieEntity>? topFilmsList;
-  final MovieEntity? recommendedMovie;
-  final DioException? error;
+sealed class MovieState extends Equatable {
+  const MovieState();
 
-  const MovieState({
-    this.popularFilmsList,
-    this.topFilmsList,
-    this.error,
-    this.recommendedMovie,
-  });
+  @override
+  List<Object?> get props => [];
 }
 
 final class MovieLoading extends MovieState {
-  MovieLoading();
+  const MovieLoading();
 }
 
 final class MovieError extends MovieState {
-  const MovieError(DioException error) : super(error: error);
+  final Failure failure;
+
+  const MovieError(this.failure);
+
+  @override
+  List<Object?> get props => [failure];
 }
 
 final class MovieSuccess extends MovieState {
-  const MovieSuccess(
-    List<MovieEntity>? popularFilmsList,
-    List<MovieEntity>? topFilmsList,
-    MovieEntity? recommendedMovie,
-  ) : super(
-          popularFilmsList: popularFilmsList,
-          topFilmsList: topFilmsList,
-          recommendedMovie: recommendedMovie,
-        );
+  final List<MovieEntity> popularFilmsList;
+  final List<MovieEntity> topFilmsList;
+  final MovieEntity recommendedMovie;
 
-  MovieSuccess copyWith({
-    List<MovieEntity>? popularFilmsList,
-    List<MovieEntity>? topFilmsList,
-    MovieEntity? recommendedMovie,
-  }) {
-    return MovieSuccess(
-      popularFilmsList ?? super.popularFilmsList!,
-      topFilmsList ?? super.topFilmsList!,
-      recommendedMovie ?? super.recommendedMovie!,
-    );
-  }
+  const MovieSuccess(this.popularFilmsList, this.topFilmsList, this.recommendedMovie);
+
+  @override
+  List<Object?> get props => [popularFilmsList, topFilmsList, recommendedMovie];
 }

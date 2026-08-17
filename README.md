@@ -1,16 +1,42 @@
 # filmio
 
-A new Flutter project.
+A Flutter movie and series browser backed by TMDB and Firebase.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### 1. Configure secrets
 
-A few resources to get you started if this is your first Flutter project:
+The TMDB token is supplied at build time, not committed. Copy the template and
+fill in your own [TMDB API read access token](https://www.themoviedb.org/settings/api):
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```bash
+cp env.example.json env.json
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+`env.json` is gitignored.
+
+### 2. Run
+
+```bash
+flutter run --dart-define-from-file=env.json
+```
+
+The VS Code launch configurations in `.vscode/launch.json` already pass this
+flag, so `F5` works without extra arguments.
+
+Building without the define starts the app but every TMDB request will fail
+with 401; the console prints a reminder on launch.
+
+### 3. Code generation
+
+After changing anything annotated (`@RoutePage`, `@RestApi`, `@JsonSerializable`):
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+## Conventions
+
+Architecture, layering, and testing rules live in
+`.claude/skills/flutter-conventions/`. The migration plan tracking this
+codebase against them is in [docs/conventions-migration.md](docs/conventions-migration.md).

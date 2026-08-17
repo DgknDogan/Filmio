@@ -1,4 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Release builds need this in their own manifest: the debug and profile
+         manifests declare it for the Flutter tooling, so a release APK was the
+         only build without it — and TMDB, Firebase and the font fetch all
+         need the network. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="Filmio"
         android:name="${applicationName}"

@@ -1,27 +1,31 @@
 import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
 
-import '../../../../core/resources/firebase_state.dart';
-import '../../domain/usecase/register.dart';
+import '../../domain/usecases/register.dart';
 
-part '../states/register_state.dart';
+part 'register_state.dart';
 
 class RegisterCubit extends Cubit<RegisterState> {
   final RegisterUseCase _registerUseCase;
-  RegisterCubit(this._registerUseCase) : super(RegisterState());
 
-  Future<bool> createAccount({
-    required String email,
-    required String password,
-  }) async {
-    final registerState = await _registerUseCase.call(params: RegisterParams(email: email, password: password));
+  RegisterCubit(this._registerUseCase) : super(const RegisterState());
 
-    if (registerState is FirebaseSuccess) {
-      if (registerState.data!.user != null) {
+  Future<bool> createAccount({required String email, required String password}) async {
+    emit(state.copyWith(isSubmitting: true));
+
+    final result = await _registerUseCase.call(params: RegisterParams(email: email, password: password));
+
+    if (isClosed) return false;
+
+    return result.fold(
+      (failure) {
+        emit(state.copyWith(isSubmitting: false, errorMessage: failure.message));
+        return false;
+      },
+      (_) {
+        emit(state.copyWith(isSubmitting: false));
         return true;
-      }
-    } else if (registerState is FirebaseError) {
-      return false;
-    }
-    return false;
+      },
+    );
   }
 }

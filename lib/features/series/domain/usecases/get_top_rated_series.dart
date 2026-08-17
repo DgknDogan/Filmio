@@ -1,15 +1,17 @@
-import '../../../../core/resources/data_state.dart';
-import '../../../../core/usecases/usecase.dart';
-import '../entities/series_entity.dart';
-import '../repository/series_repository.dart';
+import 'package:fpdart/fpdart.dart';
 
-class GetTopRatedSeriesUseCase extends UseCase<DataState<List<SeriesEntity>>, void> {
+import '../../../../core/resource/failure.dart';
+import '../../../../core/usecase/usecase.dart';
+import '../entities/series_entity.dart';
+import '../repositories/series_repository.dart';
+
+class GetTopRatedSeriesUseCase extends UseCase<Either<Failure, List<SeriesEntity>>, void> {
   final SeriesRepository _seriesRepository;
 
   GetTopRatedSeriesUseCase(this._seriesRepository);
 
   @override
-  Future<DataState<List<SeriesEntity>>> call({void params}) {
+  Future<Either<Failure, List<SeriesEntity>>> call({void params}) {
     return _seriesRepository.getTopRatedSeries();
   }
 }

@@ -1,15 +1,17 @@
+import 'package:fpdart/fpdart.dart';
+
+import '../../../../core/resource/failure.dart';
+import '../../../../core/usecase/usecase.dart';
 import '../entities/movie.dart';
+import '../repositories/liked_movies_repository.dart';
 
-import '../../../../core/resources/firebase_state.dart';
-import '../../../../core/usecases/usecase.dart';
-import '../repository/firebase_repository.dart';
+class LikeMovieUseCase extends UseCase<Either<Failure, Unit>, MovieEntity> {
+  final LikedMoviesRepository _likedMoviesRepository;
 
-class LikeMovieUseCase extends UseCase<FirebaseState<bool>, MovieEntity> {
-  final FirebaseRepository _firebaseRepository;
+  LikeMovieUseCase(this._likedMoviesRepository);
 
-  LikeMovieUseCase(this._firebaseRepository);
   @override
-  Future<FirebaseState<bool>> call({MovieEntity? params}) {
-    return _firebaseRepository.likeMovie(movie: params!);
+  Future<Either<Failure, Unit>> call({MovieEntity? params}) {
+    return _likedMoviesRepository.likeMovie(movie: params!);
   }
 }

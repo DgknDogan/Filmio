@@ -3,15 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'config/l10n/app_localizations.dart';
 import 'config/routes/app_router.dart';
 import 'config/theme/cubit/theme_cubit.dart';
 import 'config/theme/theme.dart';
+import 'firebase_options.dart';
 import 'injection_container.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await ScreenUtil.ensureScreenSize();
-  await Firebase.initializeApp();
   await initDependencies();
   runApp(const MyApp());
 }
@@ -23,11 +27,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: Size(360, 690),
+      designSize: const Size(360, 690),
       minTextAdapt: true,
       builder: (context, child) {
         return BlocProvider(
-          create: (context) => ThemeCubit(),
+          create: (context) => getIt<ThemeCubit>(),
           child: BlocBuilder<ThemeCubit, ThemeState>(
             builder: (context, state) {
               return MaterialApp.router(
@@ -36,7 +40,21 @@ class MyApp extends StatelessWidget {
                 darkTheme: darkTheme,
                 themeMode: state.mode,
                 routerConfig: _appRouter.config(),
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
                 title: 'Filmio',
+                builder: (context, child) {
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      final currentFocus = FocusScope.of(context);
+                      if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+                        currentFocus.focusedChild!.unfocus();
+                      }
+                    },
+                    child: child,
+                  );
+                },
               );
             },
           ),

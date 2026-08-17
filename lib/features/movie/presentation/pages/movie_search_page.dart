@@ -1,16 +1,18 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../config/routes/app_router.gr.dart';
+import '../../../../core/custom/app_error_view.dart';
+import '../../../../core/custom/poster_card.dart';
+import '../../../../core/custom/search_results_grid.dart';
+import '../../../../core/extensions/context_extension.dart';
 import '../../../../core/extensions/string_extension.dart';
-import '../../../../core/utils/custom/custom_searchbar.dart';
+import '../../../../core/utils/hero_tags.dart';
 import '../../../../injection_container.dart';
-import '../cubit/search_cubit.dart';
+import '../../domain/entities/movie.dart';
+import '../bloc/search_bloc.dart';
 
 @RoutePage()
 class MovieSearchPage extends StatefulWidget {
@@ -26,118 +28,112 @@ class MovieSearchPage extends StatefulWidget {
 class _MovieSearchPageState extends State<MovieSearchPage> {
   late final FocusNode _focus;
   late final TextEditingController _controller;
+
   @override
   void initState() {
     _controller = TextEditingController();
     _focus = FocusNode();
-    Future.delayed(
-      250.milliseconds,
-      () {
-        _focus.requestFocus();
-      },
-    );
+    Future.delayed(250.milliseconds, _focus.requestFocus);
     super.initState();
   }
 
   @override
   void dispose() {
     _focus.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => SearchCubit(getIt()),
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          actionsPadding: EdgeInsets.only(right: 20.w),
-          actions: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Hero(
-                  tag: widget.heroTag,
-                  child: BlocBuilder<SearchCubit, SearchState>(
-                    builder: (context, state) {
-                      return CustomSearchbar(
-                        controller: _controller,
-                        width: 260.w,
-                        height: 40.h,
-                        isEnabled: true,
-                        focusNode: _focus,
-                        hintText: widget.hintText,
-                        onChanged: (query) {
-                          context.read<SearchCubit>().searchMovies(query: query);
-                        },
-                      );
-                    },
-                  ),
-                ),
-                SizedBox(width: 10.w),
-                GestureDetector(
-                  onTap: () {
-                    _controller.clear();
-                    context.router.maybePop();
-                  },
-                  child: Text(
-                    "Cancel",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                )
-              ],
-            ),
-          ],
-        ),
-        body: BlocBuilder<SearchCubit, SearchState>(
+      create: (context) => SearchBloc(getIt()),
+      // The view is a separate widget so everything inside it reads the bloc
+      // from a context *below* the provider. Reading it from this build method
+      // throws ProviderNotFoundException.
+      child: _SearchView(controller: _controller, focus: _focus, heroTag: widget.heroTag, hintText: widget.hintText),
+    );
+  }
+}
+
+class _SearchView extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focus;
+  final String heroTag;
+  final String hintText;
+
+  const _SearchView({required this.controller, required this.focus, required this.heroTag, required this.hintText});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: BlocBuilder<SearchBloc, SearchState>(
           builder: (context, state) {
-            return GridView.builder(
-              cacheExtent: state.searchedMovies.length * 10,
-              itemCount: state.searchedMovies.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                childAspectRatio: 0.7.r,
-                crossAxisCount: 2,
-              ),
-              itemBuilder: (context, index) {
-                return Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 10.w,
-                    vertical: 10.h,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  clipBehavior: Clip.hardEdge,
-                  child: GestureDetector(
-                    onTap: () =>
-                        context.router.push(MovieDetailsRoute(movie: state.searchedMovies[index], heroTag: state.searchedMovies[index].title!)),
-                    child: Hero(
-                      tag: state.searchedMovies[index].title!,
-                      child: CachedNetworkImage(
-                        placeholder: (context, url) {
-                          return Shimmer.fromColors(
-                            baseColor: Colors.grey.shade600,
-                            highlightColor: Colors.grey.shade500,
-                            child: Container(
-                              width: 300.w,
-                              height: 300.h,
-                              decoration: BoxDecoration(color: Colors.amber),
-                            ),
-                          );
-                        },
-                        imageUrl: state.searchedMovies[index].posterPath!.coverImage,
-                        memCacheHeight: 1000,
-                        fit: BoxFit.cover,
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SearchBarRow(
+                  heroTag: heroTag,
+                  hintText: hintText,
+                  controller: controller,
+                  focus: focus,
+                  // Every keystroke reports itself; the bloc's transformer is
+                  // what decides which ones reach the API.
+                  onChanged: (query) => context.read<SearchBloc>().add(SearchQueryChanged(query)),
+                ),
+                if (state case SearchLoaded(:final movies))
+                  SearchResultsSummary(count: movies.length, scope: context.l10n.moviesTitle),
+                Expanded(
+                  child: switch (state) {
+                    SearchInitial() => const SizedBox.shrink(),
+                    SearchLoading() => const Center(child: CircularProgressIndicator()),
+                    SearchFailure(:final message) => AppErrorView(
+                        message: message,
+                        onRetry: () => context.read<SearchBloc>().add(SearchRetried(controller.text)),
                       ),
-                    ),
-                  ),
-                );
-              },
+                    SearchLoaded(:final movies) when movies.isEmpty => AppErrorView(
+                        message: context.l10n.searchNoResults,
+                      ),
+                    SearchLoaded(:final movies) => SearchResultsGrid(
+                        children: [
+                          // A query can answer with two films of the same name
+                          // — a remake, a re-release — so the grid position is
+                          // what tells the two posters apart.
+                          for (final (index, movie) in movies.indexed)
+                            _Result(
+                              movie: movie,
+                              tag: posterHeroTag('movie-search', index: index, id: movie.id),
+                            ),
+                        ],
+                      ),
+                  },
+                ),
+              ],
             );
           },
         ),
       ),
+    );
+  }
+}
+
+class _Result extends StatelessWidget {
+  final MovieEntity movie;
+  final String tag;
+
+  const _Result({required this.movie, required this.tag});
+
+  @override
+  Widget build(BuildContext context) {
+    final meta = [movie.releaseDate?.year, movie.voteAverage?.toStringAsFixed(1)].nonNulls.join(' · ');
+
+    return PosterCard(
+      imageUrl: movie.posterPath?.coverImage ?? '',
+      title: movie.title ?? '',
+      meta: meta,
+      heroTag: tag,
+      onTap: () => context.router.push(MovieDetailsRoute(movie: movie, heroTag: tag)),
     );
   }
 }

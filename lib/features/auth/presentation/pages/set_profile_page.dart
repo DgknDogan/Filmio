@@ -5,19 +5,23 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/utils/custom/custom_button.dart';
-import '../../../../core/utils/custom/custom_text_field.dart';
+import '../../../../core/extensions/context_extension.dart';
+
+import '../../../../core/custom/custom_button.dart';
+import '../../../../core/custom/custom_text_field.dart';
+import '../../../../injection_container.dart';
 import '../cubit/profile_cubit.dart';
+import '../../../../config/theme/app_spacing.dart';
 
 @RoutePage()
-class SetProfile extends StatefulWidget {
-  const SetProfile({super.key});
+class SetProfilePage extends StatefulWidget {
+  const SetProfilePage({super.key});
 
   @override
-  State<SetProfile> createState() => _SetProfileState();
+  State<SetProfilePage> createState() => _SetProfilePageState();
 }
 
-class _SetProfileState extends State<SetProfile> with TickerProviderStateMixin {
+class _SetProfilePageState extends State<SetProfilePage> with TickerProviderStateMixin {
   late final AnimationController nameErrorAnimationController;
   late final AnimationController photoErrorAnimationController;
 
@@ -46,14 +50,14 @@ class _SetProfileState extends State<SetProfile> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ProfileCubit(),
+      create: (context) => ProfileCubit(getIt(), getIt()),
       child: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
           return Scaffold(
             resizeToAvoidBottomInset: false,
             body: SafeArea(
               child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 20.w),
+                margin: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
                 child: Column(
                   children: [
                     _SetName(
@@ -62,12 +66,12 @@ class _SetProfileState extends State<SetProfile> with TickerProviderStateMixin {
                     _SetPhoto(
                       errorAnimationController: photoErrorAnimationController,
                     ),
-                    Spacer(),
+                    const Spacer(),
                     _Buttons(
                       nameError: nameErrorAnimationController,
                       photoError: photoErrorAnimationController,
                     ),
-                    SizedBox(height: 30.h),
+                    AppGap.vertical(AppSpacing.xxxl),
                   ],
                 ),
               ),
@@ -121,16 +125,16 @@ class _SetNameState extends State<_SetName> with TickerProviderStateMixin {
             children: [
               Text(
                 "Your name is ${state.currentName ?? ""}",
-                style: Theme.of(context).textTheme.titleLarge,
+                style: context.textTheme.titleLarge,
               ),
-              SizedBox(height: 30.h),
+              AppGap.vertical(AppSpacing.xxxl),
               CustomTextField(
                 hasError: state.hasError,
                 maxLength: 10,
                 controller: textEditingController,
                 onChanged: (name) => context.read<ProfileCubit>().changeName(name: textEditingController.text),
                 isObsecure: false,
-                text: "Name",
+                text: context.l10n.authName,
               ).animate(controller: widget.errorAnimationController)
                 ..shakeX(
                   amount: 5,
@@ -145,7 +149,7 @@ class _SetNameState extends State<_SetName> with TickerProviderStateMixin {
             ..fadeIn(begin: 0, duration: 1000.ms, delay: 500.ms, curve: Curves.easeInOut)
             ..moveY(begin: 150, end: 200, duration: 1000.ms, delay: 500.ms, curve: Curves.easeInOut);
         } else {
-          return SizedBox();
+          return const SizedBox();
         }
       },
     );
@@ -187,17 +191,17 @@ class _SetPhotoState extends State<_SetPhoto> with TickerProviderStateMixin {
               AnimatedContainer(
                 duration: 500.ms,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(90.r),
+                  borderRadius: AppRadius.pillAll,
                   border: state.hasError
                       ? Border.all(
-                          color: Colors.red.shade600,
+                          color: context.palette.danger,
                           width: 2.5.r,
                         )
                       : null,
                 ),
                 child: CircleAvatar(
-                  backgroundImage: state.selectedPhoto != null ? Image.asset(state.selectedPhoto!).image : null,
-                  backgroundColor: Color(0xff2a2a2a),
+                  backgroundImage: state.selectedPhoto != null ? AssetImage(state.selectedPhoto!) : null,
+                  backgroundColor: context.palette.avatarBackground,
                   radius: 70.r,
                 ),
               ).animate(controller: widget.errorAnimationController)
@@ -207,78 +211,78 @@ class _SetPhotoState extends State<_SetPhoto> with TickerProviderStateMixin {
                   duration: 500.ms,
                   curve: Curves.easeInOut,
                 ),
-              SizedBox(height: 10.h),
+              AppGap.vertical(AppSpacing.sm),
               Text(
-                "Set a profile picture",
-                style: Theme.of(context).textTheme.titleLarge,
+                context.l10n.authSetProfilePicture,
+                style: context.textTheme.titleLarge,
               ),
-              SizedBox(height: 20.h),
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  GridView.builder(
-                    shrinkWrap: true,
-                    itemCount: 6,
-                    physics: NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 1.4,
-                      crossAxisSpacing: 0,
-                      mainAxisSpacing: 20,
-                    ),
-                    itemBuilder: (context, index) {
-                      final List<String> imagePathList;
-                      if (state.option) {
-                        imagePathList = context.read<ProfileCubit>().getMaleImages();
-                      } else {
-                        imagePathList = context.read<ProfileCubit>().getFemaleImages();
-                      }
-                      return Align(
-                        child: GestureDetector(
-                          onTap: () {
-                            context.read<ProfileCubit>().selectProfilePicture(image: imagePathList[index]);
-                          },
-                          child: CircleAvatar(
-                            radius: 60.r,
-                            backgroundImage: Image.asset(imagePathList[index]).image,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  GestureDetector(
-                    onTap: () => context.read<ProfileCubit>().changeOption(),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Icon(
-                        Icons.arrow_back_ios_rounded,
-                        size: 25.r,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => context.read<ProfileCubit>().changeOption(),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        size: 25.r,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              )
+              AppGap.vertical(AppSpacing.xl),
+              _AvatarPicker(showMale: state.option)
             ],
           )
               .animate(controller: photoAnimationController)
               .fadeIn(begin: 0, duration: 1000.ms, delay: 500.ms, curve: Curves.easeInOut)
               .moveY(begin: 0, end: 30, duration: 1000.ms, delay: 500.ms, curve: Curves.easeInOut);
         } else {
-          return SizedBox();
+          return const SizedBox();
         }
       },
+    );
+  }
+}
+
+/// The six avatars for one gender, with the arrows that switch between them.
+class _AvatarPicker extends StatelessWidget {
+  final bool showMale;
+
+  const _AvatarPicker({required this.showMale});
+
+  @override
+  Widget build(BuildContext context) {
+    final cubit = context.read<ProfileCubit>();
+    final avatars = showMale ? cubit.getMaleImages() : cubit.getFemaleImages();
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        GridView.builder(
+          shrinkWrap: true,
+          itemCount: avatars.length,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 1.4,
+            crossAxisSpacing: 0,
+            mainAxisSpacing: 20,
+          ),
+          itemBuilder: (context, index) => Align(
+            child: GestureDetector(
+              onTap: () => cubit.selectProfilePicture(image: avatars[index].path),
+              child: CircleAvatar(radius: 60.r, backgroundImage: avatars[index].provider()),
+            ),
+          ),
+        ),
+        const _SwitchGenderArrow(alignment: Alignment.centerLeft, icon: Icons.arrow_back_ios_rounded),
+        const _SwitchGenderArrow(alignment: Alignment.centerRight, icon: Icons.arrow_forward_ios_rounded),
+      ],
+    );
+  }
+}
+
+class _SwitchGenderArrow extends StatelessWidget {
+  final Alignment alignment;
+  final IconData icon;
+
+  const _SwitchGenderArrow({required this.alignment, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.read<ProfileCubit>().changeOption(),
+      child: Align(
+        alignment: alignment,
+        child: Icon(icon, size: 25.r, color: context.palette.onImage),
+      ),
     );
   }
 }
@@ -297,7 +301,7 @@ class _Buttons extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             CustomButton(
-              text: state.stage != 1 ? "Next" : "Finish",
+              text: state.stage != 1 ? context.l10n.next : context.l10n.finish,
               width: 100.w,
               onPressed: () async {
                 if (state is ProfileSetName) {
@@ -316,7 +320,7 @@ class _Buttons extends StatelessWidget {
                     return;
                   }
                   if (context.mounted) {
-                    context.router.push(HomeRoute());
+                    context.router.push(const WrapperRoute());
                   }
                 }
               },

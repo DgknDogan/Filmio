@@ -32,7 +32,10 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
-/lib/core/utils/api_key.dart
+
+# Secrets passed via --dart-define-from-file. Copy env.example.json to env.json
+# and fill in your own TMDB token.
+/env.json
 
 # Symbolication related
 app.*.symbols
@@ -44,3 +47,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Patrol generates these; they are never committed.
+integration_test/test_bundle.dart
+.patrol.env

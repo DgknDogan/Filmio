@@ -1,17 +1,26 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../config/routes/app_router.gr.dart';
-import '../../../../core/extensions/brightness_extension.dart';
+import '../../../../core/custom/app_error_view.dart';
+import '../../../../core/custom/browse_view.dart';
+import '../../../../core/custom/featured_hero.dart';
+import '../../../../core/custom/poster_card.dart';
+import '../../../../core/extensions/context_extension.dart';
+import '../../../../core/extensions/genre_extension.dart';
 import '../../../../core/extensions/string_extension.dart';
-import '../../../../core/utils/custom/custom_searchbar.dart';
-import '../../../../core/utils/custom/custom_sliver_app_bar.dart';
-import '../../../../core/utils/custom/hero_image.dart';
-import '../../../../core/utils/custom/recommended_container.dart';
+import '../../../../core/utils/hero_tags.dart';
 import '../../domain/entities/movie.dart';
 import '../bloc/movie_bloc.dart';
+
+/// The featured title's poster can also appear in a row further down, so its
+/// tag is the banner's own rather than the title's.
+const _featuredHeroTag = 'movie_featured_poster';
+
+/// The search control and the search screen's field are the same object at two
+/// widths, so they share a tag and the one becomes the other.
+const _searchHeroTag = 'movie_searchbar';
 
 @RoutePage()
 class MoviePage extends StatelessWidget {
@@ -24,76 +33,11 @@ class MoviePage extends StatelessWidget {
       child: Scaffold(
         body: BlocBuilder<MovieBloc, MovieState>(
           builder: (context, state) {
-            if (state is MovieSuccess) {
-              return CustomScrollView(
-                slivers: [
-                  CustomSliverAppBar(
-                    title: Text("Movies"),
-                    actions: [
-                      Container(
-                        margin: EdgeInsets.only(right: 20.w),
-                        child: GestureDetector(
-                          onTap: () => context.router.push(MovieSearchRoute(heroTag: "movie_searchbar", hintText: "Search a movie")),
-                          child: Hero(
-                            tag: "movie_searchbar",
-                            createRectTween: (begin, end) => RectTween(begin: begin, end: end),
-                            flightShuttleBuilder: (flightContext, animation, direction, fromContext, toContext) {
-                              if (direction == HeroFlightDirection.push) {
-                                return Material(color: Colors.transparent, child: fromContext.widget);
-                              } else {
-                                return Material(color: Colors.transparent, child: toContext.widget);
-                              }
-                            },
-                            child: GestureDetector(
-                              child: CustomSearchbar(
-                                height: 40.h,
-                                width: 200.w,
-                                isEnabled: false,
-                                hintText: "Search a movie",
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Column(
-                      children: [
-                        RecommendedContainer(
-                          imageUrl: state.recommendedMovie?.posterPath!.coverImage ?? "",
-                          tag: "movie_poster",
-                          onTap: () => context.router.push(
-                            MovieDetailsRoute(movie: state.recommendedMovie!, heroTag: "movie_poster"),
-                          ),
-                        ),
-                        _ScrollableFilmList(
-                          title: "Popular Movies",
-                          movieList: state.popularFilmsList!,
-                          storageKey: PageStorageKey("popular_movies"),
-                        ),
-                        SizedBox(height: 20.h),
-                        _ScrollableFilmList(
-                          title: "Top Movies",
-                          movieList: state.topFilmsList!,
-                          storageKey: PageStorageKey("top_movies"),
-                        ),
-                        SizedBox(height: 40.h),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            } else if (state is MovieLoading) {
-              return Center(
-                child: CircularProgressIndicator(color: Theme.of(context).isLight ? Colors.black : Colors.white),
-              );
-            } else {
-              return Center(
-                child: Text(state.error!.message!),
-              );
-            }
+            return switch (state) {
+              MovieSuccess() => _Content(state: state),
+              MovieLoading() => const Center(child: CircularProgressIndicator()),
+              MovieError() => AppErrorView(message: state.failure.message),
+            };
           },
         ),
       ),
@@ -101,83 +45,88 @@ class MoviePage extends StatelessWidget {
   }
 }
 
-class _ScrollableFilmList extends StatelessWidget {
-  final String title;
-  final List<MovieEntity> movieList;
-  final PageStorageKey<String> storageKey;
+/// What the films tab puts into [BrowseView]: a recommendation at the head of
+/// the page, then the rows.
+class _Content extends StatelessWidget {
+  final MovieSuccess state;
 
-  const _ScrollableFilmList({
-    required this.title,
-    required this.movieList,
-    required this.storageKey,
-  });
+  const _Content({required this.state});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MovieBloc, MovieState>(
-      builder: (context, state) {
-        return Container(
-          margin: EdgeInsets.only(left: 20.w),
-          child: Column(
-            spacing: 10.h,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(right: 20.w),
-                    child: Text(
-                      "See more",
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 200.h,
-                child: ListView.builder(
-                  key: storageKey,
-                  itemCount: movieList.length,
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) {
-                    return _MovieCard(movie: movieList[index]);
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+    final hint = context.l10n.moviesSearchHint;
+
+    return BrowseView(
+      searchHeroTag: _searchHeroTag,
+      searchHint: hint,
+      onSearch: () => context.router.push(
+        MovieSearchRoute(heroTag: _searchHeroTag, hintText: hint),
+      ),
+      featuredBuilder: (context, stretch) => _Hero(movie: state.recommendedMovie, stretch: stretch),
+      rows: [
+        BrowseRow(
+          title: context.l10n.moviesPopular,
+          storageKey: const PageStorageKey('popular_movies'),
+          posters: _posters(state.popularFilmsList, 'movies-popular'),
+        ),
+        BrowseRow(
+          title: context.l10n.moviesTop,
+          storageKey: const PageStorageKey('top_movies'),
+          posters: _posters(state.topFilmsList, 'movies-top'),
+        ),
+      ],
+    );
+  }
+
+  /// The two rows overlap — a film can be both popular and top rated — so each
+  /// row scopes its own tags rather than naming the film.
+  List<Widget> _posters(List<MovieEntity> movies, String scope) => [
+        for (final (index, movie) in movies.indexed)
+          _MoviePoster(movie: movie, tag: posterHeroTag(scope, index: index, id: movie.id)),
+      ];
+}
+
+class _Hero extends StatelessWidget {
+  final MovieEntity movie;
+  final double stretch;
+
+  const _Hero({required this.movie, required this.stretch});
+
+  @override
+  Widget build(BuildContext context) {
+    return FeaturedHero(
+      imageUrl: movie.backdropPath?.coverImage ?? movie.posterPath?.coverImage ?? '',
+      posterUrl: movie.posterPath?.coverImage ?? '',
+      kicker: context.l10n.recommendedForYou,
+      title: movie.title ?? '',
+      rating: movie.voteAverage,
+      metaParts: [movie.genreIds.firstMovieGenre],
+      heroTag: _featuredHeroTag,
+      actionLabel: context.l10n.detailsAction,
+      stretch: stretch,
+      onAction: () => context.router.push(
+        MovieDetailsRoute(movie: movie, heroTag: _featuredHeroTag),
+      ),
     );
   }
 }
 
-class _MovieCard extends StatelessWidget {
+class _MoviePoster extends StatelessWidget {
   final MovieEntity movie;
+  final String tag;
 
-  const _MovieCard({required this.movie});
+  const _MoviePoster({required this.movie, required this.tag});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MovieBloc, MovieState>(
-      builder: (context, state) {
-        state as MovieSuccess;
-        return Container(
-          height: 200.h,
-          margin: EdgeInsets.only(right: 20.r),
-          child: GestureDetector(
-            onTap: () => context.router.push(MovieDetailsRoute(movie: movie, heroTag: movie.title!)),
-            child: HeroImage(
-              tag: movie.title!,
-              imageUrl: movie.posterPath!.coverImage,
-            ),
-          ),
-        );
-      },
+    final meta = [movie.releaseDate?.year, movie.voteAverage?.toStringAsFixed(1)].nonNulls.join(' · ');
+
+    return PosterCard(
+      imageUrl: movie.posterPath?.coverImage ?? '',
+      title: movie.title ?? '',
+      meta: meta,
+      heroTag: tag,
+      onTap: () => context.router.push(MovieDetailsRoute(movie: movie, heroTag: tag)),
     );
   }
 }

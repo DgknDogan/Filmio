@@ -1,5 +1,6 @@
-import '../../../../core/models/movie.dart' show MovieModel;
 import 'package:json_annotation/json_annotation.dart';
+
+import 'movie_model.dart';
 
 part 'movie_api_response.g.dart';
 

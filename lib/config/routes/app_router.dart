@@ -18,12 +18,13 @@ class AppRouter extends RootStackRouter {
           page: RegisterRoute.page,
         ),
         AutoRoute(
-          page: SetProfile.page,
+          page: SetProfileRoute.page,
         ),
         CustomRoute(
-          transitionsBuilder: (context, animation, secondaryAnimation, child) => slideLeftTransition(context, animation, secondaryAnimation, child),
-          durationInMilliseconds: 1000,
-          page: HomeRoute.page,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              slideLeftTransition(context, animation, secondaryAnimation, child),
+          duration: const Duration(milliseconds: 1000),
+          page: WrapperRoute.page,
           children: [
             AutoRoute(
               page: MovieRoute.page,
@@ -44,13 +45,16 @@ class AppRouter extends RootStackRouter {
           },
         ),
         CustomRoute(
-          page: SeriesDeatailsRoute.page,
+          page: SeriesDetailsRoute.page,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(opacity: animation, child: child);
           },
         ),
         AutoRoute(
           page: LikedMoviesRoute.page,
+        ),
+        AutoRoute(
+          page: LikedSeriesRoute.page,
         ),
         CustomRoute(
           page: MovieSearchRoute.page,
@@ -62,7 +66,8 @@ class AppRouter extends RootStackRouter {
         ),
         CustomRoute(
           page: SettingsRoute.page,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) => slideLeftTransition(context, animation, secondaryAnimation, child),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              slideLeftTransition(context, animation, secondaryAnimation, child),
         )
       ];
 }

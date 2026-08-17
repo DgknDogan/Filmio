@@ -1,14 +1,17 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/extensions/brightness_extension.dart';
-import '../../../../core/utils/custom/custom_button.dart';
-import '../../../../core/utils/custom/custom_clipper.dart';
-import '../../../../core/utils/custom/custom_form.dart';
+import '../../../../config/theme/app_spacing.dart';
+import '../../../../core/custom/custom_button.dart';
+import '../../../../core/extensions/context_extension.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../../injection_container.dart';
 import '../cubit/register_cubit.dart';
+import '../widgets/auth_error_snack_bar.dart';
+import '../widgets/auth_fields.dart';
+import '../widgets/auth_footer.dart';
+import '../widgets/auth_layout.dart';
 
 @RoutePage()
 class RegisterPage extends StatelessWidget {
@@ -16,151 +19,140 @@ class RegisterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: BlocProvider(
-        create: (context) => RegisterCubit(getIt()),
-        child: Column(
-          children: [
-            _LoginHeader(),
-            _RegisterForm(),
-          ],
-        ),
+    return BlocProvider(
+      create: (context) => RegisterCubit(getIt()),
+      child: BlocListener<RegisterCubit, RegisterState>(
+        listenWhen: (previous, current) =>
+            current.errorMessage != null && previous.errorMessage != current.errorMessage,
+        listener: (context, state) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(authErrorSnackBar(context, state.errorMessage!));
+        },
+        child: const _RegisterView(),
       ),
     );
   }
 }
 
-class _LoginHeader extends StatelessWidget {
-  const _LoginHeader();
+class _RegisterView extends StatefulWidget {
+  const _RegisterView();
 
   @override
-  Widget build(BuildContext context) {
-    return ClipPath(
-      clipper: CustomBorderClipper(),
-      child: Container(
-        height: 170.h,
-        width: double.infinity,
-        decoration: Theme.of(context).isLight
-            ? BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xff6a5acd),
-                    Color(0xff3700b3),
-                  ],
-                ),
-              )
-            : BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xff252525),
-                    Colors.black,
-                  ],
-                ),
-              ),
-        child: Container(
-          margin: EdgeInsets.only(left: 20.w, top: 50.h),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Create a new",
-                style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: Colors.white, fontSize: 26.sp),
-              ),
-              Text(
-                "Account",
-                style: Theme.of(context).textTheme.headlineLarge!.copyWith(fontSize: 28.sp),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  State<_RegisterView> createState() => _RegisterViewState();
 }
 
-class _RegisterForm extends StatefulWidget {
-  const _RegisterForm();
-
-  @override
-  State<_RegisterForm> createState() => _RegisterFormState();
-}
-
-class _RegisterFormState extends State<_RegisterForm> {
-  late final TextEditingController emailController;
-  late final TextEditingController passwordController;
+class _RegisterViewState extends State<_RegisterView> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+  late final TextEditingController _confirmationController;
+  late final FocusNode _passwordFocus;
+  late final FocusNode _confirmationFocus;
 
   @override
   void initState() {
-    emailController = TextEditingController();
-    passwordController = TextEditingController();
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+    _confirmationController = TextEditingController();
+    _passwordFocus = FocusNode();
+    _confirmationFocus = FocusNode();
     super.initState();
   }
 
   @override
   void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmationController.dispose();
+    _passwordFocus.dispose();
+    _confirmationFocus.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<RegisterCubit, RegisterState>(
-      builder: (context, state) {
-        return Container(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
+    return AuthLayout(
+      title: context.l10n.authRegisterTitle,
+      subtitle: context.l10n.authRegisterSubtitle,
+      form: Form(
+        key: _formKey,
+        child: AutofillGroup(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomForm(
-                emailController: emailController,
-                passwordController: passwordController,
+              AuthEmailField(
+                controller: _emailController,
+                onSubmitted: _passwordFocus.requestFocus,
               ),
-              SizedBox(height: 10.h),
-              _FormSubTexts(),
-              SizedBox(height: 30.h),
-              CustomButton(
-                text: "Register",
-                width: double.infinity,
-                onPressed: () async {
-                  final isUserCreated = await context.read<RegisterCubit>().createAccount(
-                        email: emailController.text,
-                        password: passwordController.text,
-                      );
-                  if (isUserCreated && context.mounted) {
-                    emailController.clear();
-                    passwordController.clear();
-                    context.router.maybePop();
-                  }
-                },
+              AppGap.vertical(AppSpacing.md),
+              AuthPasswordField(
+                controller: _passwordController,
+                focusNode: _passwordFocus,
+                label: context.l10n.authPassword,
+                autofillHint: AutofillHints.newPassword,
+                textInputAction: TextInputAction.next,
+                validator: (value) => Validators.password(value, context.l10n),
+                onSubmitted: _confirmationFocus.requestFocus,
+              ),
+              AppGap.vertical(AppSpacing.md),
+              // Catching a typo here costs one field; catching it after the
+              // account exists costs a password reset.
+              AuthPasswordField(
+                controller: _confirmationController,
+                focusNode: _confirmationFocus,
+                label: context.l10n.authConfirmPassword,
+                autofillHint: AutofillHints.newPassword,
+                textInputAction: TextInputAction.done,
+                validator: (value) => Validators.passwordConfirmation(value, _passwordController.text, context.l10n),
+                onSubmitted: _submit,
               ),
             ],
           ),
-        );
-      },
+        ),
+      ),
+      submitButton: _SubmitButton(onPressed: _submit),
+      footer: AuthFooter(
+        prompt: context.l10n.authHaveAccount,
+        action: context.l10n.authSignIn,
+        onPressed: () => context.router.maybePop(),
+      ),
     );
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final router = context.router;
+    final isUserCreated = await context.read<RegisterCubit>().createAccount(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+
+    // A failure is already on screen via the page's BlocListener.
+    if (!isUserCreated) return;
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    router.maybePop();
   }
 }
 
-class _FormSubTexts extends StatelessWidget {
-  const _FormSubTexts();
+class _SubmitButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _SubmitButton({required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        GestureDetector(
-          onTap: () {
-            context.router.maybePop();
-          },
-          child: Text(
-            "Have an account?",
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ),
-      ],
+    return BlocSelector<RegisterCubit, RegisterState, bool>(
+      selector: (state) => state.isSubmitting,
+      builder: (context, isSubmitting) {
+        return CustomButton(
+          text: context.l10n.authRegister,
+          isLoading: isSubmitting,
+          onPressed: onPressed,
+        );
+      },
     );
   }
 }

@@ -1,11 +1,11 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../../../core/models/series_model.dart';
+import 'series_model.dart';
 
 part 'series_api_response.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class SeriesApiResponse with EquatableMixin {
   final int? page;
   final List<SeriesModel>? results;

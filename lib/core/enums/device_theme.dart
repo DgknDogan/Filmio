@@ -1,21 +1,17 @@
-import 'package:flutter/material.dart' show Icon, Icons;
+import 'package:flutter/material.dart' show Icon, Icons, ThemeMode;
 
 enum DeviceTheme {
-  light(label: "Light", icon: Icon(Icons.sunny)),
-  dark(label: "Dark", icon: Icon(Icons.dark_mode)),
-  system(label: "System", icon: Icon(Icons.phone_android_outlined));
-
-  final String label;
+  light(icon: Icon(Icons.sunny)),
+  dark(icon: Icon(Icons.dark_mode)),
+  system(icon: Icon(Icons.phone_android_outlined));
 
   final Icon icon;
 
-  const DeviceTheme({required this.label, required this.icon});
+  const DeviceTheme({required this.icon});
 
-  static DeviceTheme getEnumByLabel({required String label}) {
-    return DeviceTheme.values.firstWhere(
-      (element) {
-        return element.label == label;
-      },
-    );
-  }
+  ThemeMode get themeMode => switch (this) {
+        DeviceTheme.light => ThemeMode.light,
+        DeviceTheme.dark => ThemeMode.dark,
+        DeviceTheme.system => ThemeMode.system,
+      };
 }

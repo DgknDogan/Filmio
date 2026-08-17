@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
-import '../extensions/firebase_auth_extension.dart';
+import '../constants/constants.dart';
 
 extension FirebaseFirestoreExtension on FirebaseFirestore {
-  DocumentReference<Map<String, dynamic>> getUserDocRef() {
-    return FirebaseFirestore.instance.collection("User").doc(FirebaseAuth.instance.getUserId);
-  }
+  /// The document holding one user's data. Takes the uid rather than reading
+  /// `FirebaseAuth.instance` itself, so callers stay injectable.
+  DocumentReference<Map<String, dynamic>> userDoc(String uid) => collection(userCollection).doc(uid);
 }

@@ -1,29 +1,27 @@
 import 'package:bloc/bloc.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../../core/extensions/firebase_firestore_extension.dart';
+import 'package:equatable/equatable.dart';
 
-import '../../../../core/models/movie.dart';
 import '../../../movie/domain/entities/movie.dart';
+import '../../../movie/domain/usecases/get_liked_movies.dart';
 
-part '../states/liked_movies_state.dart';
+part 'liked_movies_state.dart';
 
 class LikedMoviesCubit extends Cubit<LikedMoviesState> {
-  LikedMoviesCubit() : super(LikedMoviesState(list: [])) {
-    _init();
-  }
+  final GetLikedMoviesUseCase _getLikedMoviesUseCase;
 
-  void _init() async {
-    await getLikedMovies();
+  LikedMoviesCubit(this._getLikedMoviesUseCase) : super(const LikedMoviesLoading()) {
+    getLikedMovies();
   }
 
   Future<void> getLikedMovies() async {
-    final userDocumentRef = FirebaseFirestore.instance.getUserDocRef();
-    final userDocumentSnapshot = await userDocumentRef.get();
-    final List<dynamic> list = userDocumentSnapshot.data()!["liked_movies"];
-    final List<MovieEntity> moviesList = [];
-    for (Map<String, dynamic> movieData in list) {
-      moviesList.add(MovieModel.fromJson(movieData));
-    }
-    emit(LikedMoviesState(list: moviesList));
+    if (!isClosed) emit(const LikedMoviesLoading());
+
+    final result = await _getLikedMoviesUseCase.call();
+    if (isClosed) return;
+
+    result.fold(
+      (failure) => emit(LikedMoviesFailure(failure.message)),
+      (movies) => emit(LikedMoviesLoaded(movies)),
+    );
   }
 }

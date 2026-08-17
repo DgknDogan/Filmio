@@ -26,48 +26,81 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  dio: ^5.8.0+1
-  flutter_screenutil: ^5.9.3
+
+  # State management
   bloc: ^9.0.0
   flutter_bloc: ^9.0.0
-  auto_route: ^9.3.0+1
+  equatable: ^2.0.7
+
+  # Routing and DI
+  auto_route: ^11.0.0
+  get_it: ^8.0.3
+
+  # Networking
+  dio: ^5.8.0+1
+  retrofit: ^4.7.2
+  json_annotation: ^4.9.0
+
+  # Functional error handling
+  fpdart: ^1.1.1
+
+  # Firebase
   firebase_core: ^3.10.1
   firebase_auth: ^5.4.1
-  email_validator: ^3.0.0
   firebase_storage: ^12.4.1
   cloud_firestore: ^5.6.2
-  flutter_page_stepper: ^0.0.1
-  meta: ^1.15.0
-  animations: ^2.0.11
-  animate_do: ^3.3.4
-  flutter_animate: ^4.5.2
-  equatable: ^2.0.7
-  json_annotation: ^4.9.0
-  json_serializable: ^6.9.3
-  cached_network_image: ^3.4.1
-  flutter_cache_manager: ^3.4.1
-  intl: ^0.19.0
-  shimmer: ^3.0.0
-  retrofit: ^4.4.2
-  get_it: ^8.0.3
+
+  # Local storage
   shared_preferences: ^2.5.2
-  flutter_native_splash: ^2.4.5
-  extract_colors_from_image: ^0.0.1
-  device_preview: ^1.2.0
-  palette_generator: ^0.3.3+6
-  flutter_isolate: ^2.1.0
+
+  # Localization
+  flutter_localizations:
+    sdk: flutter
+
+  # UI
+  flutter_screenutil: ^5.9.3
+  flutter_animate: ^4.5.2
+  cached_network_image: ^3.4.1
+  shimmer: ^3.0.0
+  intl: ^0.20.2
+  google_fonts: ^8.2.1
+  rxdart: ^0.28.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+
+  # Code generation
   build_runner: ^2.4.14
-  auto_route_generator: ^9.3.1
-  retrofit_generator: ^9.1.9
-  
+  auto_route_generator: ^10.6.0
+  retrofit_generator: ^10.2.8
+  json_serializable: ^6.9.3
+  flutter_native_splash: ^2.4.5
+  flutter_gen_runner: ^5.15.0
+
+  # Testing
+  bloc_test: ^10.0.0
+  mocktail: ^1.0.0
+  patrol: ^4.0.0
+
+
+flutter_gen:
+  output: lib/gen/
+
+patrol:
+  app_name: Filmio
+  test_directory: integration_test
+  android:
+    package_name: com.example.filmio
+  ios:
+    bundle_id: com.example.filmio
 
 # The following section is specific to Flutter packages.
 flutter:
+  # Required by this SDK for gen-l10n. Kept alongside flutter_gen deliberately —
+  # see the note in docs/conventions-migration.md.
+  generate: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

@@ -1,16 +1,18 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../config/routes/app_router.gr.dart';
-import '../../../../core/extensions/brightness_extension.dart';
-import '../../../../core/utils/custom/custom_button.dart';
-import '../../../../core/utils/custom/custom_clipper.dart';
-import '../../../../core/utils/custom/custom_form.dart';
+import '../../../../config/theme/app_spacing.dart';
+import '../../../../core/custom/custom_button.dart';
+import '../../../../core/extensions/context_extension.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../../injection_container.dart';
 import '../cubit/login_cubit.dart';
+import '../widgets/auth_error_snack_bar.dart';
+import '../widgets/auth_fields.dart';
+import '../widgets/auth_footer.dart';
+import '../widgets/auth_layout.dart';
 
 @RoutePage()
 class LoginPage extends StatelessWidget {
@@ -20,168 +22,154 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<LoginCubit>(
       create: (context) => getIt<LoginCubit>(),
-      child: Scaffold(
-        extendBody: true,
-        resizeToAvoidBottomInset: true,
-        body: Column(
-          children: [
-            _LoginHeader(),
-            _LoginForm(),
-          ],
-        ),
+      child: BlocListener<LoginCubit, LoginState>(
+        listenWhen: (previous, current) =>
+            current.errorMessage != null && previous.errorMessage != current.errorMessage,
+        listener: (context, state) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(authErrorSnackBar(context, state.errorMessage!));
+        },
+        child: const _LoginView(),
       ),
     );
   }
 }
 
-class _LoginHeader extends StatelessWidget {
-  const _LoginHeader();
+class _LoginView extends StatefulWidget {
+  const _LoginView();
 
   @override
-  Widget build(BuildContext context) {
-    return ClipPath(
-      clipper: CustomBorderClipper(),
-      child: Container(
-        height: 170.h,
-        width: double.infinity,
-        decoration: Theme.of(context).isLight
-            ? BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xff6a5acd),
-                    Color(0xff3700b3),
-                  ],
-                ),
-              )
-            : BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xff252525),
-                    Colors.black,
-                  ],
-                ),
-              ),
-        child: Container(
-          margin: EdgeInsets.only(left: 20.w, top: 50.h),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Hello, Welcome back to",
-                style: Theme.of(context).textTheme.headlineMedium!.copyWith(color: Colors.white, fontSize: 26.sp),
-              ),
-              Text(
-                "Filmio",
-                style: Theme.of(context).textTheme.headlineLarge!.copyWith(fontSize: 28.sp),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  State<_LoginView> createState() => _LoginViewState();
 }
 
-class _LoginForm extends StatefulWidget {
-  const _LoginForm();
-
-  @override
-  State<_LoginForm> createState() => _LoginFormState();
-}
-
-class _LoginFormState extends State<_LoginForm> {
-  late final TextEditingController emailController;
-  late final TextEditingController passwordController;
-  final auth = FirebaseAuth.instance;
+class _LoginViewState extends State<_LoginView> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+  late final FocusNode _passwordFocus;
 
   @override
   void initState() {
-    emailController = TextEditingController();
-    passwordController = TextEditingController();
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+    _passwordFocus = FocusNode();
     super.initState();
   }
 
   @override
   void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CustomForm(
-            emailController: emailController,
-            passwordController: passwordController,
+    return AuthLayout(
+      title: context.l10n.authLoginTitle,
+      subtitle: context.l10n.authLoginSubtitle,
+      form: Form(
+        key: _formKey,
+        child: AutofillGroup(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AuthEmailField(
+                controller: _emailController,
+                onSubmitted: _passwordFocus.requestFocus,
+              ),
+              AppGap.vertical(AppSpacing.md),
+              AuthPasswordField(
+                controller: _passwordController,
+                focusNode: _passwordFocus,
+                label: context.l10n.authPassword,
+                autofillHint: AutofillHints.password,
+                textInputAction: TextInputAction.done,
+                validator: (value) => Validators.password(value, context.l10n),
+                onSubmitted: _submit,
+              ),
+              AppGap.vertical(AppSpacing.lg),
+              const _RememberMe(),
+            ],
           ),
-          SizedBox(height: 10.h),
-          _FormSubTexts(),
-          SizedBox(height: 30.h),
-          CustomButton(
-            text: "Log In",
-            width: double.infinity,
-            onPressed: () async {
-              final isLoggedin = await context.read<LoginCubit>().login(
-                    email: emailController.text,
-                    password: passwordController.text,
-                  );
-              if (context.mounted && isLoggedin && auth.currentUser!.displayName == null) {
-                FocusManager.instance.primaryFocus?.unfocus();
-                context.router.replace(SetProfile());
-              } else if (context.mounted && isLoggedin && auth.currentUser!.displayName != null) {
-                FocusManager.instance.primaryFocus?.unfocus();
-                context.router.replace(HomeRoute());
-              }
-            },
-          ),
-        ],
+        ),
       ),
+      submitButton: _SubmitButton(onPressed: _submit),
+      footer: AuthFooter(
+        prompt: context.l10n.authNoAccount,
+        action: context.l10n.authSignUp,
+        onPressed: () => context.router.push(const RegisterRoute()),
+      ),
+    );
+  }
+
+  Future<void> _submit() async {
+    // The form answers what the server should never be asked twice.
+    if (!_formKey.currentState!.validate()) return;
+
+    final router = context.router;
+    final outcome = await context.read<LoginCubit>().login(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+
+    // A failure is already on screen via the page's BlocListener.
+    if (outcome == LoginOutcome.failed) return;
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    router.replace(outcome == LoginOutcome.needsProfile ? const SetProfileRoute() : const WrapperRoute());
+  }
+}
+
+/// The checkbox and its label, as one target. Tapping the words works too,
+/// which is the difference between a 24pt hit area and a comfortable one.
+class _RememberMe extends StatelessWidget {
+  const _RememberMe();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<LoginCubit, LoginState, bool>(
+      selector: (state) => state.isChecked,
+      builder: (context, isChecked) {
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: InkWell(
+            borderRadius: AppRadius.smAll,
+            onTap: () => context.read<LoginCubit>().changeCheckBox(!isChecked),
+            child: Padding(
+              padding: EdgeInsets.only(right: AppSpacing.md),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // The row owns the gesture, so the box only has to draw.
+                  IgnorePointer(child: Checkbox(value: isChecked, onChanged: (_) {})),
+                  Text(context.l10n.authRememberMe, style: context.styles.footerPrompt),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
 
-class _FormSubTexts extends StatelessWidget {
-  const _FormSubTexts();
+class _SubmitButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _SubmitButton({required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<LoginCubit, LoginState>(
-      builder: (context, state) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              spacing: 5.w,
-              children: [
-                Checkbox(
-                  activeColor: Theme.of(context).isLight ? Color(0xff3700b3) : Colors.white,
-                  value: state.isChecked,
-                  onChanged: (value) {
-                    context.read<LoginCubit>().changeCheckBox(value!);
-                  },
-                ),
-                Text(
-                  "Remember Me",
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-            GestureDetector(
-              onTap: () {
-                context.router.push(RegisterRoute());
-              },
-              child: Text(
-                "Create an account",
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
-          ],
+    return BlocSelector<LoginCubit, LoginState, bool>(
+      selector: (state) => state.isSubmitting,
+      builder: (context, isSubmitting) {
+        return CustomButton(
+          text: context.l10n.authLogIn,
+          isLoading: isSubmitting,
+          onPressed: onPressed,
         );
       },
     );

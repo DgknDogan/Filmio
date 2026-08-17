@@ -5,11 +5,28 @@
 # IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
 # invoked from the command line by running `flutter analyze`.
 
-# The following line activates a set of recommended lints for Flutter apps,
-# packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  exclude:
+    # An iOS build checks Swift Package Manager dependencies out here; some of
+    # them ship their own Dart sources and are not ours to analyze.
+    - build/**
+
+formatter:
+  page_width: 150
 
 linter:
   rules:
-    - prefer_relative_imports
+    # const wherever possible — the cheapest rebuild prevention there is
+    prefer_const_constructors: true
+    prefer_const_constructors_in_immutables: true
+    prefer_const_declarations: true
+    prefer_const_literals_to_create_immutables: true
+
+    # no print in production code
+    avoid_print: true
+
+    # imports within lib/ are relative paths, not package: URIs
+    prefer_relative_imports: true
+    avoid_relative_lib_imports: true

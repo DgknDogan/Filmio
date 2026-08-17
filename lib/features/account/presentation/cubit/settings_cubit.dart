@@ -1,22 +1,20 @@
 import 'package:bloc/bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:equatable/equatable.dart';
 
-import '../../../../injection_container.dart';
-import '../../../auth/domain/usecase/logout.dart';
+import '../../../auth/domain/usecases/logout.dart';
 
-part '../states/settings_state.dart';
+part 'settings_state.dart';
 
 class SettingsCubit extends Cubit<SettingsState> {
   final LogoutUseCase _logoutUseCase;
-  SettingsCubit(this._logoutUseCase)
-      : super(
-          SettingsState(),
-        );
 
+  SettingsCubit(this._logoutUseCase) : super(const SettingsIdle());
+
+  /// Signing out clears the remembered flag inside the auth repository — the
+  /// cubit has no business knowing where that flag lives.
   Future<void> logout() async {
-    await getIt<SharedPreferences>().remove("is_remembered");
-    await getIt<SharedPreferences>().remove("email");
-    await getIt<SharedPreferences>().remove("password");
+    emit(const SettingsSigningOut());
     await _logoutUseCase.call();
+    if (!isClosed) emit(const SettingsSignedOut());
   }
 }
