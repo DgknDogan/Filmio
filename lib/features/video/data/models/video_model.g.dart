@@ -19,7 +19,8 @@ VideoModel _$VideoModelFromJson(Map<String, dynamic> json) => VideoModel(
       iso31661: json['iso_3166_1'] as String?,
     );
 
-Map<String, dynamic> _$VideoModelToJson(VideoModel instance) => <String, dynamic>{
+Map<String, dynamic> _$VideoModelToJson(VideoModel instance) =>
+    <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'key': instance.key,

@@ -33,7 +33,8 @@ class $AssetsFemaleGen {
   AssetGenImage get female6 => const AssetGenImage('assets/female/female6.png');
 
   /// List of all assets
-  List<AssetGenImage> get values => [female1, female2, female3, female4, female5, female6];
+  List<AssetGenImage> get values =>
+      [female1, female2, female3, female4, female5, female6];
 }
 
 class $AssetsMaleGen {

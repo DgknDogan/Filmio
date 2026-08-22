@@ -51,9 +51,14 @@ jobs:
       # Generated code is committed, so it can go stale. This is the only thing
       # that catches an annotated source or an .arb edited without a
       # regeneration.
+      #
+      # A checkout has no build cache, so this always regenerates from scratch.
+      # Reproducing a failure locally needs `dart run build_runner clean` first:
+      # with a warm cache build_runner writes nothing and a stale file looks
+      # current.
       - name: Generated code is current
         run: |
-          dart run build_runner build --delete-conflicting-outputs
+          dart run build_runner build
           flutter gen-l10n
           git diff --exit-code
 
