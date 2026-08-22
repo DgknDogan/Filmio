@@ -21,8 +21,7 @@ class AppRouter extends RootStackRouter {
           page: SetProfileRoute.page,
         ),
         CustomRoute(
-          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-              slideLeftTransition(context, animation, secondaryAnimation, child),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) => slideLeftTransition(context, animation, secondaryAnimation, child),
           duration: const Duration(milliseconds: 1000),
           page: WrapperRoute.page,
           children: [

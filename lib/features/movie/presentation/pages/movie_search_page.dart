@@ -79,8 +79,7 @@ class _SearchView extends StatelessWidget {
                   // what decides which ones reach the API.
                   onChanged: (query) => context.read<SearchBloc>().add(SearchQueryChanged(query)),
                 ),
-                if (state case SearchLoaded(:final movies))
-                  SearchResultsSummary(count: movies.length, scope: context.l10n.moviesTitle),
+                if (state case SearchLoaded(:final movies)) SearchResultsSummary(count: movies.length, scope: context.l10n.moviesTitle),
                 Expanded(
                   child: switch (state) {
                     SearchInitial() => const SizedBox.shrink(),

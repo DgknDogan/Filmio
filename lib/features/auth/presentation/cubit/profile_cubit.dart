@@ -10,8 +10,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   final UpdateDisplayNameUseCase _updateDisplayNameUseCase;
   final UpdateProfilePhotoUseCase _updateProfilePhotoUseCase;
 
-  ProfileCubit(this._updateDisplayNameUseCase, this._updateProfilePhotoUseCase)
-      : super(const ProfileSetName(hasError: false));
+  ProfileCubit(this._updateDisplayNameUseCase, this._updateProfilePhotoUseCase) : super(const ProfileSetName(hasError: false));
 
   void next() {
     emit(const ProfileSetPhoto(option: true, hasError: false));

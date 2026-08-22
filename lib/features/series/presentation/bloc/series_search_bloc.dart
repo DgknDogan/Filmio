@@ -19,8 +19,7 @@ class SeriesSearchBloc extends Bloc<SeriesSearchEvent, SeriesSearchState> {
     on<SeriesSearchRetried>(_onRetried);
   }
 
-  Future<void> _onQueryChanged(SeriesSearchQueryChanged event, Emitter<SeriesSearchState> emit) =>
-      _search(event.query, emit);
+  Future<void> _onQueryChanged(SeriesSearchQueryChanged event, Emitter<SeriesSearchState> emit) => _search(event.query, emit);
 
   /// Deliberately outside the transformer: the reader has already waited for
   /// one failed request and asked for it again on purpose, so making them wait

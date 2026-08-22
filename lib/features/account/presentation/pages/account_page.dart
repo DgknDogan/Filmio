@@ -105,13 +105,9 @@ class _Profile extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: palette.tagNeutralBackground,
                 border: Border.all(color: palette.inputBorder),
-                image: loaded?.photoUrl == null
-                    ? null
-                    : DecorationImage(image: AssetImage(loaded!.photoUrl!), fit: BoxFit.cover),
+                image: loaded?.photoUrl == null ? null : DecorationImage(image: AssetImage(loaded!.photoUrl!), fit: BoxFit.cover),
               ),
-              child: loaded?.photoUrl != null
-                  ? null
-                  : Icon(Icons.person_outline_rounded, color: palette.textSecondary, size: AppSpacing.xxxl),
+              child: loaded?.photoUrl != null ? null : Icon(Icons.person_outline_rounded, color: palette.textSecondary, size: AppSpacing.xxxl),
             ),
             AppGap.horizontal(AppSpacing.lg),
             Expanded(

@@ -21,8 +21,7 @@ void main() {
   HttpResponse<MovieApiResponse> responseWith(MovieApiResponse body, {int statusCode = 200}) =>
       HttpResponse(body, Response(requestOptions: requestOptions, statusCode: statusCode, data: body));
 
-  MovieApiResponse page(List<MovieModel>? results) =>
-      MovieApiResponse(page: 1, results: results, totalPages: 1, totalResults: results?.length ?? 0);
+  MovieApiResponse page(List<MovieModel>? results) => MovieApiResponse(page: 1, results: results, totalPages: 1, totalResults: results?.length ?? 0);
 
   setUp(() {
     api = MockMovieApiService();
@@ -44,8 +43,7 @@ void main() {
     });
 
     test('a null results array becomes an empty list, not a crash', () async {
-      when(() => api.getPopularMovies(language: any(named: 'language'), page: any(named: 'page')))
-          .thenAnswer((_) async => responseWith(page(null)));
+      when(() => api.getPopularMovies(language: any(named: 'language'), page: any(named: 'page'))).thenAnswer((_) async => responseWith(page(null)));
 
       final result = await repository.getPopularMovies();
 
@@ -90,10 +88,8 @@ void main() {
   });
 
   test('getSimilarMovies forwards the movie id', () async {
-    when(() => api.getSimilarMovies(
-        movieId: any(named: 'movieId'),
-        language: any(named: 'language'),
-        page: any(named: 'page'))).thenAnswer((_) async => responseWith(page(const [])));
+    when(() => api.getSimilarMovies(movieId: any(named: 'movieId'), language: any(named: 'language'), page: any(named: 'page')))
+        .thenAnswer((_) async => responseWith(page(const [])));
 
     await repository.getSimilarMovies(movieId: 42);
 

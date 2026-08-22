@@ -22,8 +22,7 @@ void main() {
   late MockDiscoverMoviesUseCase discover;
 
   List<MovieEntity> titles(int count, {int from = 0}) => [
-        for (var index = from; index < from + count; index++)
-          MovieEntity(id: index, title: 'Film $index', posterPath: '/$index.jpg'),
+        for (var index = from; index < from + count; index++) MovieEntity(id: index, title: 'Film $index', posterPath: '/$index.jpg'),
       ];
 
   PaginatedList<MovieEntity> page(

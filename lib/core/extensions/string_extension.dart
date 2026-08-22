@@ -21,8 +21,7 @@ extension StringExtension on String {
 
   /// A camelCase identifier as words: `scienceFiction` → "Science Fiction".
   /// The genre enums are named in Dart's casing but read by people.
-  String get spacedWords =>
-      replaceAllMapped(RegExp('([a-z0-9])([A-Z])'), (match) => '${match[1]} ${match[2]}').capitalFirstLetter;
+  String get spacedWords => replaceAllMapped(RegExp('([a-z0-9])([A-Z])'), (match) => '${match[1]} ${match[2]}').capitalFirstLetter;
 
   String get capitalFirstLetter => substring(0, 1).toUpperCase() + substring(1, length);
 }

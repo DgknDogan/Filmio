@@ -14,5 +14,4 @@
 ///
 /// It only has to be unique at the moment the flight starts: the tag travels
 /// to the details screen as a route argument, so nothing recomputes it there.
-String posterHeroTag(String scope, {required int index, int? id}) =>
-    'poster-$scope-${id == null ? 'index$index' : 'id$id'}';
+String posterHeroTag(String scope, {required int index, int? id}) => 'poster-$scope-${id == null ? 'index$index' : 'id$id'}';

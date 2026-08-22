@@ -31,8 +31,7 @@ Failure failureFromStatusCode(int? statusCode) {
     401 || 403 => ServerFailure('Not authorised to read this. Check the API token.', statusCode: statusCode),
     404 => ServerFailure('Not found.', statusCode: statusCode),
     429 => ServerFailure('Too many requests. Wait a moment and try again.', statusCode: statusCode),
-    final int code when code >= 500 =>
-      ServerFailure('The server is having trouble. Try again later.', statusCode: code),
+    final int code when code >= 500 => ServerFailure('The server is having trouble. Try again later.', statusCode: code),
     _ => ServerFailure('The request failed.', statusCode: statusCode),
   };
 }

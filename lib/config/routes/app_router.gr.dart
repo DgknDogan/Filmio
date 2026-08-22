@@ -11,33 +11,53 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i19;
 import 'package:filmio/core/enums/discover_sort.dart' as _i22;
-import 'package:filmio/features/account/presentation/pages/account_page.dart' as _i1;
-import 'package:filmio/features/account/presentation/pages/liked_movies_page.dart' as _i2;
-import 'package:filmio/features/account/presentation/pages/liked_series_page.dart' as _i3;
-import 'package:filmio/features/account/presentation/pages/settings_page.dart' as _i15;
+import 'package:filmio/features/account/presentation/pages/account_page.dart'
+    as _i1;
+import 'package:filmio/features/account/presentation/pages/liked_movies_page.dart'
+    as _i2;
+import 'package:filmio/features/account/presentation/pages/liked_series_page.dart'
+    as _i3;
+import 'package:filmio/features/account/presentation/pages/settings_page.dart'
+    as _i15;
 import 'package:filmio/features/auth/presentation/pages/login_page.dart' as _i4;
-import 'package:filmio/features/auth/presentation/pages/register_page.dart' as _i9;
-import 'package:filmio/features/auth/presentation/pages/set_profile_page.dart' as _i14;
-import 'package:filmio/features/landing/presentation/pages/splash_page.dart' as _i16;
-import 'package:filmio/features/landing/presentation/pages/wrapper_page.dart' as _i18;
+import 'package:filmio/features/auth/presentation/pages/register_page.dart'
+    as _i9;
+import 'package:filmio/features/auth/presentation/pages/set_profile_page.dart'
+    as _i14;
+import 'package:filmio/features/landing/presentation/pages/splash_page.dart'
+    as _i16;
+import 'package:filmio/features/landing/presentation/pages/wrapper_page.dart'
+    as _i18;
 import 'package:filmio/features/movie/domain/entities/movie.dart' as _i21;
-import 'package:filmio/features/movie/presentation/pages/movie_details_page.dart' as _i5;
-import 'package:filmio/features/movie/presentation/pages/movie_discover_page.dart' as _i6;
-import 'package:filmio/features/movie/presentation/pages/movie_page.dart' as _i7;
-import 'package:filmio/features/movie/presentation/pages/movie_search_page.dart' as _i8;
-import 'package:filmio/features/series/domain/entities/series_entity.dart' as _i23;
-import 'package:filmio/features/series/presentation/pages/series_details_page.dart' as _i10;
-import 'package:filmio/features/series/presentation/pages/series_discover_page.dart' as _i11;
-import 'package:filmio/features/series/presentation/pages/series_page.dart' as _i12;
-import 'package:filmio/features/series/presentation/pages/series_search_page.dart' as _i13;
-import 'package:filmio/features/video/domain/entities/video_entity.dart' as _i24;
-import 'package:filmio/features/video/presentation/pages/trailer_page.dart' as _i17;
+import 'package:filmio/features/movie/presentation/pages/movie_details_page.dart'
+    as _i5;
+import 'package:filmio/features/movie/presentation/pages/movie_discover_page.dart'
+    as _i6;
+import 'package:filmio/features/movie/presentation/pages/movie_page.dart'
+    as _i7;
+import 'package:filmio/features/movie/presentation/pages/movie_search_page.dart'
+    as _i8;
+import 'package:filmio/features/series/domain/entities/series_entity.dart'
+    as _i23;
+import 'package:filmio/features/series/presentation/pages/series_details_page.dart'
+    as _i10;
+import 'package:filmio/features/series/presentation/pages/series_discover_page.dart'
+    as _i11;
+import 'package:filmio/features/series/presentation/pages/series_page.dart'
+    as _i12;
+import 'package:filmio/features/series/presentation/pages/series_search_page.dart'
+    as _i13;
+import 'package:filmio/features/video/domain/entities/video_entity.dart'
+    as _i24;
+import 'package:filmio/features/video/presentation/pages/trailer_page.dart'
+    as _i17;
 import 'package:flutter/material.dart' as _i20;
 
 /// generated route for
 /// [_i1.AccountPage]
 class AccountRoute extends _i19.PageRouteInfo<void> {
-  const AccountRoute({List<_i19.PageRouteInfo>? children}) : super(AccountRoute.name, initialChildren: children);
+  const AccountRoute({List<_i19.PageRouteInfo>? children})
+      : super(AccountRoute.name, initialChildren: children);
 
   static const String name = 'AccountRoute';
 
@@ -84,7 +104,8 @@ class LikedSeriesRoute extends _i19.PageRouteInfo<void> {
 /// generated route for
 /// [_i4.LoginPage]
 class LoginRoute extends _i19.PageRouteInfo<void> {
-  const LoginRoute({List<_i19.PageRouteInfo>? children}) : super(LoginRoute.name, initialChildren: children);
+  const LoginRoute({List<_i19.PageRouteInfo>? children})
+      : super(LoginRoute.name, initialChildren: children);
 
   static const String name = 'LoginRoute';
 
@@ -215,7 +236,8 @@ class MovieDiscoverRouteArgs {
 /// generated route for
 /// [_i7.MoviePage]
 class MovieRoute extends _i19.PageRouteInfo<void> {
-  const MovieRoute({List<_i19.PageRouteInfo>? children}) : super(MovieRoute.name, initialChildren: children);
+  const MovieRoute({List<_i19.PageRouteInfo>? children})
+      : super(MovieRoute.name, initialChildren: children);
 
   static const String name = 'MovieRoute';
 
@@ -282,7 +304,9 @@ class MovieSearchRouteArgs {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! MovieSearchRouteArgs) return false;
-    return key == other.key && heroTag == other.heroTag && hintText == other.hintText;
+    return key == other.key &&
+        heroTag == other.heroTag &&
+        hintText == other.hintText;
   }
 
   @override
@@ -292,7 +316,8 @@ class MovieSearchRouteArgs {
 /// generated route for
 /// [_i9.RegisterPage]
 class RegisterRoute extends _i19.PageRouteInfo<void> {
-  const RegisterRoute({List<_i19.PageRouteInfo>? children}) : super(RegisterRoute.name, initialChildren: children);
+  const RegisterRoute({List<_i19.PageRouteInfo>? children})
+      : super(RegisterRoute.name, initialChildren: children);
 
   static const String name = 'RegisterRoute';
 
@@ -359,7 +384,9 @@ class SeriesDetailsRouteArgs {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! SeriesDetailsRouteArgs) return false;
-    return key == other.key && series == other.series && heroTag == other.heroTag;
+    return key == other.key &&
+        series == other.series &&
+        heroTag == other.heroTag;
   }
 
   @override
@@ -427,7 +454,8 @@ class SeriesDiscoverRouteArgs {
 /// generated route for
 /// [_i12.SeriesHomePage]
 class SeriesHomeRoute extends _i19.PageRouteInfo<void> {
-  const SeriesHomeRoute({List<_i19.PageRouteInfo>? children}) : super(SeriesHomeRoute.name, initialChildren: children);
+  const SeriesHomeRoute({List<_i19.PageRouteInfo>? children})
+      : super(SeriesHomeRoute.name, initialChildren: children);
 
   static const String name = 'SeriesHomeRoute';
 
@@ -494,7 +522,9 @@ class SeriesSearchRouteArgs {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! SeriesSearchRouteArgs) return false;
-    return key == other.key && heroTag == other.heroTag && hintText == other.hintText;
+    return key == other.key &&
+        heroTag == other.heroTag &&
+        hintText == other.hintText;
   }
 
   @override
@@ -504,7 +534,8 @@ class SeriesSearchRouteArgs {
 /// generated route for
 /// [_i14.SetProfilePage]
 class SetProfileRoute extends _i19.PageRouteInfo<void> {
-  const SetProfileRoute({List<_i19.PageRouteInfo>? children}) : super(SetProfileRoute.name, initialChildren: children);
+  const SetProfileRoute({List<_i19.PageRouteInfo>? children})
+      : super(SetProfileRoute.name, initialChildren: children);
 
   static const String name = 'SetProfileRoute';
 
@@ -519,7 +550,8 @@ class SetProfileRoute extends _i19.PageRouteInfo<void> {
 /// generated route for
 /// [_i15.SettingsPage]
 class SettingsRoute extends _i19.PageRouteInfo<void> {
-  const SettingsRoute({List<_i19.PageRouteInfo>? children}) : super(SettingsRoute.name, initialChildren: children);
+  const SettingsRoute({List<_i19.PageRouteInfo>? children})
+      : super(SettingsRoute.name, initialChildren: children);
 
   static const String name = 'SettingsRoute';
 
@@ -534,7 +566,8 @@ class SettingsRoute extends _i19.PageRouteInfo<void> {
 /// generated route for
 /// [_i16.SplashPage]
 class SplashRoute extends _i19.PageRouteInfo<void> {
-  const SplashRoute({List<_i19.PageRouteInfo>? children}) : super(SplashRoute.name, initialChildren: children);
+  const SplashRoute({List<_i19.PageRouteInfo>? children})
+      : super(SplashRoute.name, initialChildren: children);
 
   static const String name = 'SplashRoute';
 
@@ -596,7 +629,8 @@ class TrailerRouteArgs {
 /// generated route for
 /// [_i18.WrapperPage]
 class WrapperRoute extends _i19.PageRouteInfo<void> {
-  const WrapperRoute({List<_i19.PageRouteInfo>? children}) : super(WrapperRoute.name, initialChildren: children);
+  const WrapperRoute({List<_i19.PageRouteInfo>? children})
+      : super(WrapperRoute.name, initialChildren: children);
 
   static const String name = 'WrapperRoute';
 

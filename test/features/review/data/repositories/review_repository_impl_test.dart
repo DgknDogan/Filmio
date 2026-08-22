@@ -35,17 +35,13 @@ void main() {
   );
 
   void stubMovie(HttpResponse<ReviewApiResponse> response) {
-    when(() => api.getMovieReviews(
-        movieId: any(named: 'movieId'),
-        language: any(named: 'language'),
-        page: any(named: 'page'))).thenAnswer((_) async => response);
+    when(() => api.getMovieReviews(movieId: any(named: 'movieId'), language: any(named: 'language'), page: any(named: 'page')))
+        .thenAnswer((_) async => response);
   }
 
   void stubSeries(HttpResponse<ReviewApiResponse> response) {
-    when(() => api.getSeriesReviews(
-        seriesId: any(named: 'seriesId'),
-        language: any(named: 'language'),
-        page: any(named: 'page'))).thenAnswer((_) async => response);
+    when(() => api.getSeriesReviews(seriesId: any(named: 'seriesId'), language: any(named: 'language'), page: any(named: 'page')))
+        .thenAnswer((_) async => response);
   }
 
   setUp(() {
@@ -103,8 +99,7 @@ void main() {
     test('the last page reports that there is nothing more to ask for', () async {
       stubMovie(responseWith(envelope(results: const [review], page: 3, totalPages: 3, totalResults: 42)));
 
-      final reviews =
-          (await repository.getReviews(mediaId: 550, mediaType: MediaType.movie, page: 3)).getRight().toNullable()!;
+      final reviews = (await repository.getReviews(mediaId: 550, mediaType: MediaType.movie, page: 3)).getRight().toNullable()!;
 
       expect(reviews.hasMore, isFalse);
     });
@@ -112,8 +107,7 @@ void main() {
     test('a null results array becomes an empty page, not a crash', () async {
       stubMovie(responseWith(envelope(results: null)));
 
-      final reviews =
-          (await repository.getReviews(mediaId: 550, mediaType: MediaType.movie, page: 1)).getRight().toNullable()!;
+      final reviews = (await repository.getReviews(mediaId: 550, mediaType: MediaType.movie, page: 1)).getRight().toNullable()!;
 
       expect(reviews.items, isEmpty);
       expect(reviews.totalResults, 0);
@@ -124,8 +118,7 @@ void main() {
       // would keep asking for a next page that does not exist.
       stubMovie(responseWith(envelope(results: const [review], page: null, totalPages: null, totalResults: null)));
 
-      final reviews =
-          (await repository.getReviews(mediaId: 550, mediaType: MediaType.movie, page: 4)).getRight().toNullable()!;
+      final reviews = (await repository.getReviews(mediaId: 550, mediaType: MediaType.movie, page: 4)).getRight().toNullable()!;
 
       expect(reviews.page, 4);
       expect(reviews.totalPages, 4);
@@ -136,8 +129,7 @@ void main() {
     test('a non-200 becomes a ServerFailure carrying the code', () async {
       stubMovie(responseWith(envelope(results: const []), statusCode: 404));
 
-      final failure =
-          (await repository.getReviews(mediaId: 550, mediaType: MediaType.movie, page: 1)).getLeft().toNullable();
+      final failure = (await repository.getReviews(mediaId: 550, mediaType: MediaType.movie, page: 1)).getLeft().toNullable();
 
       expect(failure, isA<ServerFailure>());
       expect((failure as ServerFailure).statusCode, 404);

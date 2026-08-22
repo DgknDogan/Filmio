@@ -55,8 +55,7 @@ class MovieDetailsCubit extends Cubit<MovieDetailsState> {
     result.fold(
       (failure) => emit(state.copyWith(similars: SimilarMoviesFailure(failure.message))),
       (similarMovies) => emit(
-        state.copyWith(
-            similars: SimilarMoviesLoaded(similarMovies.where((movie) => movie.posterPath != null).toList())),
+        state.copyWith(similars: SimilarMoviesLoaded(similarMovies.where((movie) => movie.posterPath != null).toList())),
       ),
     );
   }

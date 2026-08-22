@@ -65,8 +65,7 @@ void main() {
     blocTest<SeriesDetailsCubit, SeriesDetailsState>(
       'keeps only titles with a poster',
       build: build,
-      setUp: () => when(() => getSimilar.call(params: any(named: 'params')))
-          .thenAnswer((_) async => const Right([similar, similarWithoutPoster])),
+      setUp: () => when(() => getSimilar.call(params: any(named: 'params'))).thenAnswer((_) async => const Right([similar, similarWithoutPoster])),
       wait: const Duration(milliseconds: 10),
       verify: (cubit) => expect((cubit.state.similars as SimilarSeriesLoaded).series, const [similar]),
     );
@@ -74,8 +73,7 @@ void main() {
     blocTest<SeriesDetailsCubit, SeriesDetailsState>(
       'a failure is its own state rather than an empty row',
       build: build,
-      setUp: () => when(() => getSimilar.call(params: any(named: 'params')))
-          .thenAnswer((_) async => const Left(ServerFailure('boom'))),
+      setUp: () => when(() => getSimilar.call(params: any(named: 'params'))).thenAnswer((_) async => const Left(ServerFailure('boom'))),
       wait: const Duration(milliseconds: 10),
       verify: (cubit) => expect(cubit.state.similars, const SimilarSeriesFailure('boom')),
     );
@@ -106,8 +104,7 @@ void main() {
     blocTest<SeriesDetailsCubit, SeriesDetailsState>(
       'a failed like leaves the heart as it was',
       build: build,
-      setUp: () => when(() => like.call(params: any(named: 'params')))
-          .thenAnswer((_) async => const Left(NetworkFailure('offline'))),
+      setUp: () => when(() => like.call(params: any(named: 'params'))).thenAnswer((_) async => const Left(NetworkFailure('offline'))),
       act: (cubit) => cubit.likeSeries(series: series),
       wait: const Duration(milliseconds: 10),
       verify: (cubit) => expect(cubit.state.isSeriesLiked, isFalse),

@@ -173,8 +173,7 @@ class _BackdropLayer extends StatelessWidget {
 
         // Pulling the page down past the top stretches the artwork instead of
         // leaving a gap under it.
-        final height =
-            offset < 0 ? _BackdropMetrics.max - offset : lerpDouble(_BackdropMetrics.max, _BackdropMetrics.min, t)!;
+        final height = offset < 0 ? _BackdropMetrics.max - offset : lerpDouble(_BackdropMetrics.max, _BackdropMetrics.min, t)!;
         final sigma = t * 16;
 
         return SizedBox(

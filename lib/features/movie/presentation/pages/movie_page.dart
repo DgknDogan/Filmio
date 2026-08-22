@@ -91,8 +91,7 @@ class _Content extends StatelessWidget {
   /// The two rows overlap — a film can be both popular and top rated — so each
   /// row scopes its own tags rather than naming the film.
   List<Widget> _posters(List<MovieEntity> movies, String scope) => [
-        for (final (index, movie) in movies.indexed)
-          MoviePosterCard(movie: movie, heroTag: posterHeroTag(scope, index: index, id: movie.id)),
+        for (final (index, movie) in movies.indexed) MoviePosterCard(movie: movie, heroTag: posterHeroTag(scope, index: index, id: movie.id)),
       ];
 }
 

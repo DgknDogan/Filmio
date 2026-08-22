@@ -23,13 +23,11 @@ void main() {
   const trailer = VideoModel(id: 'v1', key: 'abc', site: 'YouTube', size: 1080, type: 'Trailer', official: true);
 
   void stubMovie(HttpResponse<VideoApiResponse> response) {
-    when(() => api.getMovieVideos(movieId: any(named: 'movieId'), language: any(named: 'language')))
-        .thenAnswer((_) async => response);
+    when(() => api.getMovieVideos(movieId: any(named: 'movieId'), language: any(named: 'language'))).thenAnswer((_) async => response);
   }
 
   void stubSeries(HttpResponse<VideoApiResponse> response) {
-    when(() => api.getSeriesVideos(seriesId: any(named: 'seriesId'), language: any(named: 'language')))
-        .thenAnswer((_) async => response);
+    when(() => api.getSeriesVideos(seriesId: any(named: 'seriesId'), language: any(named: 'language'))).thenAnswer((_) async => response);
   }
 
   setUp(() {

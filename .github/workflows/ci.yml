@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+# A new push to the same branch makes the run in flight pointless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Pinned rather than "stable": a toolchain that moves on its own turns an
+  # unrelated push into a red build.
+  FLUTTER_VERSION: "3.44.4"
+
+jobs:
+  verify:
+    name: Format, analyze, test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Dependencies
+        run: flutter pub get
+
+      # Generated files keep the generator's own formatting. Reformatting them
+      # would make every regeneration churn, and the check below would fail on
+      # a diff nobody wrote.
+      - name: Format
+        run: |
+          dart format --output=none --set-exit-if-changed \
+            $(git ls-files '*.dart' | grep -vE '\.(g|gr|gen)\.dart$|app_localizations')
+
+      - name: Analyze
+        run: flutter analyze
+
+      # No env.json here on purpose: a unit or widget test that needs the TMDB
+      # token is a test that reaches the network, and none of them should.
+      - name: Test
+        run: flutter test
+
+      # Generated code is committed, so it can go stale. This is the only thing
+      # that catches an annotated source or an .arb edited without a
+      # regeneration.
+      - name: Generated code is current
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+          flutter gen-l10n
+          git diff --exit-code
+
+  android:
+    name: Android APK
+    needs: verify
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Dependencies
+        run: flutter pub get
+
+      # env.json is gitignored, so the build writes the same file locally from
+      # the repository secret. Never echoed — the heredoc keeps it out of the
+      # command line and the log.
+      - name: Write env.json
+        env:
+          TMDB_TOKEN: ${{ secrets.TMDB_TOKEN }}
+        run: |
+          cat > env.json <<JSON
+          {"TMDB_TOKEN": "$TMDB_TOKEN"}
+          JSON
+
+      - name: Build
+        run: flutter build apk --release --dart-define-from-file=env.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: filmio-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 14
+
+      # The distribution step below is skipped until the credentials exist, so
+      # the pipeline is useful from the first run and gains a delivery leg the
+      # moment FIREBASE_SERVICE_ACCOUNT is added to the repository secrets.
+      - name: Are distribution credentials set?
+        id: distribution
+        env:
+          CREDENTIALS: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -n "$CREDENTIALS" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set — the build was not distributed."
+          fi
+
+      - name: Firebase App Distribution
+        if: steps.distribution.outputs.ready == 'true'
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          # Not a secret — it is already in the committed google-services.json.
+          appId: 1:640047605009:android:826779897f5c522d0d18b0
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          groups: testers
+          releaseNotes: ${{ github.event.head_commit.message }}
+          file: build/app/outputs/flutter-apk/app-release.apk

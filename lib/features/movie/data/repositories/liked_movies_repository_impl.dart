@@ -27,8 +27,7 @@ class LikedMoviesRepositoryImpl extends LikedMoviesRepository {
       }
 
       final List<dynamic> likedMoviesDynamic = userDoc.data()!["liked_movies"] ?? const [];
-      final likedMovies =
-          likedMoviesDynamic.map((movie) => MovieModel.fromJson(Map<String, dynamic>.from(movie)).toEntity()).toList();
+      final likedMovies = likedMoviesDynamic.map((movie) => MovieModel.fromJson(Map<String, dynamic>.from(movie)).toEntity()).toList();
 
       return Right(likedMovies);
     } on FirebaseException catch (e) {

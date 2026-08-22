@@ -50,8 +50,7 @@ void main() {
     stub(Right(page(const [first])));
   });
 
-  ReviewsCubit build({int? mediaId = 550, MediaType mediaType = MediaType.movie}) =>
-      ReviewsCubit(getReviews, mediaId: mediaId, mediaType: mediaType);
+  ReviewsCubit build({int? mediaId = 550, MediaType mediaType = MediaType.movie}) => ReviewsCubit(getReviews, mediaId: mediaId, mediaType: mediaType);
 
   group('the first page', () {
     test('is asked for as soon as the cubit exists', () async {

@@ -23,8 +23,7 @@ class LoginPage extends StatelessWidget {
     return BlocProvider<LoginCubit>(
       create: (context) => getIt<LoginCubit>(),
       child: BlocListener<LoginCubit, LoginState>(
-        listenWhen: (previous, current) =>
-            current.errorMessage != null && previous.errorMessage != current.errorMessage,
+        listenWhen: (previous, current) => current.errorMessage != null && previous.errorMessage != current.errorMessage,
         listener: (context, state) {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()

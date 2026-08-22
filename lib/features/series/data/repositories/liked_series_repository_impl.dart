@@ -38,9 +38,7 @@ class LikedSeriesRepositoryImpl extends LikedSeriesRepository {
       // An account that has never liked a series has no field at all, which is
       // an empty list rather than a failure.
       final List<dynamic> likedSeriesDynamic = userDoc.data()![_field] ?? const [];
-      final likedSeries = likedSeriesDynamic
-          .map((series) => SeriesModel.fromJson(Map<String, dynamic>.from(series)).toEntity())
-          .toList();
+      final likedSeries = likedSeriesDynamic.map((series) => SeriesModel.fromJson(Map<String, dynamic>.from(series)).toEntity()).toList();
 
       return Right(likedSeries);
     } on FirebaseException catch (e) {

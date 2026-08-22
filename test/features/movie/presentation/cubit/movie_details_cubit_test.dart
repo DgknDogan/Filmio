@@ -59,8 +59,7 @@ void main() {
     blocTest<MovieDetailsCubit, MovieDetailsState>(
       'keeps only titles with a poster',
       build: build,
-      setUp: () => when(() => getSimilar.call(params: any(named: 'params')))
-          .thenAnswer((_) async => const Right([similar, similarWithoutPoster])),
+      setUp: () => when(() => getSimilar.call(params: any(named: 'params'))).thenAnswer((_) async => const Right([similar, similarWithoutPoster])),
       wait: const Duration(milliseconds: 10),
       verify: (cubit) => expect(cubit.state.similars, const SimilarMoviesLoaded([similar])),
     );
@@ -68,8 +67,7 @@ void main() {
     blocTest<MovieDetailsCubit, MovieDetailsState>(
       'a failure is distinguishable from an empty result',
       build: build,
-      setUp: () => when(() => getSimilar.call(params: any(named: 'params')))
-          .thenAnswer((_) async => const Left(NetworkFailure('offline'))),
+      setUp: () => when(() => getSimilar.call(params: any(named: 'params'))).thenAnswer((_) async => const Left(NetworkFailure('offline'))),
       wait: const Duration(milliseconds: 10),
       verify: (cubit) => expect(cubit.state.similars, const SimilarMoviesFailure('offline')),
     );
@@ -87,8 +85,7 @@ void main() {
     blocTest<MovieDetailsCubit, MovieDetailsState>(
       'a failed like leaves the flag alone rather than lying to the user',
       build: build,
-      setUp: () => when(() => like.call(params: any(named: 'params')))
-          .thenAnswer((_) async => const Left(NetworkFailure('offline'))),
+      setUp: () => when(() => like.call(params: any(named: 'params'))).thenAnswer((_) async => const Left(NetworkFailure('offline'))),
       wait: const Duration(milliseconds: 10),
       act: (cubit) => cubit.likeMovie(movie: movie),
       verify: (cubit) => expect(cubit.state.isMovieLiked, isFalse),

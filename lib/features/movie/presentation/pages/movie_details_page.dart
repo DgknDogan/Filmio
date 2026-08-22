@@ -107,9 +107,8 @@ class _LikeButton extends StatelessWidget {
           icon: isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
           label: isLiked ? context.l10n.unlikeAction : context.l10n.likeAction,
           iconColor: context.palette.accentSoft,
-          onPressed: () => isLiked
-              ? context.read<MovieDetailsCubit>().dislikeMovie(movie: movie)
-              : context.read<MovieDetailsCubit>().likeMovie(movie: movie),
+          onPressed: () =>
+              isLiked ? context.read<MovieDetailsCubit>().dislikeMovie(movie: movie) : context.read<MovieDetailsCubit>().likeMovie(movie: movie),
         );
       },
     );
@@ -129,8 +128,7 @@ class _SimilarMovies extends StatelessWidget {
           selector: (state) => state.similars,
           builder: (context, similars) {
             return switch (similars) {
-              SimilarMoviesLoading() =>
-                SizedBox(height: 168.h, child: const Center(child: CircularProgressIndicator())),
+              SimilarMoviesLoading() => SizedBox(height: 168.h, child: const Center(child: CircularProgressIndicator())),
               SimilarMoviesFailure(:final message) => Text(message, style: context.styles.meta),
               SimilarMoviesLoaded(:final movies) when movies.isEmpty => const SizedBox.shrink(),
               SimilarMoviesLoaded(:final movies) => Column(

@@ -109,9 +109,7 @@ class _DiscoverFilterSheetState extends State<DiscoverFilterSheet> {
               _RangeField(
                 label: context.l10n.filtersRating,
                 // The whole scale reads as "any", not as "0 to 10".
-                value: _ratingIsWhole
-                    ? context.l10n.filtersAny
-                    : '${_rating.start.toStringAsFixed(1)} – ${_rating.end.toStringAsFixed(1)}',
+                value: _ratingIsWhole ? context.l10n.filtersAny : '${_rating.start.toStringAsFixed(1)} – ${_rating.end.toStringAsFixed(1)}',
                 child: RangeSlider(
                   values: _rating,
                   min: 0,
@@ -158,16 +156,14 @@ class _Genres extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final genres = isSeries
-        ? [for (final genre in SeriesType.values) (genre.id, genre.label)]
-        : [for (final genre in MovieType.values) (genre.id, genre.label)];
+    final genres =
+        isSeries ? [for (final genre in SeriesType.values) (genre.id, genre.label)] : [for (final genre in MovieType.values) (genre.id, genre.label)];
 
     return Wrap(
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,
       children: [
-        for (final (id, label) in genres)
-          _GenreChip(label: label, isSelected: selected.contains(id), onTap: () => onToggle(id)),
+        for (final (id, label) in genres) _GenreChip(label: label, isSelected: selected.contains(id), onTap: () => onToggle(id)),
       ],
     );
   }

@@ -22,8 +22,7 @@ void main() {
 
   SeriesBloc build() => SeriesBloc(getPopular, getTopRated);
 
-  void stub(
-      {required Either<Failure, List<SeriesEntity>> popular, required Either<Failure, List<SeriesEntity>> topRated}) {
+  void stub({required Either<Failure, List<SeriesEntity>> popular, required Either<Failure, List<SeriesEntity>> topRated}) {
     when(() => getPopular.call()).thenAnswer((_) async => popular);
     when(() => getTopRated.call()).thenAnswer((_) async => topRated);
   }

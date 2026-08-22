@@ -22,8 +22,7 @@ void main() {
 
   MovieBloc build() => MovieBloc(getPopular, getTopRated);
 
-  void stub(
-      {required Either<Failure, List<MovieEntity>> popular, required Either<Failure, List<MovieEntity>> topRated}) {
+  void stub({required Either<Failure, List<MovieEntity>> popular, required Either<Failure, List<MovieEntity>> topRated}) {
     when(() => getPopular.call()).thenAnswer((_) async => popular);
     when(() => getTopRated.call()).thenAnswer((_) async => topRated);
   }

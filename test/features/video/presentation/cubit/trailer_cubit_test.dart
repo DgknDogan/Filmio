@@ -26,8 +26,7 @@ void main() {
     stub(const Right(trailer));
   });
 
-  TrailerCubit build({int? mediaId = 550, MediaType mediaType = MediaType.movie}) =>
-      TrailerCubit(getTrailer, mediaId: mediaId, mediaType: mediaType);
+  TrailerCubit build({int? mediaId = 550, MediaType mediaType = MediaType.movie}) => TrailerCubit(getTrailer, mediaId: mediaId, mediaType: mediaType);
 
   test('asks for the trailer as soon as the cubit exists', () async {
     final cubit = build();

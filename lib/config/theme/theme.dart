@@ -35,8 +35,7 @@ ThemeData _themeOf(AppPalette palette, Brightness brightness) {
       style: ButtonStyle(
         textStyle: WidgetStatePropertyAll(styles.buttonLabel),
         foregroundColor: WidgetStateProperty.resolveWith(
-          (states) =>
-              states.contains(WidgetState.disabled) ? palette.onButton.withValues(alpha: 0.45) : palette.onButton,
+          (states) => states.contains(WidgetState.disabled) ? palette.onButton.withValues(alpha: 0.45) : palette.onButton,
         ),
         // Pressed deepens the wash; disabled drops to 45% of it. Neither
         // swaps the colour for a grey.
@@ -47,9 +46,7 @@ ThemeData _themeOf(AppPalette palette, Brightness brightness) {
         }),
         side: WidgetStateProperty.resolveWith(
           (states) => BorderSide(
-            color: states.contains(WidgetState.disabled)
-                ? palette.buttonBorder.withValues(alpha: 0.45)
-                : palette.buttonBorder,
+            color: states.contains(WidgetState.disabled) ? palette.buttonBorder.withValues(alpha: 0.45) : palette.buttonBorder,
           ),
         ),
         overlayColor: const WidgetStatePropertyAll(Colors.transparent),
@@ -66,8 +63,7 @@ ThemeData _themeOf(AppPalette palette, Brightness brightness) {
       style: ButtonStyle(
         textStyle: WidgetStatePropertyAll(styles.buttonLabel),
         foregroundColor: WidgetStateProperty.resolveWith(
-          (states) =>
-              states.contains(WidgetState.disabled) ? palette.textPrimary.withValues(alpha: 0.45) : palette.textPrimary,
+          (states) => states.contains(WidgetState.disabled) ? palette.textPrimary.withValues(alpha: 0.45) : palette.textPrimary,
         ),
         backgroundColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.pressed) ? palette.textPrimary.withValues(alpha: 0.07) : null,

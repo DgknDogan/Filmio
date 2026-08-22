@@ -33,8 +33,7 @@ void main() {
       );
 
   void stub(List<VideoEntity> videos) {
-    when(() => repository.getVideos(mediaId: any(named: 'mediaId'), mediaType: any(named: 'mediaType')))
-        .thenAnswer((_) async => Right(videos));
+    when(() => repository.getVideos(mediaId: any(named: 'mediaId'), mediaType: any(named: 'mediaType'))).thenAnswer((_) async => Right(videos));
   }
 
   Future<VideoEntity?> pick() async {
@@ -124,10 +123,7 @@ void main() {
     });
 
     test('a teaser stands in when there is no trailer', () async {
-      stub([
-        video(key: 'clip', size: 1080, type: VideoType.other),
-        video(key: 'teaser', size: 480, type: VideoType.teaser)
-      ]);
+      stub([video(key: 'clip', size: 1080, type: VideoType.other), video(key: 'teaser', size: 480, type: VideoType.teaser)]);
 
       expect((await pick())?.key, 'teaser');
     });

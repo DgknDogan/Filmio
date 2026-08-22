@@ -22,8 +22,7 @@ class RegisterPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => RegisterCubit(getIt()),
       child: BlocListener<RegisterCubit, RegisterState>(
-        listenWhen: (previous, current) =>
-            current.errorMessage != null && previous.errorMessage != current.errorMessage,
+        listenWhen: (previous, current) => current.errorMessage != null && previous.errorMessage != current.errorMessage,
         listener: (context, state) {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()

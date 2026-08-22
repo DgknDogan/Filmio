@@ -85,8 +85,7 @@ void main() {
   });
 
   testWidgets('a failure shows the message and offers a retry', (tester) async {
-    when(() => searchMovies.call(params: any(named: 'params')))
-        .thenAnswer((_) async => const Left(NetworkFailure('No internet connection.')));
+    when(() => searchMovies.call(params: any(named: 'params'))).thenAnswer((_) async => const Left(NetworkFailure('No internet connection.')));
 
     await pumpPage(tester);
     await type(tester, 'matrix');
@@ -96,8 +95,7 @@ void main() {
   });
 
   testWidgets('the retry button re-runs the same query without waiting out the debounce', (tester) async {
-    when(() => searchMovies.call(params: any(named: 'params')))
-        .thenAnswer((_) async => const Left(NetworkFailure('No internet connection.')));
+    when(() => searchMovies.call(params: any(named: 'params'))).thenAnswer((_) async => const Left(NetworkFailure('No internet connection.')));
 
     await pumpPage(tester);
     await type(tester, 'matrix');

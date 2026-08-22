@@ -128,8 +128,7 @@ class _SimilarSeries extends StatelessWidget {
           selector: (state) => state.similars,
           builder: (context, similars) {
             return switch (similars) {
-              SimilarSeriesLoading() =>
-                SizedBox(height: 168.h, child: const Center(child: CircularProgressIndicator())),
+              SimilarSeriesLoading() => SizedBox(height: 168.h, child: const Center(child: CircularProgressIndicator())),
               SimilarSeriesFailure(:final message) => Text(message, style: context.styles.meta),
               SimilarSeriesLoaded(:final series) when series.isEmpty => const SizedBox.shrink(),
               SimilarSeriesLoaded(:final series) => Column(
