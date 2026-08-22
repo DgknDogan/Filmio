@@ -3,16 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../config/routes/app_router.gr.dart';
 import '../../../../core/custom/app_error_view.dart';
-import '../../../../core/custom/poster_card.dart';
 import '../../../../core/custom/search_results_grid.dart';
 import '../../../../core/extensions/context_extension.dart';
-import '../../../../core/extensions/string_extension.dart';
 import '../../../../core/utils/hero_tags.dart';
 import '../../../../injection_container.dart';
-import '../../domain/entities/series_entity.dart';
 import '../bloc/series_search_bloc.dart';
+import '../widgets/series_poster_card.dart';
 
 @RoutePage()
 class SeriesSearchPage extends StatefulWidget {
@@ -98,9 +95,9 @@ class _SearchView extends StatelessWidget {
                           // name — a reboot, a local remake — so the grid
                           // position is what tells the two posters apart.
                           for (final (index, entry) in series.indexed)
-                            _Result(
+                            SeriesPosterCard(
                               series: entry,
-                              tag: posterHeroTag('series-search', index: index, id: entry.id),
+                              heroTag: posterHeroTag('series-search', index: index, id: entry.id),
                             ),
                         ],
                       ),
@@ -111,26 +108,6 @@ class _SearchView extends StatelessWidget {
           },
         ),
       ),
-    );
-  }
-}
-
-class _Result extends StatelessWidget {
-  final SeriesEntity series;
-  final String tag;
-
-  const _Result({required this.series, required this.tag});
-
-  @override
-  Widget build(BuildContext context) {
-    final meta = [series.firstAirDate?.year, series.voteAverage?.toStringAsFixed(1)].nonNulls.join(' · ');
-
-    return PosterCard(
-      imageUrl: series.posterPath?.coverImage ?? '',
-      title: series.name ?? '',
-      meta: meta,
-      heroTag: tag,
-      onTap: () => context.router.push(SeriesDetailsRoute(series: series, heroTag: tag)),
     );
   }
 }

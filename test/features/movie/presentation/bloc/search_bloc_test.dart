@@ -27,8 +27,8 @@ void main() {
     blocTest<SearchBloc, SearchState>(
       'a burst of keystrokes becomes one request, for the last of them',
       build: build,
-      setUp: () => when(() => useCase.call(params: any(named: 'params')))
-          .thenAnswer((_) async => const Right([withPoster])),
+      setUp: () =>
+          when(() => useCase.call(params: any(named: 'params'))).thenAnswer((_) async => const Right([withPoster])),
       act: (bloc) async {
         // "matr" typed quickly — four events, well inside the window.
         for (final query in ['m', 'ma', 'mat', 'matr']) {
@@ -48,8 +48,8 @@ void main() {
     blocTest<SearchBloc, SearchState>(
       'typing that pauses long enough searches twice',
       build: build,
-      setUp: () => when(() => useCase.call(params: any(named: 'params')))
-          .thenAnswer((_) async => const Right([withPoster])),
+      setUp: () =>
+          when(() => useCase.call(params: any(named: 'params'))).thenAnswer((_) async => const Right([withPoster])),
       act: (bloc) async {
         bloc.add(const SearchQueryChanged('first'));
         await Future<void>.delayed(settle);
@@ -125,8 +125,8 @@ void main() {
   blocTest<SearchBloc, SearchState>(
     'a retry skips the debounce — the reader already waited once',
     build: build,
-    setUp: () => when(() => useCase.call(params: any(named: 'params')))
-        .thenAnswer((_) async => const Right([withPoster])),
+    setUp: () =>
+        when(() => useCase.call(params: any(named: 'params'))).thenAnswer((_) async => const Right([withPoster])),
     act: (bloc) => bloc.add(const SearchRetried('matrix')),
     // Far shorter than the debounce: if the retry went through the transformer
     // nothing would have happened yet.

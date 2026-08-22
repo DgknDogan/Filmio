@@ -3,18 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../config/routes/app_router.gr.dart';
 import '../../../../config/theme/app_spacing.dart';
 import '../../../../core/custom/circle_icon_button.dart';
 import '../../../../core/custom/details_scaffold.dart';
-import '../../../../core/custom/poster_card.dart';
 import '../../../../core/custom/section_header.dart';
 import '../../../../core/extensions/context_extension.dart';
+import '../../../../core/enums/media_type.dart';
 import '../../../../core/extensions/string_extension.dart';
 import '../../../../core/utils/hero_tags.dart';
 import '../../../../injection_container.dart';
+import '../../../review/presentation/cubit/reviews_cubit.dart';
+import '../../../review/presentation/widgets/reviews_section.dart';
+import '../../../video/presentation/cubit/trailer_cubit.dart';
+import '../../../video/presentation/widgets/trailer_section.dart';
 import '../../domain/entities/movie.dart';
 import '../cubit/movie_details_cubit.dart';
+import '../widgets/movie_poster_card.dart';
 
 @RoutePage()
 class MovieDetailsPage extends StatelessWidget {
@@ -25,14 +29,27 @@ class MovieDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => MovieDetailsCubit(
-        getIt(),
-        getIt(),
-        movie,
-        getIt(),
-        getIt(),
-      ),
+    // Both cubits are stood up here rather than inside the widgets that read
+    // them: the reviews block is one of several things hung off the details
+    // sheet, and the page is what knows which film it is showing.
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => MovieDetailsCubit(
+            getIt(),
+            getIt(),
+            movie,
+            getIt(),
+            getIt(),
+          ),
+        ),
+        BlocProvider(
+          create: (context) => ReviewsCubit(getIt(), mediaId: movie.id, mediaType: MediaType.movie),
+        ),
+        BlocProvider(
+          create: (context) => TrailerCubit(getIt(), mediaId: movie.id, mediaType: MediaType.movie),
+        ),
+      ],
       child: _DetailsView(
         movie: movie,
         heroTag: heroTag,
@@ -51,8 +68,10 @@ class _DetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final backdropUrl = movie.backdropPath?.coverImage ?? movie.posterPath?.coverImage ?? '';
+
     return DetailsScaffold(
-      backdropUrl: movie.backdropPath?.coverImage ?? movie.posterPath?.coverImage ?? '',
+      backdropUrl: backdropUrl,
       posterUrl: movie.posterPath?.coverImage ?? '',
       title: movie.title ?? '',
       heroTag: heroTag,
@@ -62,7 +81,13 @@ class _DetailsView extends StatelessWidget {
       genreIds: movie.genreIds,
       overview: movie.overview,
       action: _LikeButton(movie: movie),
-      extras: const [_SimilarMovies()],
+      extras: [
+        // The trailer sits directly under the synopsis: it is the one thing on
+        // this page you can actually watch.
+        TrailerSection(fallbackImageUrl: backdropUrl),
+        const _SimilarMovies(),
+        const ReviewsSection(),
+      ],
     );
   }
 }
@@ -126,20 +151,10 @@ class _SimilarMovies extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final similar = movies[index];
                           final tag = posterHeroTag('movie-similar', index: index, id: similar.id);
-                          final meta = [
-                            similar.releaseDate?.year,
-                            similar.voteAverage?.toStringAsFixed(1),
-                          ].nonNulls.join(' · ');
 
                           return SizedBox(
                             width: 96.w,
-                            child: PosterCard(
-                              imageUrl: similar.posterPath?.coverImage ?? '',
-                              title: similar.title ?? '',
-                              meta: meta,
-                              heroTag: tag,
-                              onTap: () => context.router.push(MovieDetailsRoute(movie: similar, heroTag: tag)),
-                            ),
+                            child: MoviePosterCard(movie: similar, heroTag: tag),
                           );
                         },
                       ),

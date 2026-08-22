@@ -1,6 +1,11 @@
 import 'package:fpdart/fpdart.dart';
 
+import '../../../../core/enums/discover_sort.dart';
+import '../../../../core/enums/media_type.dart';
+import '../../../../core/models/discover_filters.dart';
+import '../../../../core/models/paginated_list.dart';
 import '../../../../core/network/api_guard.dart';
+import '../../../../core/network/discover_query.dart';
 import '../../../../core/resource/failure.dart';
 import '../../domain/entities/movie.dart';
 import '../../domain/repositories/movie_repository.dart';
@@ -49,6 +54,44 @@ class MovieRepositoryImpl extends MovieRepository {
     return guardApiCall(
       () => _movieApiService.getSimilarMovies(movieId: movieId, language: _language, page: _firstPage),
       _toEntities,
+    );
+  }
+
+  @override
+  Future<Either<Failure, PaginatedList<MovieEntity>>> discoverMovies({
+    required DiscoverFilters filters,
+    required DiscoverSort sort,
+    required int page,
+  }) {
+    return guardApiCall<PaginatedList<MovieEntity>, MovieApiResponse>(
+      () => _movieApiService.discoverMovies(
+        sortBy: DiscoverQuery.sortBy(sort),
+        withGenres: DiscoverQuery.genres(filters),
+        voteAverageGte: filters.minRating,
+        voteAverageLte: filters.maxRating,
+        voteCountGte: DiscoverQuery.voteCountFloor(sort, MediaType.movie),
+        releaseDateGte: DiscoverQuery.fromYear(filters.minYear),
+        releaseDateLte: DiscoverQuery.toYear(filters.maxYear),
+        includeAdult: false,
+        language: _language,
+        page: page,
+      ),
+      (body) => _toPage(body, page),
+    );
+  }
+
+  /// [requestedPage] stands in when TMDB leaves the envelope's numbers out: a
+  /// page whose number defaulted to zero would read as "there is more" for
+  /// ever, and the grid would never stop asking.
+  static PaginatedList<MovieEntity> _toPage(MovieApiResponse body, int requestedPage) {
+    final movies = _toEntities(body);
+    final page = body.page ?? requestedPage;
+
+    return PaginatedList(
+      items: movies,
+      page: page,
+      totalPages: body.totalPages ?? page,
+      totalResults: body.totalResults ?? movies.length,
     );
   }
 

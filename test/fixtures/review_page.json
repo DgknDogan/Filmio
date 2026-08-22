@@ -1,0 +1,36 @@
+{
+  "id": 550,
+  "page": 1,
+  "results": [
+    {
+      "author": "Cat Ellington",
+      "author_details": {
+        "name": "Cat Ellington",
+        "username": "CatEllington",
+        "avatar_path": "/xNs0Iz3JBOgOJVUOZOF6dPX5Cxg.jpg",
+        "rating": 8.0
+      },
+      "content": "A masterclass in restraint.",
+      "created_at": "2021-06-25T14:31:00.123Z",
+      "id": "60d5f1a4b0a1e5002dabc123",
+      "updated_at": "2021-06-26T09:02:11.456Z",
+      "url": "https://www.themoviedb.org/review/60d5f1a4b0a1e5002dabc123"
+    },
+    {
+      "author": "gravatarUser",
+      "author_details": {
+        "name": "",
+        "username": "gravatarUser",
+        "avatar_path": "/https://secure.gravatar.com/avatar/abc123.jpg",
+        "rating": null
+      },
+      "content": "No score, plenty of opinion.",
+      "created_at": "2022-01-02T00:00:00.000Z",
+      "id": "61d0f1a4b0a1e5002dabc999",
+      "updated_at": "2022-01-02T00:00:00.000Z",
+      "url": "https://www.themoviedb.org/review/61d0f1a4b0a1e5002dabc999"
+    }
+  ],
+  "total_pages": 3,
+  "total_results": 42
+}

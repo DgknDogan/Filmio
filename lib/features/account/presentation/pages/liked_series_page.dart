@@ -128,7 +128,6 @@ class _LikedSeriesRow extends StatelessWidget {
               child: PosterCard(
                 imageUrl: series.posterPath?.coverImage ?? '',
                 title: series.name ?? '',
-                showCaption: false,
                 heroTag: tag,
               ),
             ),

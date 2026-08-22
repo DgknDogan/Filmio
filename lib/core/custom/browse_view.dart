@@ -19,7 +19,7 @@ double get _fieldHeight => searchFieldHeight;
 
 /// Room under the last row. The page has to be able to scroll a whole block
 /// past the top for the snap to have anywhere to land.
-double get _foot => 500.h;
+double get _foot => 100.h;
 
 /// How near an end the page has to be let go for that end to take it.
 ///
@@ -52,7 +52,18 @@ class BrowseRow {
   /// One `PosterCard` per title.
   final List<Widget> posters;
 
-  const BrowseRow({required this.title, required this.storageKey, required this.posters});
+  /// The way out of the row, at the end of its heading — the whole catalogue
+  /// the row is the head of. Omitted, the heading carries nothing.
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  const BrowseRow({
+    required this.title,
+    required this.storageKey,
+    required this.posters,
+    this.actionLabel,
+    this.onAction,
+  });
 }
 
 /// A tab that opens on one title's artwork and continues into rows of posters.
@@ -298,6 +309,8 @@ class _BrowseViewState extends State<BrowseView> with SingleTickerProviderStateM
                         title: row.title,
                         storageKey: row.storageKey,
                         posters: row.posters,
+                        actionLabel: row.actionLabel,
+                        onAction: row.onAction,
                       ),
                     ],
                     AppGap.vertical(_foot),

@@ -131,6 +131,57 @@ class _MovieApiService implements MovieApiService {
   }
 
   @override
+  Future<HttpResponse<MovieApiResponse>> discoverMovies({
+    String? sortBy,
+    String? withGenres,
+    double? voteAverageGte,
+    double? voteAverageLte,
+    int? voteCountGte,
+    String? releaseDateGte,
+    String? releaseDateLte,
+    bool? includeAdult,
+    String? language,
+    int? page,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'sort_by': sortBy,
+      r'with_genres': withGenres,
+      r'vote_average.gte': voteAverageGte,
+      r'vote_average.lte': voteAverageLte,
+      r'vote_count.gte': voteCountGte,
+      r'primary_release_date.gte': releaseDateGte,
+      r'primary_release_date.lte': releaseDateLte,
+      r'include_adult': includeAdult,
+      r'language': language,
+      r'page': page,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<HttpResponse<MovieApiResponse>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/discover/movie',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late MovieApiResponse _value;
+    try {
+      _value = MovieApiResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
+  }
+
+  @override
   Future<HttpResponse<MovieApiResponse>> getSimilarMovies({
     required int movieId,
     String? language,

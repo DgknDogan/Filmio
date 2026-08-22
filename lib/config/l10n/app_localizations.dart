@@ -331,6 +331,132 @@ abstract class AppLocalizations {
   /// **'{count} votes'**
   String detailsVotes(String count);
 
+  /// Opens the full, filterable list for a home row
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get seeAll;
+
+  /// Heading of the filter sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filtersTitle;
+
+  /// Resets every filter in the sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get filtersClear;
+
+  /// Applies the chosen filters and closes the sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get filtersApply;
+
+  /// Heading of the genre chips in the filter sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Genre'**
+  String get filtersGenre;
+
+  /// Heading of the vote average range in the filter sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get filtersRating;
+
+  /// Heading of the release year range in the filter sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get filtersYear;
+
+  /// Value shown for a range left at its full width, i.e. not filtering
+  ///
+  /// In en, this message translates to:
+  /// **'Any'**
+  String get filtersAny;
+
+  /// The control that opens the filter sheet, with how many filters are set
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Filter} other{Filter ({count})}}'**
+  String filtersAction(int count);
+
+  /// How many titles the current filters match, across every page
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No titles} =1{1 title} other{{count} titles}}'**
+  String browseResultCount(int count);
+
+  /// Shown when a filtered browse returns no titles
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches these filters.'**
+  String get browseEmpty;
+
+  /// Heading of the trailer block on a details screen
+  ///
+  /// In en, this message translates to:
+  /// **'Trailer'**
+  String get trailerTitle;
+
+  /// Opens the trailer player
+  ///
+  /// In en, this message translates to:
+  /// **'Play trailer'**
+  String get trailerPlay;
+
+  /// Shown when the player cannot open the video the title points at
+  ///
+  /// In en, this message translates to:
+  /// **'The trailer could not be loaded.'**
+  String get trailerLoadFailed;
+
+  /// Shown when a video is on a host other than YouTube or Vimeo
+  ///
+  /// In en, this message translates to:
+  /// **'This trailer is hosted somewhere the app cannot play.'**
+  String get trailerUnsupported;
+
+  /// Heading of the reviews block on a details screen
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get reviewsTitle;
+
+  /// How many reviews a title has, across every page
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No reviews yet} =1{1 review} other{{count} reviews}}'**
+  String reviewsCount(int count);
+
+  /// Fetches the next page of reviews
+  ///
+  /// In en, this message translates to:
+  /// **'Load more reviews'**
+  String get reviewsLoadMore;
+
+  /// Opens a review that is cut off after a few lines
+  ///
+  /// In en, this message translates to:
+  /// **'Read more'**
+  String get reviewsReadMore;
+
+  /// Collapses a review back to a few lines
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get reviewsShowLess;
+
+  /// Credit for a review whose author TMDB does not name
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous'**
+  String get reviewsUnknownAuthor;
+
   /// Heading of the similar series row on a series' details screen
   ///
   /// In en, this message translates to:

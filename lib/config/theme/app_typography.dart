@@ -181,19 +181,6 @@ class AppTextStyles {
   /// The label inside a genre chip.
   TextStyle get tag => _font(fontSize: 11.sp, color: _palette.onTagNeutral);
 
-  /// The title and the meta line printed over a poster thumbnail.
-  TextStyle get posterTitle => _font(
-        fontSize: 10.sp,
-        color: _palette.onImage,
-        fontWeight: FontWeight.w500,
-        height: 1.2,
-      );
-  TextStyle get posterMeta => _font(
-        fontSize: 8.sp,
-        color: _palette.onImageMuted,
-        letterSpacing: 8.sp * 0.08,
-      );
-
   /// The title of a film in a list row.
   TextStyle get rowTitle => _font(
         fontSize: 15.sp,

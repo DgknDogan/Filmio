@@ -107,7 +107,6 @@ class FeaturedHero extends StatelessWidget {
                       child: PosterCard(
                         imageUrl: posterUrl,
                         title: title,
-                        showCaption: false,
                         heroTag: heroTag,
                       ),
                     ),

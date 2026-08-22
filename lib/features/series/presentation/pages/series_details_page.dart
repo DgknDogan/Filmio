@@ -3,18 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../config/routes/app_router.gr.dart';
 import '../../../../config/theme/app_spacing.dart';
 import '../../../../core/custom/circle_icon_button.dart';
 import '../../../../core/custom/details_scaffold.dart';
-import '../../../../core/custom/poster_card.dart';
 import '../../../../core/custom/section_header.dart';
 import '../../../../core/extensions/context_extension.dart';
+import '../../../../core/enums/media_type.dart';
 import '../../../../core/extensions/string_extension.dart';
 import '../../../../core/utils/hero_tags.dart';
 import '../../../../injection_container.dart';
+import '../../../review/presentation/cubit/reviews_cubit.dart';
+import '../../../review/presentation/widgets/reviews_section.dart';
+import '../../../video/presentation/cubit/trailer_cubit.dart';
+import '../../../video/presentation/widgets/trailer_section.dart';
 import '../../domain/entities/series_entity.dart';
 import '../cubit/series_details_cubit.dart';
+import '../widgets/series_poster_card.dart';
 
 @RoutePage()
 class SeriesDetailsPage extends StatelessWidget {
@@ -25,14 +29,27 @@ class SeriesDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => SeriesDetailsCubit(
-        getIt(),
-        getIt(),
-        series,
-        getIt(),
-        getIt(),
-      ),
+    // Both cubits are stood up here rather than inside the widgets that read
+    // them: the reviews block is one of several things hung off the details
+    // sheet, and the page is what knows which series it is showing.
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => SeriesDetailsCubit(
+            getIt(),
+            getIt(),
+            series,
+            getIt(),
+            getIt(),
+          ),
+        ),
+        BlocProvider(
+          create: (context) => ReviewsCubit(getIt(), mediaId: series.id, mediaType: MediaType.series),
+        ),
+        BlocProvider(
+          create: (context) => TrailerCubit(getIt(), mediaId: series.id, mediaType: MediaType.series),
+        ),
+      ],
       child: _DetailsView(series: series, heroTag: heroTag),
     );
   }
@@ -49,8 +66,10 @@ class _DetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final backdropUrl = series.backdropPath?.coverImage ?? series.posterPath?.coverImage ?? '';
+
     return DetailsScaffold(
-      backdropUrl: series.backdropPath?.coverImage ?? series.posterPath?.coverImage ?? '',
+      backdropUrl: backdropUrl,
       posterUrl: series.posterPath?.coverImage ?? '',
       title: series.name ?? '',
       heroTag: heroTag,
@@ -61,7 +80,13 @@ class _DetailsView extends StatelessWidget {
       isSeries: true,
       overview: series.overview,
       action: _LikeButton(series: series),
-      extras: const [_SimilarSeries()],
+      extras: [
+        // The trailer sits directly under the synopsis: it is the one thing on
+        // this page you can actually watch.
+        TrailerSection(fallbackImageUrl: backdropUrl),
+        const _SimilarSeries(),
+        const ReviewsSection(),
+      ],
     );
   }
 }
@@ -125,20 +150,9 @@ class _SimilarSeries extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final similar = series[index];
                           final tag = posterHeroTag('series-similar', index: index, id: similar.id);
-                          final meta = [
-                            similar.firstAirDate?.year,
-                            similar.voteAverage?.toStringAsFixed(1),
-                          ].nonNulls.join(' · ');
-
                           return SizedBox(
                             width: 96.w,
-                            child: PosterCard(
-                              imageUrl: similar.posterPath?.coverImage ?? '',
-                              title: similar.name ?? '',
-                              meta: meta,
-                              heroTag: tag,
-                              onTap: () => context.router.push(SeriesDetailsRoute(series: similar, heroTag: tag)),
-                            ),
+                            child: SeriesPosterCard(series: similar, heroTag: tag),
                           );
                         },
                       ),

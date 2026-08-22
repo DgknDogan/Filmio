@@ -1,11 +1,13 @@
 import '../extensions/string_extension.dart';
 
+/// TMDB's television genres. They overlap the film list without matching it —
+/// television has its own ids, and its own genres.
 enum SeriesType {
   action(id: 10759),
   animation(id: 16),
-  comedy(id: 16),
+  comedy(id: 35),
   crime(id: 80),
-  documentary(id: 80),
+  documentary(id: 99),
   drama(id: 18),
   family(id: 10751),
   kids(id: 10762),
@@ -22,7 +24,10 @@ enum SeriesType {
 
   const SeriesType({required this.id});
 
+  /// What the reader sees: `scienceFiction` as "Science Fiction".
+  String get label => name.spacedWords;
+
   static String getEnumById({required int id}) {
-    return SeriesType.values.firstWhere((element) => element.id == id).name.capitalFirstLetter;
+    return SeriesType.values.firstWhere((element) => element.id == id).label;
   }
 }

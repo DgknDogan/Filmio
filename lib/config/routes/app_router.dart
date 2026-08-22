@@ -64,10 +64,20 @@ class AppRouter extends RootStackRouter {
           page: SeriesSearchRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,
         ),
-        CustomRoute(
+        AutoRoute(
           page: SettingsRoute.page,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-              slideLeftTransition(context, animation, secondaryAnimation, child),
+        ),
+        CustomRoute(
+          page: TrailerRoute.page,
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+        ),
+        CustomRoute(
+          page: MovieDiscoverRoute.page,
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+        ),
+        CustomRoute(
+          page: SeriesDiscoverRoute.page,
+          transitionsBuilder: TransitionsBuilders.fadeIn,
         )
       ];
 }

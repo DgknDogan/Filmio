@@ -3,16 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../config/routes/app_router.gr.dart';
 import '../../../../core/custom/app_error_view.dart';
-import '../../../../core/custom/poster_card.dart';
 import '../../../../core/custom/search_results_grid.dart';
 import '../../../../core/extensions/context_extension.dart';
-import '../../../../core/extensions/string_extension.dart';
 import '../../../../core/utils/hero_tags.dart';
 import '../../../../injection_container.dart';
-import '../../domain/entities/movie.dart';
 import '../bloc/search_bloc.dart';
+import '../widgets/movie_poster_card.dart';
 
 @RoutePage()
 class MovieSearchPage extends StatefulWidget {
@@ -101,9 +98,9 @@ class _SearchView extends StatelessWidget {
                           // — a remake, a re-release — so the grid position is
                           // what tells the two posters apart.
                           for (final (index, movie) in movies.indexed)
-                            _Result(
+                            MoviePosterCard(
                               movie: movie,
-                              tag: posterHeroTag('movie-search', index: index, id: movie.id),
+                              heroTag: posterHeroTag('movie-search', index: index, id: movie.id),
                             ),
                         ],
                       ),
@@ -114,26 +111,6 @@ class _SearchView extends StatelessWidget {
           },
         ),
       ),
-    );
-  }
-}
-
-class _Result extends StatelessWidget {
-  final MovieEntity movie;
-  final String tag;
-
-  const _Result({required this.movie, required this.tag});
-
-  @override
-  Widget build(BuildContext context) {
-    final meta = [movie.releaseDate?.year, movie.voteAverage?.toStringAsFixed(1)].nonNulls.join(' · ');
-
-    return PosterCard(
-      imageUrl: movie.posterPath?.coverImage ?? '',
-      title: movie.title ?? '',
-      meta: meta,
-      heroTag: tag,
-      onTap: () => context.router.push(MovieDetailsRoute(movie: movie, heroTag: tag)),
     );
   }
 }

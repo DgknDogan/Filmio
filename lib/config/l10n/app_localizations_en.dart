@@ -131,6 +131,95 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get seeAll => 'All';
+
+  @override
+  String get filtersTitle => 'Filters';
+
+  @override
+  String get filtersClear => 'Clear';
+
+  @override
+  String get filtersApply => 'Apply';
+
+  @override
+  String get filtersGenre => 'Genre';
+
+  @override
+  String get filtersRating => 'Rating';
+
+  @override
+  String get filtersYear => 'Year';
+
+  @override
+  String get filtersAny => 'Any';
+
+  @override
+  String filtersAction(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Filter ($count)',
+      zero: 'Filter',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browseResultCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count titles',
+      one: '1 title',
+      zero: 'No titles',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browseEmpty => 'Nothing matches these filters.';
+
+  @override
+  String get trailerTitle => 'Trailer';
+
+  @override
+  String get trailerPlay => 'Play trailer';
+
+  @override
+  String get trailerLoadFailed => 'The trailer could not be loaded.';
+
+  @override
+  String get trailerUnsupported => 'This trailer is hosted somewhere the app cannot play.';
+
+  @override
+  String get reviewsTitle => 'Reviews';
+
+  @override
+  String reviewsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reviews',
+      one: '1 review',
+      zero: 'No reviews yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewsLoadMore => 'Load more reviews';
+
+  @override
+  String get reviewsReadMore => 'Read more';
+
+  @override
+  String get reviewsShowLess => 'Show less';
+
+  @override
+  String get reviewsUnknownAuthor => 'Anonymous';
+
+  @override
   String get similarSeries => 'Similar series';
 
   @override

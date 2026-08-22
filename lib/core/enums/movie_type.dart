@@ -25,7 +25,10 @@ enum MovieType {
 
   const MovieType({required this.id});
 
+  /// What the reader sees: `scienceFiction` as "Science Fiction".
+  String get label => name.spacedWords;
+
   static String getEnumById({required int id}) {
-    return MovieType.values.firstWhere((element) => element.id == id).name.capitalFirstLetter;
+    return MovieType.values.firstWhere((element) => element.id == id).label;
   }
 }

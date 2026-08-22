@@ -138,13 +138,4 @@ class AppDecorations {
           stops: const [0, 0.78, 1],
         ),
       );
-
-  /// The same treatment on a poster thumbnail, behind its caption.
-  BoxDecoration get posterCaptionScrim => BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: [_palette.captionScrim, _palette.captionScrim.withValues(alpha: 0)],
-        ),
-      );
 }

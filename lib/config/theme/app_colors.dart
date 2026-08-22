@@ -45,10 +45,6 @@ class AppPalette {
   /// there is no lighter page for an edge to read against.
   final Color shadow;
 
-  /// The scrim under a poster's caption. Dark in both brightnesses, because
-  /// the artwork it sits on does not change.
-  final Color captionScrim;
-
   /// Genre chips. The first genre takes the accent pair, the rest the neutral
   /// one — which is how the system tells a primary label from a secondary.
   final Color tagAccentBackground;
@@ -114,6 +110,11 @@ class AppPalette {
   /// Behind the profile avatar while it loads.
   final Color avatarBackground;
 
+  /// The ground a video is played on. Near-black in both brightnesses: what
+  /// sits on it is the picture, and a light page around a playing trailer
+  /// would be read as part of the video's frame.
+  final Color videoStage;
+
   /// A message that floats over the page. Deliberately the opposite of
   /// [surface] in light, so it does not vanish into the page behind it.
   final Color snackBarBackground;
@@ -137,7 +138,6 @@ class AppPalette {
     required this.divider,
     required this.sheet,
     required this.shadow,
-    required this.captionScrim,
     required this.tagAccentBackground,
     required this.onTagAccent,
     required this.tagNeutralBackground,
@@ -164,6 +164,7 @@ class AppPalette {
     required this.card,
     required this.onCard,
     required this.avatarBackground,
+    required this.videoStage,
     required this.snackBarBackground,
     required this.onSnackBar,
     required this.inputBorder,
@@ -186,7 +187,6 @@ class AppPalette {
     divider: Color(0x141B1C24),
     sheet: Colors.white,
     shadow: Color(0x33000000),
-    captionScrim: Color(0xf00f1019),
     tagAccentBackground: Color(0xffE7E5FE),
     onTagAccent: Color(0xff3B3470),
     tagNeutralBackground: Color(0xffEDEDF2),
@@ -214,6 +214,7 @@ class AppPalette {
     card: Colors.white,
     onCard: Colors.black,
     avatarBackground: Color(0xff2a2a2a),
+    videoStage: Color(0xff0f1019),
     snackBarBackground: Color(0xff232532),
     onSnackBar: Color(0xffe9e9ed),
     inputBorder: Color(0xffE0E0E8),
@@ -233,7 +234,6 @@ class AppPalette {
     divider: Color(0x17e9e9ed),
     sheet: Color(0xff1c1e2b),
     shadow: Color(0xcc000000),
-    captionScrim: Color(0xf00f1019),
     // accent-800 / accent-100 and neutral-800 / neutral-100.
     tagAccentBackground: Color(0xff423a6a),
     onTagAccent: Color(0xfff5f4ff),
@@ -270,6 +270,7 @@ class AppPalette {
     card: Colors.white,
     onCard: Colors.black,
     avatarBackground: Color(0xff2a2a2a),
+    videoStage: Color(0xff0f1019),
     snackBarBackground: Color(0xff232532),
     onSnackBar: Color(0xffe9e9ed),
     // neutral-800: the hairline the system uses for a field edge.

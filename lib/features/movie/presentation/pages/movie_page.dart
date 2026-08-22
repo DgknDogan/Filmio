@@ -6,13 +6,14 @@ import '../../../../config/routes/app_router.gr.dart';
 import '../../../../core/custom/app_error_view.dart';
 import '../../../../core/custom/browse_view.dart';
 import '../../../../core/custom/featured_hero.dart';
-import '../../../../core/custom/poster_card.dart';
+import '../../../../core/enums/discover_sort.dart';
 import '../../../../core/extensions/context_extension.dart';
 import '../../../../core/extensions/genre_extension.dart';
 import '../../../../core/extensions/string_extension.dart';
 import '../../../../core/utils/hero_tags.dart';
 import '../../domain/entities/movie.dart';
 import '../bloc/movie_bloc.dart';
+import '../widgets/movie_poster_card.dart';
 
 /// The featured title's poster can also appear in a row further down, so its
 /// tag is the banner's own rather than the title's.
@@ -68,21 +69,30 @@ class _Content extends StatelessWidget {
           title: context.l10n.moviesPopular,
           storageKey: const PageStorageKey('popular_movies'),
           posters: _posters(state.popularFilmsList, 'movies-popular'),
+          actionLabel: context.l10n.seeAll,
+          onAction: () => _browseAll(context, context.l10n.moviesPopular, DiscoverSort.popularity),
         ),
         BrowseRow(
           title: context.l10n.moviesTop,
           storageKey: const PageStorageKey('top_movies'),
           posters: _posters(state.topFilmsList, 'movies-top'),
+          actionLabel: context.l10n.seeAll,
+          onAction: () => _browseAll(context, context.l10n.moviesTop, DiscoverSort.topRated),
         ),
       ],
     );
+  }
+
+  /// The whole catalogue the row is the head of, in the row's own order.
+  void _browseAll(BuildContext context, String title, DiscoverSort sort) {
+    context.router.push(MovieDiscoverRoute(title: title, sort: sort));
   }
 
   /// The two rows overlap — a film can be both popular and top rated — so each
   /// row scopes its own tags rather than naming the film.
   List<Widget> _posters(List<MovieEntity> movies, String scope) => [
         for (final (index, movie) in movies.indexed)
-          _MoviePoster(movie: movie, tag: posterHeroTag(scope, index: index, id: movie.id)),
+          MoviePosterCard(movie: movie, heroTag: posterHeroTag(scope, index: index, id: movie.id)),
       ];
 }
 
@@ -107,26 +117,6 @@ class _Hero extends StatelessWidget {
       onAction: () => context.router.push(
         MovieDetailsRoute(movie: movie, heroTag: _featuredHeroTag),
       ),
-    );
-  }
-}
-
-class _MoviePoster extends StatelessWidget {
-  final MovieEntity movie;
-  final String tag;
-
-  const _MoviePoster({required this.movie, required this.tag});
-
-  @override
-  Widget build(BuildContext context) {
-    final meta = [movie.releaseDate?.year, movie.voteAverage?.toStringAsFixed(1)].nonNulls.join(' · ');
-
-    return PosterCard(
-      imageUrl: movie.posterPath?.coverImage ?? '',
-      title: movie.title ?? '',
-      meta: meta,
-      heroTag: tag,
-      onTap: () => context.router.push(MovieDetailsRoute(movie: movie, heroTag: tag)),
     );
   }
 }

@@ -236,7 +236,6 @@ class _Header extends StatelessWidget {
             child: PosterCard(
               imageUrl: details.posterUrl,
               title: details.title,
-              showCaption: false,
               heroTag: details.heroTag,
             ),
           ),

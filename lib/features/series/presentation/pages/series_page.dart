@@ -6,13 +6,14 @@ import '../../../../config/routes/app_router.gr.dart';
 import '../../../../core/custom/app_error_view.dart';
 import '../../../../core/custom/browse_view.dart';
 import '../../../../core/custom/featured_hero.dart';
-import '../../../../core/custom/poster_card.dart';
+import '../../../../core/enums/discover_sort.dart';
 import '../../../../core/extensions/context_extension.dart';
 import '../../../../core/extensions/genre_extension.dart';
 import '../../../../core/extensions/string_extension.dart';
 import '../../../../core/utils/hero_tags.dart';
 import '../../domain/entities/series_entity.dart';
 import '../bloc/series_bloc.dart';
+import '../widgets/series_poster_card.dart';
 
 /// The featured title's poster can also appear in a row further down, so its
 /// tag is the banner's own rather than the title's.
@@ -69,21 +70,30 @@ class _Content extends StatelessWidget {
           title: context.l10n.seriesPopular,
           storageKey: const PageStorageKey('popular_series'),
           posters: _posters(state.popularSeriesList, 'series-popular'),
+          actionLabel: context.l10n.seeAll,
+          onAction: () => _browseAll(context, context.l10n.seriesPopular, DiscoverSort.popularity),
         ),
         BrowseRow(
           title: context.l10n.seriesTop,
           storageKey: const PageStorageKey('top_series'),
           posters: _posters(state.topSeriesList, 'series-top'),
+          actionLabel: context.l10n.seeAll,
+          onAction: () => _browseAll(context, context.l10n.seriesTop, DiscoverSort.topRated),
         ),
       ],
     );
+  }
+
+  /// The whole catalogue the row is the head of, in the row's own order.
+  void _browseAll(BuildContext context, String title, DiscoverSort sort) {
+    context.router.push(SeriesDiscoverRoute(title: title, sort: sort));
   }
 
   /// The two rows overlap — a series can be both popular and top rated — so
   /// each row scopes its own tags rather than naming the series.
   List<Widget> _posters(List<SeriesEntity> series, String scope) => [
         for (final (index, entry) in series.indexed)
-          _SeriesPoster(series: entry, tag: posterHeroTag(scope, index: index, id: entry.id)),
+          SeriesPosterCard(series: entry, heroTag: posterHeroTag(scope, index: index, id: entry.id)),
       ];
 }
 
@@ -108,26 +118,6 @@ class _Hero extends StatelessWidget {
       onAction: () => context.router.push(
         SeriesDetailsRoute(series: series, heroTag: _featuredHeroTag),
       ),
-    );
-  }
-}
-
-class _SeriesPoster extends StatelessWidget {
-  final SeriesEntity series;
-  final String tag;
-
-  const _SeriesPoster({required this.series, required this.tag});
-
-  @override
-  Widget build(BuildContext context) {
-    final meta = [series.firstAirDate?.year, series.voteAverage?.toStringAsFixed(1)].nonNulls.join(' · ');
-
-    return PosterCard(
-      imageUrl: series.posterPath?.coverImage ?? '',
-      title: series.name ?? '',
-      meta: meta,
-      heroTag: tag,
-      onTap: () => context.router.push(SeriesDetailsRoute(series: series, heroTag: tag)),
     );
   }
 }

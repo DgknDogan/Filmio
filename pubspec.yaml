@@ -65,6 +65,7 @@ dependencies:
   intl: ^0.20.2
   google_fonts: ^8.2.1
   rxdart: ^0.28.0
+  pod_player: 0.2.2
 
 dev_dependencies:
   flutter_test:
