@@ -81,6 +81,17 @@ jobs:
           channel: stable
           cache: true
 
+      # flutter-action caches the SDK, not Gradle. Without this the runner
+      # downloads the whole Gradle distribution and every dependency again on
+      # each build.
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+          restore-keys: gradle-
+
       - name: Dependencies
         run: flutter pub get
 
