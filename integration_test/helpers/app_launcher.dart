@@ -62,6 +62,22 @@ Future<void> signIn(PatrolIntegrationTester $) async {
   await $.pump(const Duration(seconds: 3));
 }
 
+/// Pumps until [read] returns something, or gives up.
+///
+/// What the signed-in tabs wait on is two live services answering, so it is
+/// waited for by polling rather than by settling: the tab shimmers while it
+/// waits and a shimmer never settles.
+Future<T?> waitFor<T>(PatrolIntegrationTester $, T? Function() read) async {
+  for (var attempt = 0; attempt < 40; attempt++) {
+    final value = read();
+    if (value != null) return value;
+
+    await $.pump(const Duration(milliseconds: 500));
+  }
+
+  return null;
+}
+
 /// Guards against a test being pointed at anything other than a debug build.
 void assertNotProduction() {
   assert(() {

@@ -4,7 +4,7 @@ import 'package:retrofit/retrofit.dart';
 import '../../../../core/constants/constants.dart';
 import '../models/movie_api_response.dart';
 import '../models/movie_detail_model.dart';
-import '../models/recommendation_api_response.dart';
+import '../models/movie_recommendation_response.dart';
 
 part 'movie_api_service.g.dart';
 
@@ -63,8 +63,8 @@ abstract class MovieApiService {
   /// header takes it off the shared Dio's TMDB credentials: a per-request
   /// header replaces the one on `BaseOptions`, so the user's Firebase ID token
   /// travels here and the TMDB token does not.
-  @GET("$recommendationBaseUrl/recommendations")
-  Future<HttpResponse<RecommendationApiResponse>> getRecommendations({
+  @GET("$recommendationBaseUrl/recommendations/movies")
+  Future<HttpResponse<MovieRecommendationResponse>> getRecommendations({
     @Header("Authorization") required String authorization,
     @Query("limit") int? limit,
   });

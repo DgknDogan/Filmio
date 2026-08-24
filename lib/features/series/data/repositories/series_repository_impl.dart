@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/enums/discover_sort.dart';
@@ -7,6 +8,7 @@ import '../../../../core/models/paginated_list.dart';
 import '../../../../core/network/api_guard.dart';
 import '../../../../core/network/discover_query.dart';
 import '../../../../core/resource/failure.dart';
+import '../../../../core/resource/failure_mapper.dart';
 import '../../domain/entities/series_entity.dart';
 import '../../domain/repositories/series_repository.dart';
 import '../datasources/series_api_service.dart';
@@ -18,7 +20,11 @@ class SeriesRepositoryImpl extends SeriesRepository {
 
   final SeriesApiService _seriesApiService;
 
-  SeriesRepositoryImpl(this._seriesApiService);
+  /// Only the recommendation service needs this: it authenticates as the user,
+  /// not as the app.
+  final FirebaseAuth _auth;
+
+  SeriesRepositoryImpl(this._seriesApiService, this._auth);
 
   @override
   Future<Either<Failure, List<SeriesEntity>>> getPopularSeries() {
@@ -55,6 +61,36 @@ class SeriesRepositoryImpl extends SeriesRepository {
       () => _seriesApiService.getSimilarSeries(seriesId: seriesId, language: _language, page: _firstPage),
       _toEntities,
     );
+  }
+
+  @override
+  Future<Either<Failure, SeriesEntity>> getSeriesDetails({required int seriesId}) {
+    return guardApiCall(
+      () => _seriesApiService.getSeriesDetails(seriesId: seriesId, language: _language),
+      (body) => body.toEntity(),
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<int>>> getRecommendedSeriesIds({int? limit}) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return const Left(AuthFailure('Sign in to see what we would recommend.'));
+    }
+
+    try {
+      final token = await user.getIdToken();
+      if (token == null) {
+        return const Left(AuthFailure('Could not verify your session. Sign in again.'));
+      }
+
+      return guardApiCall(
+        () => _seriesApiService.getRecommendations(authorization: 'Bearer $token', limit: limit),
+        (body) => body.seriesIds ?? const [],
+      );
+    } on FirebaseException catch (e) {
+      return Left(failureFromFirebase(e));
+    }
   }
 
   @override

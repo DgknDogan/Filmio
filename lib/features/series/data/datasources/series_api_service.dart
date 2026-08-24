@@ -3,6 +3,8 @@ import 'package:retrofit/retrofit.dart';
 
 import '../../../../core/constants/constants.dart';
 import '../models/series_api_response.dart';
+import '../models/series_detail_model.dart';
+import '../models/series_recommendation_response.dart';
 
 part 'series_api_service.g.dart';
 
@@ -45,6 +47,26 @@ abstract class SeriesApiService {
     @Query("include_adult") bool? includeAdult,
     @Query("language") String? language,
     @Query("page") int? page,
+  });
+
+  /// One series in full. The list endpoints above answer with a trimmed entry;
+  /// this is where a series reached by id alone — a recommendation — comes from.
+  @GET("/tv/{series_id}")
+  Future<HttpResponse<SeriesDetailModel>> getSeriesDetails({
+    @Path("series_id") required int seriesId,
+    @Query("language") String? language,
+  });
+
+  /// Filmio's own recommendation service, not TMDB.
+  ///
+  /// The absolute URL takes it off this class's base URL, and the explicit
+  /// header takes it off the shared Dio's TMDB credentials: a per-request
+  /// header replaces the one on `BaseOptions`, so the user's Firebase ID token
+  /// travels here and the TMDB token does not.
+  @GET("$recommendationBaseUrl/recommendations/series")
+  Future<HttpResponse<SeriesRecommendationResponse>> getRecommendations({
+    @Header("Authorization") required String authorization,
+    @Query("limit") int? limit,
   });
 
   @GET("/tv/{series_id}/similar")

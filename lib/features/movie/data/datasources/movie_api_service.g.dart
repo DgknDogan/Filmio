@@ -214,7 +214,7 @@ class _MovieApiService implements MovieApiService {
   }
 
   @override
-  Future<HttpResponse<RecommendationApiResponse>> getRecommendations({
+  Future<HttpResponse<MovieRecommendationResponse>> getRecommendations({
     required String authorization,
     int? limit,
   }) async {
@@ -224,20 +224,20 @@ class _MovieApiService implements MovieApiService {
     final _headers = <String, dynamic>{r'Authorization': authorization};
     _headers.removeWhere((k, v) => v == null);
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<HttpResponse<RecommendationApiResponse>>(
+    final _options = _setStreamType<HttpResponse<MovieRecommendationResponse>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'https://filmio-api-640047605009.europe-west1.run.app/recommendations',
+            'https://filmio-api-640047605009.europe-west1.run.app/recommendations/movies',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late RecommendationApiResponse _value;
+    late MovieRecommendationResponse _value;
     try {
-      _value = RecommendationApiResponse.fromJson(_result.data!);
+      _value = MovieRecommendationResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -283,7 +283,9 @@ class _MovieApiService implements MovieApiService {
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
-    if (T != dynamic && !(requestOptions.responseType == ResponseType.bytes || requestOptions.responseType == ResponseType.stream)) {
+    if (T != dynamic &&
+        !(requestOptions.responseType == ResponseType.bytes ||
+            requestOptions.responseType == ResponseType.stream)) {
       if (T == String) {
         requestOptions.responseType = ResponseType.plain;
       } else {

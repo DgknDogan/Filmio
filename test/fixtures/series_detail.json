@@ -1,0 +1,32 @@
+{
+  "adult": false,
+  "backdrop_path": "/uGYCFvHOxOSLFLzTlMDIcTiWL0o.jpg",
+  "created_by": [{ "id": 1223236, "name": "Matt Duffer" }],
+  "episode_run_time": [50],
+  "first_air_date": "2016-07-15",
+  "genres": [
+    { "id": 18, "name": "Drama" },
+    { "id": 10765, "name": "Sci-Fi & Fantasy" },
+    { "id": 9648, "name": "Mystery" }
+  ],
+  "homepage": "https://www.netflix.com/title/80057281",
+  "id": 66732,
+  "in_production": false,
+  "languages": ["en"],
+  "last_air_date": "2025-12-31",
+  "name": "Stranger Things",
+  "networks": [{ "id": 213, "name": "Netflix" }],
+  "number_of_episodes": 42,
+  "number_of_seasons": 5,
+  "origin_country": ["US"],
+  "original_language": "en",
+  "original_name": "Stranger Things",
+  "overview": "When a young boy vanishes, a small town uncovers a mystery.",
+  "popularity": 213.4193,
+  "poster_path": "/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
+  "status": "Ended",
+  "tagline": "One last adventure.",
+  "type": "Scripted",
+  "vote_average": 8.6,
+  "vote_count": 18327
+}

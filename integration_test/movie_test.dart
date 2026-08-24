@@ -26,11 +26,14 @@ void main() {
     await $(MoviePage).waitUntilVisible();
 
     final bloc = BlocProvider.of<MovieBloc>($.tester.element($(MoviePage).finder.first));
-    final recommended = await _settledRecommendation($, bloc);
+    final recommended = await waitFor($, () {
+      final state = bloc.state;
+      return state is MovieSuccess && state.recommended is! RecommendedMovieLoading ? state.recommended : null;
+    });
 
     // What no unit test can reach: a real Firebase ID token, minted for this
-    // account, accepted by Filmio's own service on Cloud Run — and the id it
-    // answers with resolving to a title at TMDB, whose credentials are a
+    // account, accepted by `/recommendations/movies` on Cloud Run — and the id
+    // it answers with resolving to a title at TMDB, whose credentials are a
     // different header on the same Dio.
     expect(
       recommended,
@@ -42,21 +45,4 @@ void main() {
     await $(FeaturedHero).waitUntilVisible();
     expect($((recommended as RecommendedMovieLoaded).movie.title!).exists, true);
   });
-}
-
-/// The recommendation once it has stopped loading.
-///
-/// Two live services answer behind it, so it is waited for rather than read —
-/// and waited for by polling the bloc instead of by settling, because the tab
-/// shimmers while it waits and a shimmer never settles.
-Future<RecommendedMovieState> _settledRecommendation(PatrolIntegrationTester $, MovieBloc bloc) async {
-  for (var attempt = 0; attempt < 40; attempt++) {
-    final state = bloc.state;
-    if (state is MovieSuccess && state.recommended is! RecommendedMovieLoading) {
-      return state.recommended;
-    }
-    await $.pump(const Duration(milliseconds: 500));
-  }
-
-  return const RecommendedMovieLoading();
 }

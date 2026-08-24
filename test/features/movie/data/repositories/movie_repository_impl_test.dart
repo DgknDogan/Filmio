@@ -1,12 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:filmio/core/enums/discover_sort.dart';
+import 'package:filmio/core/models/genre_model.dart';
 import 'package:filmio/core/models/discover_filters.dart';
 import 'package:filmio/core/network/discover_query.dart';
 import 'package:filmio/core/resource/failure.dart';
 import 'package:filmio/features/movie/data/models/movie_api_response.dart';
 import 'package:filmio/features/movie/data/models/movie_detail_model.dart';
 import 'package:filmio/features/movie/data/models/movie_model.dart';
-import 'package:filmio/features/movie/data/models/recommendation_api_response.dart';
+import 'package:filmio/features/movie/data/models/movie_recommendation_response.dart';
 import 'package:filmio/features/movie/data/repositories/movie_repository_impl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -121,7 +122,7 @@ void main() {
     }
 
     test('forwards the movie id and maps the detail response to an entity', () async {
-      stubDetails(const MovieDetailModel(id: 11, title: 'Star Wars', genres: [MovieGenreModel(id: 12, name: 'Adventure')]));
+      stubDetails(const MovieDetailModel(id: 11, title: 'Star Wars', genres: [GenreModel(id: 12, name: 'Adventure')]));
 
       final movie = (await repository.getMovieDetails(movieId: 11)).getRight().toNullable()!;
 
@@ -151,13 +152,13 @@ void main() {
   });
 
   group('getRecommendedMovieIds', () {
-    void stubRecommendations(RecommendationApiResponse body, {int statusCode = 200}) {
+    void stubRecommendations(MovieRecommendationResponse body, {int statusCode = 200}) {
       when(() => api.getRecommendations(authorization: any(named: 'authorization'), limit: any(named: 'limit')))
           .thenAnswer((_) async => bodyWith(body, statusCode: statusCode));
     }
 
     test('sends the signed-in user\'s ID token as the bearer', () async {
-      stubRecommendations(const RecommendationApiResponse(movieIds: [11]));
+      stubRecommendations(const MovieRecommendationResponse(movieIds: [11]));
 
       await repository.getRecommendedMovieIds();
 
@@ -167,7 +168,7 @@ void main() {
     });
 
     test('passes a limit through when the caller overrides the count', () async {
-      stubRecommendations(const RecommendationApiResponse(movieIds: [11]));
+      stubRecommendations(const MovieRecommendationResponse(movieIds: [11]));
 
       await repository.getRecommendedMovieIds(limit: 5);
 
@@ -175,7 +176,7 @@ void main() {
     });
 
     test('returns the ids in the order the service ranked them', () async {
-      stubRecommendations(const RecommendationApiResponse(movieIds: [11, 550, 912649], count: 3));
+      stubRecommendations(const MovieRecommendationResponse(movieIds: [11, 550, 912649], count: 3));
 
       final ids = (await repository.getRecommendedMovieIds()).getRight().toNullable();
 
@@ -183,7 +184,7 @@ void main() {
     });
 
     test('an absent id list becomes an empty list, not a crash', () async {
-      stubRecommendations(const RecommendationApiResponse());
+      stubRecommendations(const MovieRecommendationResponse());
 
       expect((await repository.getRecommendedMovieIds()).getRight().toNullable(), isEmpty);
     });
@@ -212,7 +213,7 @@ void main() {
     });
 
     test('a non-200 becomes a ServerFailure carrying the code', () async {
-      stubRecommendations(const RecommendationApiResponse(), statusCode: 401);
+      stubRecommendations(const MovieRecommendationResponse(), statusCode: 401);
 
       final failure = (await repository.getRecommendedMovieIds()).getLeft().toNullable();
 

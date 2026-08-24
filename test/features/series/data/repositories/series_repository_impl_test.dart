@@ -1,24 +1,37 @@
 import 'package:dio/dio.dart';
 import 'package:filmio/core/enums/discover_sort.dart';
 import 'package:filmio/core/models/discover_filters.dart';
+import 'package:filmio/core/models/genre_model.dart';
 import 'package:filmio/core/network/discover_query.dart';
 import 'package:filmio/core/resource/failure.dart';
 import 'package:filmio/features/series/data/models/series_api_response.dart';
+import 'package:filmio/features/series/data/models/series_detail_model.dart';
 import 'package:filmio/features/series/data/models/series_model.dart';
+import 'package:filmio/features/series/data/models/series_recommendation_response.dart';
 import 'package:filmio/features/series/data/repositories/series_repository_impl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../../../../helpers/mocks.dart';
 
+class _MockAuth extends Mock implements FirebaseAuth {}
+
+class _MockUser extends Mock implements User {}
+
 void main() {
   late MockSeriesApiService api;
+  late _MockAuth auth;
+  late _MockUser user;
   late SeriesRepositoryImpl repository;
 
   final requestOptions = RequestOptions(path: '/discover/tv');
 
   HttpResponse<SeriesApiResponse> responseWith(SeriesApiResponse body, {int statusCode = 200}) =>
+      HttpResponse(body, Response(requestOptions: requestOptions, statusCode: statusCode, data: body));
+
+  HttpResponse<T> bodyWith<T>(T body, {int statusCode = 200}) =>
       HttpResponse(body, Response(requestOptions: requestOptions, statusCode: statusCode, data: body));
 
   SeriesApiResponse page(List<SeriesModel>? results, {int? page = 1, int? totalPages = 1, int? totalResults = 0}) =>
@@ -43,7 +56,121 @@ void main() {
 
   setUp(() {
     api = MockSeriesApiService();
-    repository = SeriesRepositoryImpl(api);
+    auth = _MockAuth();
+    user = _MockUser();
+
+    when(() => auth.currentUser).thenReturn(user);
+    when(() => user.getIdToken()).thenAnswer((_) async => 'id-token');
+
+    repository = SeriesRepositoryImpl(api, auth);
+  });
+
+  group('getSeriesDetails', () {
+    void stubDetails(SeriesDetailModel body, {int statusCode = 200}) {
+      when(() => api.getSeriesDetails(seriesId: any(named: 'seriesId'), language: any(named: 'language')))
+          .thenAnswer((_) async => bodyWith(body, statusCode: statusCode));
+    }
+
+    test('forwards the series id and maps the detail response to an entity', () async {
+      stubDetails(const SeriesDetailModel(id: 66732, name: 'Stranger Things', genres: [GenreModel(id: 18, name: 'Drama')]));
+
+      final series = (await repository.getSeriesDetails(seriesId: 66732)).getRight().toNullable()!;
+
+      verify(() => api.getSeriesDetails(seriesId: 66732, language: 'en-US')).called(1);
+      expect(series.id, 66732);
+      expect(series.name, 'Stranger Things');
+      expect(series.genreIds, [18]);
+    });
+
+    test('a non-200 becomes a ServerFailure carrying the code', () async {
+      stubDetails(const SeriesDetailModel(id: 66732), statusCode: 404);
+
+      final failure = (await repository.getSeriesDetails(seriesId: 66732)).getLeft().toNullable();
+
+      expect(failure, isA<ServerFailure>());
+      expect((failure as ServerFailure).statusCode, 404);
+    });
+
+    test('a thrown DioException becomes a Failure rather than escaping', () async {
+      when(() => api.getSeriesDetails(seriesId: any(named: 'seriesId'), language: any(named: 'language')))
+          .thenThrow(DioException(requestOptions: requestOptions, type: DioExceptionType.connectionError));
+
+      expect((await repository.getSeriesDetails(seriesId: 66732)).getLeft().toNullable(), isA<NetworkFailure>());
+    });
+  });
+
+  group('getRecommendedSeriesIds', () {
+    void stubRecommendations(SeriesRecommendationResponse body, {int statusCode = 200}) {
+      when(() => api.getRecommendations(authorization: any(named: 'authorization'), limit: any(named: 'limit')))
+          .thenAnswer((_) async => bodyWith(body, statusCode: statusCode));
+    }
+
+    test("sends the signed-in user's ID token as the bearer", () async {
+      stubRecommendations(const SeriesRecommendationResponse(seriesIds: [66732]));
+
+      await repository.getRecommendedSeriesIds();
+
+      // The service authenticates as the user, not as the app — a TMDB token
+      // here would be both wrong and a token sent to somebody else's host.
+      verify(() => api.getRecommendations(authorization: 'Bearer id-token', limit: null)).called(1);
+    });
+
+    test('passes a limit through when the caller overrides the count', () async {
+      stubRecommendations(const SeriesRecommendationResponse(seriesIds: [66732]));
+
+      await repository.getRecommendedSeriesIds(limit: 5);
+
+      verify(() => api.getRecommendations(authorization: 'Bearer id-token', limit: 5)).called(1);
+    });
+
+    test('returns the ids in the order the service ranked them', () async {
+      stubRecommendations(const SeriesRecommendationResponse(seriesIds: [66732, 1399], count: 2));
+
+      expect((await repository.getRecommendedSeriesIds()).getRight().toNullable(), [66732, 1399]);
+    });
+
+    test('an absent id list becomes an empty list, not a crash', () async {
+      stubRecommendations(const SeriesRecommendationResponse());
+
+      expect((await repository.getRecommendedSeriesIds()).getRight().toNullable(), isEmpty);
+    });
+
+    test('nobody signed in is an AuthFailure, and the service is never called', () async {
+      when(() => auth.currentUser).thenReturn(null);
+
+      final failure = (await repository.getRecommendedSeriesIds()).getLeft().toNullable();
+
+      expect(failure, isA<AuthFailure>());
+      verifyNever(() => api.getRecommendations(authorization: any(named: 'authorization'), limit: any(named: 'limit')));
+    });
+
+    test('a session that yields no token is an AuthFailure', () async {
+      when(() => user.getIdToken()).thenAnswer((_) async => null);
+
+      expect((await repository.getRecommendedSeriesIds()).getLeft().toNullable(), isA<AuthFailure>());
+    });
+
+    test('a Firebase error while minting the token becomes a Failure rather than escaping', () async {
+      when(() => user.getIdToken()).thenThrow(FirebaseAuthException(code: 'network-request-failed'));
+
+      expect((await repository.getRecommendedSeriesIds()).getLeft().toNullable(), isA<Failure>());
+    });
+
+    test('a non-200 becomes a ServerFailure carrying the code', () async {
+      stubRecommendations(const SeriesRecommendationResponse(), statusCode: 401);
+
+      final failure = (await repository.getRecommendedSeriesIds()).getLeft().toNullable();
+
+      expect(failure, isA<ServerFailure>());
+      expect((failure as ServerFailure).statusCode, 401);
+    });
+
+    test('a thrown DioException becomes a Failure rather than escaping', () async {
+      when(() => api.getRecommendations(authorization: any(named: 'authorization'), limit: any(named: 'limit')))
+          .thenThrow(DioException(requestOptions: requestOptions, type: DioExceptionType.connectionError));
+
+      expect((await repository.getRecommendedSeriesIds()).getLeft().toNullable(), isA<NetworkFailure>());
+    });
   });
 
   group('discoverSeries', () {

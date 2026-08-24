@@ -1,17 +1,16 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'recommendation_api_response.g.dart';
+part 'movie_recommendation_response.g.dart';
 
-/// What Filmio's recommendation service answers with: the ids it picked, and
-/// how it picked them.
+/// What `/recommendations/movies` answers with: the ids it picked, and how it
+/// picked them.
 ///
 /// Only [movieIds] reaches the domain — the rest is there because the service
 /// sends it and dropping it from the model would make a change in the service
 /// invisible here. It is useful when reading a log or a network trace.
 @JsonSerializable(fieldRename: FieldRename.snake)
-class RecommendationApiResponse {
-  /// TMDB ids, best first. The service sends an empty list when the user has
-  /// liked too little for it to have an opinion.
+class MovieRecommendationResponse {
+  /// TMDB ids, best first.
   final List<int>? movieIds;
 
   /// How many ids came back.
@@ -20,17 +19,18 @@ class RecommendationApiResponse {
   /// How many liked titles the picks were derived from.
   final int? basedOn;
 
-  /// Which of the service's strategies produced them.
+  /// Which of the service's strategies produced them: `personalized` when the
+  /// likes were enough to build a profile from, `popular` when they were not.
   final String? strategy;
 
-  const RecommendationApiResponse({
+  const MovieRecommendationResponse({
     this.movieIds,
     this.count,
     this.basedOn,
     this.strategy,
   });
 
-  factory RecommendationApiResponse.fromJson(Map<String, dynamic> json) => _$RecommendationApiResponseFromJson(json);
+  factory MovieRecommendationResponse.fromJson(Map<String, dynamic> json) => _$MovieRecommendationResponseFromJson(json);
 
-  Map<String, dynamic> toJson() => _$RecommendationApiResponseToJson(this);
+  Map<String, dynamic> toJson() => _$MovieRecommendationResponseToJson(this);
 }

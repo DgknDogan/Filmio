@@ -53,6 +53,8 @@ import 'features/series/domain/usecases/discover_series.dart';
 import 'features/series/domain/usecases/dislike_series.dart';
 import 'features/series/domain/usecases/get_liked_series.dart';
 import 'features/series/domain/usecases/get_popular_series.dart';
+import 'features/series/domain/usecases/get_recommended_series_ids.dart';
+import 'features/series/domain/usecases/get_series_details.dart';
 import 'features/series/domain/usecases/get_similar_series.dart';
 import 'features/series/domain/usecases/get_top_rated_series.dart';
 import 'features/series/domain/usecases/like_series.dart';
@@ -83,7 +85,7 @@ Future<void> initDependencies() async {
   getIt.registerSingleton<LikedMoviesRepository>(LikedMoviesRepositoryImpl(getIt(), getIt()));
 
   getIt.registerSingleton<SeriesApiService>(SeriesApiService(getIt()));
-  getIt.registerSingleton<SeriesRepository>(SeriesRepositoryImpl(getIt()));
+  getIt.registerSingleton<SeriesRepository>(SeriesRepositoryImpl(getIt(), getIt()));
 
   getIt.registerSingleton<LikedSeriesRepository>(LikedSeriesRepositoryImpl(getIt(), getIt()));
 
@@ -122,6 +124,8 @@ Future<void> initDependencies() async {
   getIt.registerSingleton<GetPopularSeriesUseCase>(GetPopularSeriesUseCase(getIt()));
   getIt.registerSingleton<GetSimilarSeriesUseCase>(GetSimilarSeriesUseCase(getIt()));
   getIt.registerSingleton<DiscoverSeriesUseCase>(DiscoverSeriesUseCase(getIt()));
+  getIt.registerSingleton<GetSeriesDetailsUseCase>(GetSeriesDetailsUseCase(getIt()));
+  getIt.registerSingleton<GetRecommendedSeriesIdsUseCase>(GetRecommendedSeriesIdsUseCase(getIt()));
   getIt.registerSingleton<GetLikedSeriesUseCase>(GetLikedSeriesUseCase(getIt()));
   getIt.registerSingleton<LikeSeriesUseCase>(LikeSeriesUseCase(getIt()));
   getIt.registerSingleton<DislikeSeriesUseCase>(DislikeSeriesUseCase(getIt()));

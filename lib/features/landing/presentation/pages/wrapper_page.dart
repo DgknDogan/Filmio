@@ -23,7 +23,7 @@ class WrapperPage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => MovieBloc(getIt(), getIt(), getIt(), getIt())..add(GetMovies()), lazy: false),
-        BlocProvider(create: (context) => SeriesBloc(getIt(), getIt())..add(GetSeries()), lazy: false),
+        BlocProvider(create: (context) => SeriesBloc(getIt(), getIt(), getIt(), getIt())..add(GetSeries()), lazy: false),
         BlocProvider(create: (context) => AccountCubit(getIt()), lazy: false),
       ],
       child: AutoTabsRouter.pageView(
@@ -80,18 +80,23 @@ class _NavBar extends StatelessWidget {
           child: Row(
             children: [
               _NavItem(
+                // Keyed so an integration test can reach a tab without going
+                // through its label, which is localised.
+                key: const Key('moviesTab'),
                 icon: Icons.movie_outlined,
                 label: context.l10n.moviesTitle,
                 isActive: activeIndex == 0,
                 onTap: () => onSelected(0),
               ),
               _NavItem(
+                key: const Key('seriesTab'),
                 icon: Icons.tv_outlined,
                 label: context.l10n.seriesTitle,
                 isActive: activeIndex == 1,
                 onTap: () => onSelected(1),
               ),
               _NavItem(
+                key: const Key('accountTab'),
                 icon: Icons.person_outline_rounded,
                 label: context.l10n.accountTitle,
                 isActive: activeIndex == 2,
@@ -111,7 +116,7 @@ class _NavItem extends StatelessWidget {
   final bool isActive;
   final VoidCallback onTap;
 
-  const _NavItem({required this.icon, required this.label, required this.isActive, required this.onTap});
+  const _NavItem({super.key, required this.icon, required this.label, required this.isActive, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

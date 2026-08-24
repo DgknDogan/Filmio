@@ -40,6 +40,8 @@ import 'package:filmio/features/series/domain/usecases/discover_series.dart';
 import 'package:filmio/features/series/domain/usecases/dislike_series.dart';
 import 'package:filmio/features/series/domain/usecases/get_liked_series.dart';
 import 'package:filmio/features/series/domain/usecases/get_popular_series.dart';
+import 'package:filmio/features/series/domain/usecases/get_recommended_series_ids.dart';
+import 'package:filmio/features/series/domain/usecases/get_series_details.dart';
 import 'package:filmio/features/series/domain/usecases/get_similar_series.dart';
 import 'package:filmio/features/series/domain/usecases/get_top_rated_series.dart';
 import 'package:filmio/features/series/domain/usecases/like_series.dart';
@@ -73,6 +75,10 @@ class MockDislikeMovieUseCase extends Mock implements DislikeMovieUseCase {}
 class MockGetPopularSeriesUseCase extends Mock implements GetPopularSeriesUseCase {}
 
 class MockGetTopRatedSeriesUseCase extends Mock implements GetTopRatedSeriesUseCase {}
+
+class MockGetSeriesDetailsUseCase extends Mock implements GetSeriesDetailsUseCase {}
+
+class MockGetRecommendedSeriesIdsUseCase extends Mock implements GetRecommendedSeriesIdsUseCase {}
 
 class MockSearchSeriesUseCase extends Mock implements SearchSeriesUseCase {}
 

@@ -85,7 +85,12 @@ class _Content extends StatelessWidget {
       onSearch: () => context.router.push(
         SeriesSearchRoute(heroTag: _searchHeroTag, hintText: hint),
       ),
-      featuredBuilder: (context, stretch) => _Hero(series: state.recommendedSeries, stretch: stretch),
+      featuredBuilder: (context, stretch) => switch (state.recommended) {
+        RecommendedSeriesLoaded(:final series) => _Hero(series: series, stretch: stretch),
+        RecommendedSeriesLoading() => FeaturedHeroSkeleton(stretch: stretch),
+        RecommendedSeriesEmpty() => _NoHero(message: context.l10n.recommendedEmpty),
+        RecommendedSeriesFailure(:final message) => _NoHero(message: message),
+      },
       rows: [
         BrowseRow(
           title: context.l10n.seriesPopular,
@@ -115,6 +120,24 @@ class _Content extends StatelessWidget {
   List<Widget> _posters(List<SeriesEntity> series, String scope) => [
         for (final (index, entry) in series.indexed) SeriesPosterCard(series: entry, heroTag: posterHeroTag(scope, index: index, id: entry.id)),
       ];
+}
+
+/// The head of the tab with nothing in it: the recommendation service had
+/// nothing to suggest, or could not be reached. It holds the block's height so
+/// the rows below start where they always do.
+class _NoHero extends StatelessWidget {
+  final String message;
+
+  const _NoHero({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: FeaturedHero.height,
+      width: double.infinity,
+      child: AppErrorView(message: message),
+    );
+  }
 }
 
 class _Hero extends StatelessWidget {
