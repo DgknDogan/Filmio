@@ -3,6 +3,7 @@ import 'package:filmio/core/models/paginated_list.dart';
 import 'package:filmio/core/resource/failure.dart';
 import 'package:filmio/features/review/domain/entities/review_entity.dart';
 import 'package:filmio/features/review/domain/usecases/get_reviews.dart';
+import 'package:filmio/features/review/presentation/cubit/review_moderation_cubit.dart';
 import 'package:filmio/features/review/presentation/cubit/reviews_cubit.dart';
 import 'package:filmio/features/review/presentation/widgets/review_card.dart';
 import 'package:filmio/features/review/presentation/widgets/reviews_section.dart';
@@ -19,6 +20,9 @@ import '../../../../helpers/pump_app.dart';
 /// the cubit. Deliberately says nothing about padding, colours, or font sizes.
 void main() {
   late MockGetReviewsUseCase getReviews;
+  late MockReportReviewUseCase reportReview;
+  late MockBlockReviewAuthorUseCase blockAuthor;
+  late MockGetModerationUseCase getModeration;
 
   const first = ReviewEntity(id: 'r1', author: 'Cat', content: 'Good.', rating: 8);
   const second = ReviewEntity(id: 'r2', author: 'Sam', content: 'Better.');
@@ -42,6 +46,13 @@ void main() {
 
   setUp(() {
     getReviews = MockGetReviewsUseCase();
+    reportReview = MockReportReviewUseCase();
+    blockAuthor = MockBlockReviewAuthorUseCase();
+    getModeration = MockGetModerationUseCase();
+
+    // Nothing hidden unless a test says otherwise.
+    when(() => getModeration.call()).thenAnswer((_) async => (blockedAuthors: <String>{}, hiddenReviewIds: <String>{}));
+
     stubPerPage({
       1: Right(page(const [first]))
     });
@@ -51,10 +62,13 @@ void main() {
   /// scroll the sheet would have provided.
   Future<void> pumpSection(WidgetTester tester) {
     return tester.pumpApp(
-      const Scaffold(body: SingleChildScrollView(child: ReviewsSection())),
+      const Scaffold(body: SingleChildScrollView(child: ReviewsSection(mediaId: 550, mediaType: MediaType.movie))),
       providers: [
         BlocProvider<ReviewsCubit>(
           create: (context) => ReviewsCubit(getReviews, mediaId: 550, mediaType: MediaType.movie),
+        ),
+        BlocProvider<ReviewModerationCubit>(
+          create: (context) => ReviewModerationCubit(reportReview, blockAuthor, getModeration),
         ),
       ],
     );

@@ -32,19 +32,6 @@ class SeriesEntity with EquatableMixin {
   });
 
   @override
-  List<Object?> get props => [
-        backdropPath,
-        firstAirDate,
-        genreIds,
-        id,
-        name,
-        originCountry,
-        originalLanguage,
-        originalName,
-        overview,
-        popularity,
-        posterPath,
-        voteAverage,
-        voteCount
-      ];
+  List<Object?> get props =>
+      [backdropPath, firstAirDate, genreIds, id, name, originCountry, originalLanguage, originalName, overview, popularity, posterPath, voteAverage, voteCount];
 }

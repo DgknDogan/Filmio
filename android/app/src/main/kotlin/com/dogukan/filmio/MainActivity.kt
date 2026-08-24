@@ -1,4 +1,4 @@
-package com.example.filmio
+package com.dogukan.filmio
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -68,7 +68,7 @@ ThemeData _themeOf(AppPalette palette, Brightness brightness) {
         backgroundColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.pressed) ? palette.textPrimary.withValues(alpha: 0.07) : null,
         ),
-        side: WidgetStatePropertyAll(BorderSide(color: palette.inputBorder)),
+        side: WidgetStatePropertyAll(BorderSide(color: palette.controlBorder)),
         overlayColor: const WidgetStatePropertyAll(Colors.transparent),
         shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: AppRadius.smAll)),
         padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: AppSpacing.lg)),
@@ -81,9 +81,12 @@ ThemeData _themeOf(AppPalette palette, Brightness brightness) {
         textStyle: WidgetStatePropertyAll(styles.link),
         foregroundColor: WidgetStatePropertyAll(palette.accent),
         // minimumSize: WidgetStatePropertyAll(Size(0, 48.h)),
-        padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: AppSpacing.sm)),
+        // padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: AppSpacing.sm)),
         shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: AppRadius.smAll)),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        padding: const WidgetStatePropertyAll(EdgeInsets.zero),
+        minimumSize: const WidgetStatePropertyAll(Size.zero),
+        splashFactory: NoSplash.splashFactory,
       ),
     ),
     // A field is a filled surface with a hairline edge, and its name sits
@@ -103,12 +106,27 @@ ThemeData _themeOf(AppPalette palette, Brightness brightness) {
       suffixIconColor: WidgetStateColor.resolveWith(
         (states) => states.contains(WidgetState.focused) ? palette.accent : palette.textSecondary,
       ),
-      border: fieldBorder(palette.inputBorder),
-      enabledBorder: fieldBorder(palette.inputBorder),
+      border: fieldBorder(palette.controlBorder),
+      enabledBorder: fieldBorder(palette.controlBorder),
       focusedBorder: fieldBorder(palette.focusRing),
       errorBorder: fieldBorder(palette.danger),
       focusedErrorBorder: fieldBorder(palette.danger),
       disabledBorder: fieldBorder(palette.inputBorder),
+    ),
+    // Every modal in the app is a sheet: the same ground as the details
+    // sheet, the same sweep at the top, and a grabber instead of a shadow.
+    // Anything that would have been a stock Material dialog goes through
+    // `AppSheet` and lands here.
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: palette.sheet,
+      surfaceTintColor: Colors.transparent,
+      modalBarrierColor: palette.overlayScrim,
+      elevation: 0,
+      showDragHandle: true,
+      dragHandleColor: palette.controlBorder,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
+      ),
     ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
@@ -147,7 +165,7 @@ ThemeData _themeOf(AppPalette palette, Brightness brightness) {
       // padded size is what gets it to the 48pt floor.
       materialTapTargetSize: MaterialTapTargetSize.padded,
       shape: RoundedRectangleBorder(borderRadius: AppRadius.xsAll),
-      side: BorderSide(color: palette.inputBorder, width: 1.5),
+      side: BorderSide(color: palette.controlBorder, width: 1.5),
       // The tick is cut out of the accent in the page's own ground colour.
       checkColor: WidgetStatePropertyAll(palette.surface),
       fillColor: WidgetStateProperty.resolveWith(

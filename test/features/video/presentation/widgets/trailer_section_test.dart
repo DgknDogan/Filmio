@@ -13,7 +13,9 @@ import '../../../../helpers/mocks.dart';
 import '../../../../helpers/pump_app.dart';
 
 /// Asserts what each state puts on screen and that the retry reaches the
-/// cubit. The player itself belongs to `pod_player` and is not exercised here.
+/// cubit. Tapping the card hands the video to YouTube through `url_launcher`,
+/// which is a platform call rather than anything this widget decides, so it is
+/// not exercised here.
 void main() {
   late MockGetTrailerUseCase getTrailer;
 

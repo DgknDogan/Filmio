@@ -79,7 +79,7 @@ class AppDecorations {
   BoxDecoration get circleButton => BoxDecoration(
         shape: BoxShape.circle,
         color: _palette.surface.withValues(alpha: 0.7),
-        border: Border.all(color: _palette.inputBorder),
+        border: Border.all(color: _palette.controlBorder),
       );
 
   /// The sheet that carries a film's details, curved along its top edge only.
@@ -107,14 +107,19 @@ class AppDecorations {
   /// The scrim over a backdrop, so the text on it stays readable while the
   /// artwork still shows through. It fades to the page's own colour at the
   /// bottom, which is what joins the image to the page.
+  ///
+  /// The middle stop is [AppPalette.backdropWash] rather than a fixed fraction
+  /// of [AppPalette.surface]: the title and its meta line sit in that band, and
+  /// how much wash they need to be read through is the one thing about this
+  /// gradient that is not the same in both brightnesses.
   BoxDecoration get backdropScrim => BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
           colors: [
             _palette.surface,
-            _palette.surface.withValues(alpha: 0.35),
-            _palette.surface.withValues(alpha: 0.7),
+            _palette.backdropWash.withValues(alpha: 0.2),
+            _palette.surface.withValues(alpha: 0.2),
           ],
           stops: const [0.04, 0.55, 1],
         ),
@@ -133,7 +138,7 @@ class AppDecorations {
           colors: [
             _palette.sheet.withValues(alpha: opacity),
             _palette.sheet.withValues(alpha: opacity),
-            _palette.sheet.withValues(alpha: opacity * 0.85),
+            _palette.sheet.withValues(alpha: opacity),
           ],
           stops: const [0, 0.78, 1],
         ),

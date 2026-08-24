@@ -7,6 +7,7 @@ import 'config/l10n/app_localizations.dart';
 import 'config/routes/app_router.dart';
 import 'config/theme/cubit/theme_cubit.dart';
 import 'config/theme/theme.dart';
+import 'core/cubit/session_cubit.dart';
 import 'firebase_options.dart';
 import 'injection_container.dart';
 
@@ -30,8 +31,11 @@ class MyApp extends StatelessWidget {
       designSize: const Size(360, 690),
       minTextAdapt: true,
       builder: (context, child) {
-        return BlocProvider(
-          create: (context) => getIt<ThemeCubit>(),
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (context) => getIt<ThemeCubit>()),
+            BlocProvider(create: (context) => getIt<SessionCubit>()),
+          ],
           child: BlocBuilder<ThemeCubit, ThemeState>(
             builder: (context, state) {
               return MaterialApp.router(

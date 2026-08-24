@@ -1,9 +1,8 @@
 import 'package:equatable/equatable.dart';
 
-/// Where a video is hosted. TMDB names several hosts; the two the app can
-/// actually play are the two it names here, and anything else is [unknown] —
-/// which is what keeps an unplayable host out of the UI rather than in front
-/// of a player that cannot open it.
+/// Where a video is hosted. TMDB names several hosts; [vimeo] is still
+/// recognised so that a Vimeo video is understood rather than mistaken for a
+/// malformed one, but only [youtube] can be opened — see [isPlayable].
 enum VideoSite {
   youtube,
   vimeo,
@@ -71,9 +70,17 @@ class VideoEntity extends Equatable {
     this.regionCode,
   });
 
-  /// Whether there is something here a player could open: a host the app
-  /// supports, and a key to give it.
-  bool get isPlayable => site != VideoSite.unknown && (key?.isNotEmpty ?? false);
+  /// Whether the app can offer this video at all: a YouTube video, with a key
+  /// to build a watch link from.
+  ///
+  /// YouTube only, deliberately. A trailer is handed to the YouTube app (or
+  /// the browser), which is the one way to play it that stays inside YouTube's
+  /// terms of use — and the only way App Review guideline 5.2.3 accepts
+  /// without a licence to show for it. Vimeo has no equivalent hand-off worth
+  /// the second integration for the handful of titles that use it, so a Vimeo
+  /// video is treated as no trailer at all and the block simply does not
+  /// appear.
+  bool get isPlayable => site == VideoSite.youtube && (key?.isNotEmpty ?? false);
 
   @override
   List<Object?> get props => [id, name, key, site, size, type, official, publishedAt, languageCode, regionCode];

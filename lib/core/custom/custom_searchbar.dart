@@ -40,7 +40,7 @@ class CustomSearchbar extends StatelessWidget {
       decoration: BoxDecoration(
         color: palette.surfaceRaised,
         borderRadius: AppRadius.pillAll,
-        border: Border.all(color: isEnabled ? palette.accent : palette.inputBorder),
+        border: Border.all(color: isEnabled ? palette.accent : palette.controlBorder),
         boxShadow: isEnabled
             ? [
                 BoxShadow(

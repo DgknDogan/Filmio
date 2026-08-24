@@ -1,5 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:filmio/core/enums/media_type.dart';
+import 'package:filmio/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:filmio/features/auth/domain/repositories/auth_repository.dart';
+import 'package:filmio/features/auth/domain/usecases/delete_account.dart';
+import 'package:filmio/features/auth/domain/usecases/guest_session.dart';
 import 'package:filmio/features/auth/domain/usecases/is_profile_complete.dart';
 import 'package:filmio/features/auth/domain/usecases/login.dart';
 import 'package:filmio/features/auth/domain/usecases/logout.dart';
@@ -13,14 +18,20 @@ import 'package:filmio/features/movie/domain/repositories/movie_repository.dart'
 import 'package:filmio/features/movie/domain/usecases/discover_movies.dart';
 import 'package:filmio/features/movie/domain/usecases/dislike_movie.dart';
 import 'package:filmio/features/movie/domain/usecases/get_liked_movies.dart';
+import 'package:filmio/features/movie/domain/usecases/get_movie_details.dart';
 import 'package:filmio/features/movie/domain/usecases/get_popular_movies.dart';
+import 'package:filmio/features/movie/domain/usecases/get_recommended_movie_ids.dart';
 import 'package:filmio/features/movie/domain/usecases/get_similar_movies.dart';
 import 'package:filmio/features/movie/domain/usecases/get_top_rated_movies.dart';
 import 'package:filmio/features/movie/domain/usecases/like_movie.dart';
 import 'package:filmio/features/movie/domain/usecases/search_movies.dart';
 import 'package:filmio/features/review/data/datasources/review_api_service.dart';
+import 'package:filmio/features/review/data/datasources/review_moderation_local_datasource.dart';
+import 'package:filmio/features/review/domain/entities/review_report.dart';
+import 'package:filmio/features/review/domain/repositories/review_moderation_repository.dart';
 import 'package:filmio/features/review/domain/repositories/review_repository.dart';
 import 'package:filmio/features/review/domain/usecases/get_reviews.dart';
+import 'package:filmio/features/review/domain/usecases/moderate_reviews.dart';
 import 'package:filmio/features/series/data/datasources/series_api_service.dart';
 import 'package:filmio/features/series/domain/entities/series_entity.dart';
 import 'package:filmio/features/series/domain/repositories/liked_series_repository.dart';
@@ -42,6 +53,10 @@ import 'package:mocktail/mocktail.dart';
 class MockGetPopularMoviesUseCase extends Mock implements GetPopularMoviesUseCase {}
 
 class MockGetTopRatedMoviesUseCase extends Mock implements GetTopRatedMoviesUseCase {}
+
+class MockGetMovieDetailsUseCase extends Mock implements GetMovieDetailsUseCase {}
+
+class MockGetRecommendedMovieIdsUseCase extends Mock implements GetRecommendedMovieIdsUseCase {}
 
 class MockSearchMoviesUseCase extends Mock implements SearchMoviesUseCase {}
 
@@ -73,6 +88,12 @@ class MockDislikeSeriesUseCase extends Mock implements DislikeSeriesUseCase {}
 
 class MockGetReviewsUseCase extends Mock implements GetReviewsUseCase {}
 
+class MockReportReviewUseCase extends Mock implements ReportReviewUseCase {}
+
+class MockBlockReviewAuthorUseCase extends Mock implements BlockReviewAuthorUseCase {}
+
+class MockGetModerationUseCase extends Mock implements GetModerationUseCase {}
+
 class MockGetTrailerUseCase extends Mock implements GetTrailerUseCase {}
 
 class MockLoginUseCase extends Mock implements LoginUseCase {}
@@ -80,6 +101,14 @@ class MockLoginUseCase extends Mock implements LoginUseCase {}
 class MockRegisterUseCase extends Mock implements RegisterUseCase {}
 
 class MockLogoutUseCase extends Mock implements LogoutUseCase {}
+
+class MockDeleteAccountUseCase extends Mock implements DeleteAccountUseCase {}
+
+class MockIsGuestUseCase extends Mock implements IsGuestUseCase {}
+
+class MockContinueAsGuestUseCase extends Mock implements ContinueAsGuestUseCase {}
+
+class MockEndGuestSessionUseCase extends Mock implements EndGuestSessionUseCase {}
 
 class MockRestoreSessionUseCase extends Mock implements RestoreSessionUseCase {}
 
@@ -110,9 +139,36 @@ class MockReviewApiService extends Mock implements ReviewApiService {}
 
 class MockReviewRepository extends Mock implements ReviewRepository {}
 
+class MockReviewModerationRepository extends Mock implements ReviewModerationRepository {}
+
+class MockReviewModerationLocalDataSource extends Mock implements ReviewModerationLocalDataSource {}
+
 class MockVideoApiService extends Mock implements VideoApiService {}
 
 class MockVideoRepository extends Mock implements VideoRepository {}
+
+class MockAuthLocalDataSource extends Mock implements AuthLocalDataSource {}
+
+// Firebase — mocked at the SDK surface, because the repositories talk to it
+// directly rather than through a datasource of their own.
+class MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
+class MockUser extends Mock implements User {}
+
+class MockUserCredential extends Mock implements UserCredential {}
+
+class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
+
+// Firestore seals its reference types, so the analyser objects to
+// implementing them. Mocking them is still the only way to test a repository
+// that talks to Firestore directly — the alternative is a fake Firestore
+// package, a dependency for test code alone. The ignores are scoped to these
+// two declarations.
+// ignore: subtype_of_sealed_class
+class MockCollectionReference extends Mock implements CollectionReference<Map<String, dynamic>> {}
+
+// ignore: subtype_of_sealed_class
+class MockDocumentReference extends Mock implements DocumentReference<Map<String, dynamic>> {}
 
 /// Registers the values `any()` needs to construct when it stands in for a
 /// non-nullable argument. Call once per test file, in `setUpAll`.
@@ -126,4 +182,13 @@ void registerCommonFallbacks() {
   registerFallbackValue(const GetTrailerParams(mediaId: 0, mediaType: MediaType.movie));
   registerFallbackValue(const DiscoverMoviesParams());
   registerFallbackValue(const DiscoverSeriesParams());
+  registerFallbackValue(EmailAuthProvider.credential(email: '', password: ''));
+  registerFallbackValue(const ReviewReport(
+    reviewId: '',
+    author: '',
+    mediaId: 0,
+    mediaType: MediaType.movie,
+    reason: ReportReason.other,
+    excerpt: '',
+  ));
 }

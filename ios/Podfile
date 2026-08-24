@@ -34,6 +34,12 @@ target 'Runner' do
   target 'RunnerTests' do
     inherit! :search_paths
   end
+
+  # Patrol drives the app from a UI testing bundle, which needs the plugin's
+  # own pod — `:complete` rather than `:search_paths`.
+  target 'RunnerUITests' do
+    inherit! :complete
+  end
 end
 
 post_install do |installer|

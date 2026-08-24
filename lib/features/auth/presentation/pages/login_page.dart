@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../config/routes/app_router.gr.dart';
 import '../../../../config/theme/app_spacing.dart';
 import '../../../../core/custom/custom_button.dart';
+import '../../../../core/cubit/session_cubit.dart';
 import '../../../../core/extensions/context_extension.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../injection_container.dart';
@@ -76,11 +77,13 @@ class _LoginViewState extends State<_LoginView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AuthEmailField(
+                hintText: "example@gmail.com",
                 controller: _emailController,
                 onSubmitted: _passwordFocus.requestFocus,
               ),
               AppGap.vertical(AppSpacing.md),
               AuthPasswordField(
+                hintText: "******",
                 controller: _passwordController,
                 focusNode: _passwordFocus,
                 label: context.l10n.authPassword,
@@ -96,12 +99,37 @@ class _LoginViewState extends State<_LoginView> {
         ),
       ),
       submitButton: _SubmitButton(onPressed: _submit),
-      footer: AuthFooter(
-        prompt: context.l10n.authNoAccount,
-        action: context.l10n.authSignUp,
-        onPressed: () => context.router.push(const RegisterRoute()),
+      footer: Column(
+        spacing: AppSpacing.sm,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AuthFooter(
+            prompt: context.l10n.authNoAccount,
+            action: context.l10n.authSignUp,
+            onPressed: () => context.router.push(const RegisterRoute()),
+          ),
+          // Quieter than either of the two above it: an account is still the
+          // way most people should arrive, and this is the door for everyone
+          // who wants to see what the app is first.
+          TextButton(
+            onPressed: _continueAsGuest,
+            child: Text(context.l10n.authContinueAsGuest, style: context.styles.footerPrompt),
+          ),
+        ],
       ),
     );
+  }
+
+  /// Into the app with no account at all. Nothing is created anywhere — the
+  /// whole session is a flag on this device, which is why there is nothing to
+  /// undo but a sign-in.
+  Future<void> _continueAsGuest() async {
+    final router = context.router;
+
+    await context.read<SessionCubit>().startGuestSession();
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    await router.replace(const WrapperRoute());
   }
 
   Future<void> _submit() async {
@@ -109,6 +137,7 @@ class _LoginViewState extends State<_LoginView> {
     if (!_formKey.currentState!.validate()) return;
 
     final router = context.router;
+    final session = context.read<SessionCubit>();
     final outcome = await context.read<LoginCubit>().login(
           email: _emailController.text.trim(),
           password: _passwordController.text,
@@ -116,6 +145,10 @@ class _LoginViewState extends State<_LoginView> {
 
     // A failure is already on screen via the page's BlocListener.
     if (outcome == LoginOutcome.failed) return;
+
+    // Signing in ends any guest session; the cubit above the router has to be
+    // told, or the account tab greets a signed-in user as "Guest".
+    await session.refresh();
 
     FocusManager.instance.primaryFocus?.unfocus();
     router.replace(outcome == LoginOutcome.needsProfile ? const SetProfileRoute() : const WrapperRoute());
@@ -134,19 +167,23 @@ class _RememberMe extends StatelessWidget {
       builder: (context, isChecked) {
         return Align(
           alignment: Alignment.centerLeft,
-          child: InkWell(
-            borderRadius: AppRadius.smAll,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            // borderRadius: AppRadius.smAll,
             onTap: () => context.read<LoginCubit>().changeCheckBox(!isChecked),
-            child: Padding(
-              padding: EdgeInsets.only(right: AppSpacing.md),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // The row owns the gesture, so the box only has to draw.
-                  IgnorePointer(child: Checkbox(value: isChecked, onChanged: (_) {})),
-                  Text(context.l10n.authRememberMe, style: context.styles.footerPrompt),
-                ],
-              ),
+            child: Row(
+              spacing: AppSpacing.md,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // The row owns the gesture, so the box only has to draw.
+                Checkbox(
+                  value: isChecked,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+                  onChanged: (_) => context.read<LoginCubit>().changeCheckBox(!isChecked),
+                ),
+                Text(context.l10n.authRememberMe, style: context.styles.footerPrompt),
+              ],
             ),
           ),
         );

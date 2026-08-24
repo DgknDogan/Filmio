@@ -34,8 +34,7 @@ void main() {
   });
 
   test('a rejected credential surfaces the mapped message', () async {
-    when(() => login.call(params: any(named: 'params')))
-        .thenAnswer((_) async => const Left(AuthFailure('Wrong e-mail or password.', code: 'wrong-password')));
+    when(() => login.call(params: any(named: 'params'))).thenAnswer((_) async => const Left(AuthFailure('Wrong e-mail or password.', code: 'wrong-password')));
     final cubit = build();
 
     final outcome = await cubit.login(email: 'a@b.c', password: 'x');

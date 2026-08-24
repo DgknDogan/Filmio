@@ -50,7 +50,10 @@ class _Separator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-      child: Text('·', style: style.copyWith(color: context.palette.inputBorder)),
+      // Quiet, but quiet relative to the line it punctuates: [inputBorder] is
+      // a hairline meant for a drawn edge, and on a light page it left the dot
+      // at 1.2:1 — which is not a separator, it is a missing one.
+      child: Text('·', style: style.copyWith(color: (style.color ?? context.palette.textSecondary).withValues(alpha: 0.55))),
     );
   }
 }

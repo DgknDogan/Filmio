@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/enums/discover_sort.dart';
@@ -7,6 +8,7 @@ import '../../../../core/models/paginated_list.dart';
 import '../../../../core/network/api_guard.dart';
 import '../../../../core/network/discover_query.dart';
 import '../../../../core/resource/failure.dart';
+import '../../../../core/resource/failure_mapper.dart';
 import '../../domain/entities/movie.dart';
 import '../../domain/repositories/movie_repository.dart';
 import '../datasources/movie_api_service.dart';
@@ -18,7 +20,11 @@ class MovieRepositoryImpl extends MovieRepository {
 
   final MovieApiService _movieApiService;
 
-  MovieRepositoryImpl(this._movieApiService);
+  /// Only the recommendation service needs this: it authenticates as the user,
+  /// not as the app.
+  final FirebaseAuth _auth;
+
+  MovieRepositoryImpl(this._movieApiService, this._auth);
 
   @override
   Future<Either<Failure, List<MovieEntity>>> getPopularMovies() {
@@ -55,6 +61,36 @@ class MovieRepositoryImpl extends MovieRepository {
       () => _movieApiService.getSimilarMovies(movieId: movieId, language: _language, page: _firstPage),
       _toEntities,
     );
+  }
+
+  @override
+  Future<Either<Failure, MovieEntity>> getMovieDetails({required int movieId}) {
+    return guardApiCall(
+      () => _movieApiService.getMovieDetails(movieId: movieId, language: _language),
+      (body) => body.toEntity(),
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<int>>> getRecommendedMovieIds({int? limit}) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return const Left(AuthFailure('Sign in to see what we would recommend.'));
+    }
+
+    try {
+      final token = await user.getIdToken();
+      if (token == null) {
+        return const Left(AuthFailure('Could not verify your session. Sign in again.'));
+      }
+
+      return guardApiCall(
+        () => _movieApiService.getRecommendations(authorization: 'Bearer $token', limit: limit),
+        (body) => body.movieIds ?? const [],
+      );
+    } on FirebaseException catch (e) {
+      return Left(failureFromFirebase(e));
+    }
   }
 
   @override

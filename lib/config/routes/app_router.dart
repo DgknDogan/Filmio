@@ -66,9 +66,8 @@ class AppRouter extends RootStackRouter {
         AutoRoute(
           page: SettingsRoute.page,
         ),
-        CustomRoute(
-          page: TrailerRoute.page,
-          transitionsBuilder: TransitionsBuilders.fadeIn,
+        AutoRoute(
+          page: PrivacyPolicyRoute.page,
         ),
         CustomRoute(
           page: MovieDiscoverRoute.page,

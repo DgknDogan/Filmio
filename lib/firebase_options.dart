@@ -50,18 +50,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyC07RtO2wf7NfHNPe7hoLZR4Jw7-qJV9vI',
-    appId: '1:640047605009:android:826779897f5c522d0d18b0',
+    appId: '1:640047605009:android:9e5d537869c831b10d18b0',
     messagingSenderId: '640047605009',
     projectId: 'filmio-74b41',
     storageBucket: 'filmio-74b41.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAFEv4nh8Ca4xORaUBtinDvXAHtJrmCj6Y',
-    appId: '1:640047605009:ios:42a39e75e29b4c310d18b0',
+    appId: '1:640047605009:ios:273bf836227885260d18b0',
     messagingSenderId: '640047605009',
     projectId: 'filmio-74b41',
     storageBucket: 'filmio-74b41.firebasestorage.app',
-    iosBundleId: 'com.example.filmio',
+    iosBundleId: 'com.dogukan.filmio',
   );
 }

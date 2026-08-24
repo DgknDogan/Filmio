@@ -72,7 +72,7 @@ class AuthLayout extends StatelessWidget {
                       child: Column(
                         children: [
                           Padding(padding: AppInsets.authHorizontal, child: submitButton),
-                          AppGap.vertical(AppSpacing.sm),
+                          AppGap.vertical(AppSpacing.lg),
                           Padding(
                             padding: EdgeInsets.only(bottom: AppSpacing.lg),
                             child: footer,

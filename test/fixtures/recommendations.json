@@ -1,0 +1,6 @@
+{
+  "movie_ids": [11, 550, 912649],
+  "count": 3,
+  "based_on": 7,
+  "strategy": "liked_genres"
+}

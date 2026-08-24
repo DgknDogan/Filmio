@@ -384,7 +384,6 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final decorations = AppDecorations(context.palette);
-
     return AnimatedBuilder(
       animation: Listenable.merge([scroll, expansion]),
       builder: (context, child) {
@@ -394,7 +393,7 @@ class _TopBar extends StatelessWidget {
         return DecoratedBox(
           // The ground the block gives up, the bar takes on — at the same rate,
           // so the two read as one exchange rather than as two events.
-          decoration: decorations.topBarScrim(_gone(scroll)),
+          decoration: decorations.topBarScrim(_gone(scroll) * 1.5),
           child: SafeArea(
             bottom: false,
             child: Padding(
@@ -489,7 +488,7 @@ class _SearchControl extends StatelessWidget {
                   // so the fill has to travel too.
                   color: Color.lerp(palette.surface.withValues(alpha: 0.7), palette.surfaceRaised, settled),
                   borderRadius: AppRadius.pillAll,
-                  border: Border.all(color: palette.inputBorder),
+                  border: Border.all(color: palette.controlBorder),
                 ),
                 // The field's own insides rather than a copy of them, so the
                 // hint is in the same place here as it is on the search screen

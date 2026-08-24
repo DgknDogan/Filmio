@@ -12,6 +12,7 @@ import '../extensions/context_extension.dart';
 class CustomTextField extends StatefulWidget {
   /// The field's name, drawn above it.
   final String text;
+  final String hintText;
 
   final bool isObsecure;
   final TextEditingController controller;
@@ -36,6 +37,7 @@ class CustomTextField extends StatefulWidget {
     required this.isObsecure,
     required this.controller,
     required this.hasError,
+    required this.hintText,
     this.prefixIcon,
     this.focusNode,
     this.keyboardType,
@@ -83,6 +85,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           // The counter is noise on a name field; the limit still applies.
           buildCounter: (context, {required currentLength, required isFocused, required maxLength}) => null,
           decoration: InputDecoration(
+            hintText: widget.hintText,
             prefixIcon: widget.prefixIcon == null
                 ? null
                 : Padding(

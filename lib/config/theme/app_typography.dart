@@ -100,10 +100,12 @@ class AppTextStyles {
       );
 
   /// The word mark where it is a label rather than the subject — over the
-  /// featured artwork at the top of a tab.
+  /// featured artwork at the top of a tab, and then over the bar that takes
+  /// that block's ground as it scrolls away. Both of those resolve to the
+  /// page's own colour, so it is [AppPalette.onBackdrop] and not `onImage`.
   TextStyle get brandSmall => _font(
         fontSize: 13.sp,
-        color: _palette.onImage,
+        color: _palette.onBackdrop,
         fontWeight: FontWeight.w600,
         letterSpacing: 13.sp * 0.3,
       );
@@ -137,10 +139,11 @@ class AppTextStyles {
         letterSpacing: 10.sp * 0.16,
       );
 
-  /// The title of a film over its own artwork.
+  /// The title of a film over its own artwork, inside the featured block —
+  /// which is to say over the scrim that washes that artwork towards the page.
   TextStyle get featureTitle => _font(
         fontSize: 32.sp,
-        color: _palette.onImage,
+        color: _palette.onBackdrop,
         fontWeight: FontWeight.w500,
         letterSpacing: 32.sp * -0.03,
         height: 1.05,
@@ -166,8 +169,8 @@ class AppTextStyles {
   /// Year, runtime, certificate — the quiet line under a title.
   TextStyle get meta => _font(fontSize: 11.5.sp, color: _palette.textSecondary);
 
-  /// The same line where it sits on artwork.
-  TextStyle get metaOnImage => _font(fontSize: 12.sp, color: _palette.onImageMuted);
+  /// The same line where it sits on the featured block's scrimmed artwork.
+  TextStyle get metaOnImage => _font(fontSize: 12.sp, color: _palette.onBackdropMuted);
 
   /// A rating, next to its star.
   TextStyle get ratingLarge => _font(

@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/utils/content_filter.dart';
+
 /// One review of a film or a series.
 ///
 /// TMDB nests the author's name, handle, avatar and score under
@@ -54,6 +56,14 @@ class ReviewEntity extends Equatable {
     }
     return '';
   }
+
+  /// Whether the review reads as something to warn about before showing.
+  ///
+  /// A property of the text, so it is computed here next to [displayName]
+  /// rather than carried as a field somebody has to remember to set. The card
+  /// folds a flagged review behind a warning instead of dropping it — the
+  /// reader decides, which is the difference between filtering and censoring.
+  bool get isObjectionable => ContentFilter.isObjectionable(content);
 
   @override
   List<Object?> get props => [

@@ -22,6 +22,16 @@ class FeaturedHero extends StatelessWidget {
   /// know how much of itself the block is taking.
   static double get height => 430.h;
 
+  /// The width of the poster held to the left of the text — the same width the
+  /// details screen gives its poster, so the flight between the two is a move
+  /// rather than a resize. Public for the same reason [height] is: the
+  /// skeleton drawn while the block is loading has to reserve the same space,
+  /// and a second copy of the number would drift.
+  static double get posterWidth => 118.w;
+
+  /// The height of the filled action under the text.
+  static double get actionHeight => 44.h;
+
   /// The still behind the whole block.
   final String imageUrl;
 
@@ -103,7 +113,7 @@ class FeaturedHero extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     SizedBox(
-                      width: _posterWidth,
+                      width: posterWidth,
                       child: PosterCard(
                         imageUrl: posterUrl,
                         title: title,
@@ -138,10 +148,6 @@ class FeaturedHero extends StatelessWidget {
   }
 }
 
-/// The same width the details screen gives its poster, so the flight between
-/// the two is a move rather than a resize.
-double get _posterWidth => 118.w;
-
 /// The still behind the block is a ground rather than a picture: out of focus
 /// and drained of most of its colour, so the poster on top of it is the one
 /// thing on the screen that is sharp and the one thing that is in colour.
@@ -149,7 +155,7 @@ class _Backdrop extends StatelessWidget {
   final String url;
 
   /// How much of the still's own colour survives. 0 is grey.
-  static const double _saturation = 0.25;
+  static const double _saturation = 0.5;
   static const double _blur = 6;
 
   /// Draining the colour lifts the mid-tones, which leaves the wordmark short
@@ -214,10 +220,10 @@ class _Actions extends StatelessWidget {
       children: [
         Expanded(
           child: SizedBox(
-            height: 44.h,
+            height: FeaturedHero.actionHeight,
             child: ElevatedButton(
               onPressed: onPressed,
-              style: ElevatedButton.styleFrom(minimumSize: Size.fromHeight(44.h)),
+              style: ElevatedButton.styleFrom(minimumSize: Size.fromHeight(FeaturedHero.actionHeight)),
               child: Text(label),
             ),
           ),
@@ -266,7 +272,7 @@ class SquareIconButton extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: AppRadius.smAll,
               color: palette.surfaceRaised.withValues(alpha: 0.6),
-              border: Border.all(color: palette.inputBorder),
+              border: Border.all(color: palette.controlBorder),
             ),
             child: Icon(icon, size: AppSpacing.xl, color: iconColor ?? palette.textPrimary),
           ),

@@ -35,10 +35,6 @@ class DiscoverFilterSheet extends StatefulWidget {
     return showModalBottomSheet<DiscoverFilters>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: context.palette.sheet,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
-      ),
       builder: (context) => DiscoverFilterSheet(filters: filters, isSeries: isSeries),
     );
   }

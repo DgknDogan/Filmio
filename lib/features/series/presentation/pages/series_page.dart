@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../config/routes/app_router.gr.dart';
 import '../../../../core/custom/app_error_view.dart';
+import '../../../../core/custom/browse_skeleton.dart';
 import '../../../../core/custom/browse_view.dart';
 import '../../../../core/custom/featured_hero.dart';
 import '../../../../core/enums/discover_sort.dart';
@@ -36,12 +37,32 @@ class SeriesHomePage extends StatelessWidget {
           builder: (context, state) {
             return switch (state) {
               SeriesSuccess() => _Content(state: state),
-              SeriesLoading() => const Center(child: CircularProgressIndicator()),
+              SeriesLoading() => const _Loading(),
               SeriesError() => AppErrorView(message: state.failure.message),
             };
           },
         ),
       ),
+    );
+  }
+}
+
+/// The tab before its rows have arrived — the films tab's waiting screen with
+/// the series headings in it.
+class _Loading extends StatelessWidget {
+  const _Loading();
+
+  @override
+  Widget build(BuildContext context) {
+    final hint = context.l10n.seriesSearchHint;
+
+    return BrowseSkeleton(
+      searchHeroTag: _searchHeroTag,
+      searchHint: hint,
+      onSearch: () => context.router.push(
+        SeriesSearchRoute(heroTag: _searchHeroTag, hintText: hint),
+      ),
+      rowTitles: [context.l10n.seriesPopular, context.l10n.seriesTop],
     );
   }
 }

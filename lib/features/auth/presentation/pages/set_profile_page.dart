@@ -129,6 +129,7 @@ class _SetNameState extends State<_SetName> with TickerProviderStateMixin {
               ),
               AppGap.vertical(AppSpacing.xxxl),
               CustomTextField(
+                hintText: "Name",
                 hasError: state.hasError,
                 maxLength: 10,
                 controller: textEditingController,
@@ -281,7 +282,7 @@ class _SwitchGenderArrow extends StatelessWidget {
       onTap: () => context.read<ProfileCubit>().changeOption(),
       child: Align(
         alignment: alignment,
-        child: Icon(icon, size: 25.r, color: context.palette.onImage),
+        child: Icon(icon, size: 25.r, color: context.palette.icon),
       ),
     );
   }

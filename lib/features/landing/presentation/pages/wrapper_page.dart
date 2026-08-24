@@ -22,7 +22,7 @@ class WrapperPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => MovieBloc(getIt(), getIt())..add(GetMovies()), lazy: false),
+        BlocProvider(create: (context) => MovieBloc(getIt(), getIt(), getIt(), getIt())..add(GetMovies()), lazy: false),
         BlocProvider(create: (context) => SeriesBloc(getIt(), getIt())..add(GetSeries()), lazy: false),
         BlocProvider(create: (context) => AccountCubit(getIt()), lazy: false),
       ],

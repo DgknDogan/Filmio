@@ -15,12 +15,25 @@ class LikedMoviesRepositoryImpl extends LikedMoviesRepository {
 
   LikedMoviesRepositoryImpl(this._firestore, this._auth);
 
-  DocumentReference<Map<String, dynamic>> get _userDoc => _firestore.userDoc(_auth.currentUser!.uid);
+  /// The signed-in user's document, or null when nobody is signed in.
+  ///
+  /// Nullable rather than a bang: a guest reaches these screens with no
+  /// Firebase user at all, and a list that cannot be read is a failure to
+  /// report, not a crash.
+  DocumentReference<Map<String, dynamic>>? get _userDoc {
+    final uid = _auth.currentUser?.uid;
+    return uid == null ? null : _firestore.userDoc(uid);
+  }
+
+  static const _signedOut = AuthFailure('Sign in to keep the titles you like.');
 
   @override
   Future<Either<Failure, List<MovieEntity>>> getLikedMovies() async {
+    final doc = _userDoc;
+    if (doc == null) return const Left(_signedOut);
+
     try {
-      final userDoc = await _userDoc.get();
+      final userDoc = await doc.get();
 
       if (!userDoc.exists || userDoc.data() == null) {
         return const Left(ServerFailure('That record no longer exists.'));
@@ -37,8 +50,11 @@ class LikedMoviesRepositoryImpl extends LikedMoviesRepository {
 
   @override
   Future<Either<Failure, Unit>> likeMovie({required MovieEntity movie}) async {
+    final doc = _userDoc;
+    if (doc == null) return const Left(_signedOut);
+
     try {
-      await _userDoc.update({
+      await doc.update({
         "liked_movies": FieldValue.arrayUnion([MovieModel.fromEntity(movie).toJson()]),
       });
       return const Right(unit);
@@ -49,8 +65,11 @@ class LikedMoviesRepositoryImpl extends LikedMoviesRepository {
 
   @override
   Future<Either<Failure, Unit>> dislikeMovie({required MovieEntity movie}) async {
+    final doc = _userDoc;
+    if (doc == null) return const Left(_signedOut);
+
     try {
-      await _userDoc.update({
+      await doc.update({
         "liked_movies": FieldValue.arrayRemove([MovieModel.fromEntity(movie).toJson()]),
       });
       return const Right(unit);

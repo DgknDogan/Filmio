@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../config/routes/app_router.gr.dart';
 import '../../../../config/theme/app_spacing.dart';
 import '../../../../core/custom/custom_button.dart';
 import '../../../../core/extensions/context_extension.dart';
@@ -81,11 +82,13 @@ class _RegisterViewState extends State<_RegisterView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AuthEmailField(
+                hintText: "example@gmail.com",
                 controller: _emailController,
                 onSubmitted: _passwordFocus.requestFocus,
               ),
               AppGap.vertical(AppSpacing.md),
               AuthPasswordField(
+                hintText: "******",
                 controller: _passwordController,
                 focusNode: _passwordFocus,
                 label: context.l10n.authPassword,
@@ -98,6 +101,7 @@ class _RegisterViewState extends State<_RegisterView> {
               // Catching a typo here costs one field; catching it after the
               // account exists costs a password reset.
               AuthPasswordField(
+                hintText: "******",
                 controller: _confirmationController,
                 focusNode: _confirmationFocus,
                 label: context.l10n.authConfirmPassword,
@@ -111,10 +115,17 @@ class _RegisterViewState extends State<_RegisterView> {
         ),
       ),
       submitButton: _SubmitButton(onPressed: _submit),
-      footer: AuthFooter(
-        prompt: context.l10n.authHaveAccount,
-        action: context.l10n.authSignIn,
-        onPressed: () => context.router.maybePop(),
+      footer: Column(
+        spacing: AppSpacing.sm,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AuthFooter(
+            prompt: context.l10n.authHaveAccount,
+            action: context.l10n.authSignIn,
+            onPressed: () => context.router.maybePop(),
+          ),
+          const _Consent(),
+        ],
       ),
     );
   }
@@ -133,6 +144,29 @@ class _RegisterViewState extends State<_RegisterView> {
 
     FocusManager.instance.primaryFocus?.unfocus();
     router.maybePop();
+  }
+}
+
+/// The consent line, directly above the button that creates the account.
+///
+/// It sits here rather than buried in Settings because this is the moment the
+/// e-mail address is handed over, and guideline 5.1.1(ii) asks for the terms
+/// of that to be in front of the person agreeing to them. The policy opens as
+/// a screen, so reading it does not cost the half-filled form.
+class _Consent extends StatelessWidget {
+  const _Consent();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(context.l10n.authConsentPrompt, style: context.styles.footerPrompt),
+        TextButton(
+          onPressed: () => context.router.push(const PrivacyPolicyRoute()),
+          child: Text(context.l10n.settingsPrivacyPolicy),
+        ),
+      ],
+    );
   }
 }
 

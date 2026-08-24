@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../config/theme/app_spacing.dart';
+import '../../../../core/cubit/session_cubit.dart';
 import '../../../../core/custom/circle_icon_button.dart';
+import '../../../../core/custom/guest_prompt.dart';
 import '../../../../core/custom/details_scaffold.dart';
 import '../../../../core/custom/section_header.dart';
 import '../../../../core/extensions/context_extension.dart';
@@ -13,6 +15,7 @@ import '../../../../core/extensions/string_extension.dart';
 import '../../../../core/utils/hero_tags.dart';
 import '../../../../injection_container.dart';
 import '../../../review/presentation/cubit/reviews_cubit.dart';
+import '../../../review/presentation/cubit/review_moderation_cubit.dart';
 import '../../../review/presentation/widgets/reviews_section.dart';
 import '../../../video/presentation/cubit/trailer_cubit.dart';
 import '../../../video/presentation/widgets/trailer_section.dart';
@@ -45,6 +48,9 @@ class SeriesDetailsPage extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => ReviewsCubit(getIt(), mediaId: series.id, mediaType: MediaType.series),
+        ),
+        BlocProvider(
+          create: (context) => ReviewModerationCubit(getIt(), getIt(), getIt()),
         ),
         BlocProvider(
           create: (context) => TrailerCubit(getIt(), mediaId: series.id, mediaType: MediaType.series),
@@ -85,7 +91,7 @@ class _DetailsView extends StatelessWidget {
         // this page you can actually watch.
         TrailerSection(fallbackImageUrl: backdropUrl),
         const _SimilarSeries(),
-        const ReviewsSection(),
+        ReviewsSection(mediaId: series.id ?? 0, mediaType: MediaType.series),
       ],
     );
   }
@@ -98,6 +104,8 @@ class _LikeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isGuest = context.select((SessionCubit cubit) => cubit.state.isGuest);
+
     // Only the like flag matters here, so only it triggers a rebuild.
     return BlocSelector<SeriesDetailsCubit, SeriesDetailsState, bool>(
       selector: (state) => state.isSeriesLiked,
@@ -106,9 +114,14 @@ class _LikeButton extends StatelessWidget {
           icon: isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
           label: isLiked ? context.l10n.unlikeAction : context.l10n.likeAction,
           iconColor: context.palette.accentSoft,
-          onPressed: () => isLiked
-              ? context.read<SeriesDetailsCubit>().dislikeSeries(series: series)
-              : context.read<SeriesDetailsCubit>().likeSeries(series: series),
+          // The heart stays where it is for a guest rather than disappearing:
+          // it is the thing worth having an account for, and a control that
+          // is not there cannot say so.
+          onPressed: () => isGuest
+              ? showGuestPrompt(context, title: context.l10n.guestLikeTitle, body: context.l10n.guestLikeBody)
+              : isLiked
+                  ? context.read<SeriesDetailsCubit>().dislikeSeries(series: series)
+                  : context.read<SeriesDetailsCubit>().likeSeries(series: series),
         );
       },
     );

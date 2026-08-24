@@ -12,6 +12,9 @@ import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/domain/repositories/auth_repository.dart';
 import 'features/auth/domain/usecases/is_profile_complete.dart';
 import 'features/auth/domain/usecases/login.dart';
+import 'core/cubit/session_cubit.dart';
+import 'features/auth/domain/usecases/delete_account.dart';
+import 'features/auth/domain/usecases/guest_session.dart';
 import 'features/auth/domain/usecases/logout.dart';
 import 'features/auth/domain/usecases/register.dart';
 import 'features/auth/domain/usecases/restore_session.dart';
@@ -26,15 +29,21 @@ import 'features/movie/domain/repositories/movie_repository.dart';
 import 'features/movie/domain/usecases/discover_movies.dart';
 import 'features/movie/domain/usecases/dislike_movie.dart';
 import 'features/movie/domain/usecases/get_liked_movies.dart';
+import 'features/movie/domain/usecases/get_movie_details.dart';
 import 'features/movie/domain/usecases/get_popular_movies.dart';
+import 'features/movie/domain/usecases/get_recommended_movie_ids.dart';
 import 'features/movie/domain/usecases/get_similar_movies.dart';
 import 'features/movie/domain/usecases/get_top_rated_movies.dart';
 import 'features/movie/domain/usecases/like_movie.dart';
 import 'features/movie/domain/usecases/search_movies.dart';
 import 'features/review/data/datasources/review_api_service.dart';
+import 'features/review/data/datasources/review_moderation_local_datasource.dart';
+import 'features/review/data/repositories/review_moderation_repository_impl.dart';
 import 'features/review/data/repositories/review_repository_impl.dart';
+import 'features/review/domain/repositories/review_moderation_repository.dart';
 import 'features/review/domain/repositories/review_repository.dart';
 import 'features/review/domain/usecases/get_reviews.dart';
+import 'features/review/domain/usecases/moderate_reviews.dart';
 import 'features/series/data/datasources/series_api_service.dart';
 import 'features/series/data/repositories/liked_series_repository_impl.dart';
 import 'features/series/data/repositories/series_repository_impl.dart';
@@ -69,7 +78,7 @@ Future<void> initDependencies() async {
 
   // Dependencies
   getIt.registerSingleton<MovieApiService>(MovieApiService(getIt()));
-  getIt.registerSingleton<MovieRepository>(MovieRepositoryImpl(getIt()));
+  getIt.registerSingleton<MovieRepository>(MovieRepositoryImpl(getIt(), getIt()));
 
   getIt.registerSingleton<LikedMoviesRepository>(LikedMoviesRepositoryImpl(getIt(), getIt()));
 
@@ -81,6 +90,8 @@ Future<void> initDependencies() async {
   // Reviews — one service and one repository for both catalogues.
   getIt.registerSingleton<ReviewApiService>(ReviewApiService(getIt()));
   getIt.registerSingleton<ReviewRepository>(ReviewRepositoryImpl(getIt()));
+  getIt.registerSingleton<ReviewModerationLocalDataSource>(ReviewModerationLocalDataSource(sharedPreferences));
+  getIt.registerSingleton<ReviewModerationRepository>(ReviewModerationRepositoryImpl(getIt(), getIt(), getIt()));
 
   // Trailers — one service and one repository for both catalogues.
   getIt.registerSingleton<VideoApiService>(VideoApiService(getIt()));
@@ -103,6 +114,8 @@ Future<void> initDependencies() async {
   getIt.registerSingleton<SearchMoviesUseCase>(SearchMoviesUseCase(getIt()));
   getIt.registerSingleton<GetSimilarMoviesUseCase>(GetSimilarMoviesUseCase(getIt()));
   getIt.registerSingleton<DiscoverMoviesUseCase>(DiscoverMoviesUseCase(getIt()));
+  getIt.registerSingleton<GetMovieDetailsUseCase>(GetMovieDetailsUseCase(getIt()));
+  getIt.registerSingleton<GetRecommendedMovieIdsUseCase>(GetRecommendedMovieIdsUseCase(getIt()));
   getIt.registerSingleton<SearchSeriesUseCase>(SearchSeriesUseCase(getIt()));
 
   getIt.registerSingleton<GetTopRatedSeriesUseCase>(GetTopRatedSeriesUseCase(getIt()));
@@ -114,11 +127,18 @@ Future<void> initDependencies() async {
   getIt.registerSingleton<DislikeSeriesUseCase>(DislikeSeriesUseCase(getIt()));
 
   getIt.registerSingleton<GetReviewsUseCase>(GetReviewsUseCase(getIt()));
+  getIt.registerSingleton<ReportReviewUseCase>(ReportReviewUseCase(getIt()));
+  getIt.registerSingleton<BlockReviewAuthorUseCase>(BlockReviewAuthorUseCase(getIt()));
+  getIt.registerSingleton<GetModerationUseCase>(GetModerationUseCase(getIt()));
   getIt.registerSingleton<GetTrailerUseCase>(GetTrailerUseCase(getIt()));
 
   getIt.registerSingleton<LoginUseCase>(LoginUseCase(getIt()));
   getIt.registerSingleton<RegisterUseCase>(RegisterUseCase(getIt()));
   getIt.registerSingleton<LogoutUseCase>(LogoutUseCase(getIt()));
+  getIt.registerSingleton<DeleteAccountUseCase>(DeleteAccountUseCase(getIt()));
+  getIt.registerSingleton<ContinueAsGuestUseCase>(ContinueAsGuestUseCase(getIt()));
+  getIt.registerSingleton<EndGuestSessionUseCase>(EndGuestSessionUseCase(getIt()));
+  getIt.registerSingleton<IsGuestUseCase>(IsGuestUseCase(getIt()));
   getIt.registerSingleton<RestoreSessionUseCase>(RestoreSessionUseCase(getIt()));
   getIt.registerSingleton<IsProfileCompleteUseCase>(IsProfileCompleteUseCase(getIt()));
   getIt.registerSingleton<UpdateDisplayNameUseCase>(UpdateDisplayNameUseCase(getIt()));
@@ -130,4 +150,5 @@ Future<void> initDependencies() async {
   getIt.registerFactory<LoginCubit>(() => LoginCubit(getIt(), getIt()));
   getIt.registerFactory<SplashCubit>(() => SplashCubit(getIt()));
   getIt.registerFactory<ThemeCubit>(() => ThemeCubit(getIt()));
+  getIt.registerFactory<SessionCubit>(() => SessionCubit(getIt(), getIt(), getIt()));
 }

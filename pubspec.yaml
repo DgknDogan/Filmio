@@ -47,7 +47,6 @@ dependencies:
   # Firebase
   firebase_core: ^3.10.1
   firebase_auth: ^5.4.1
-  firebase_storage: ^12.4.1
   cloud_firestore: ^5.6.2
 
   # Local storage
@@ -65,7 +64,11 @@ dependencies:
   intl: ^0.20.2
   google_fonts: ^8.2.1
   rxdart: ^0.28.0
-  pod_player: 0.2.2
+
+  # Opens a trailer in the YouTube app, or the browser if it is not
+  # installed. The app deliberately does not embed a player — see the note
+  # in features/video/presentation/widgets/trailer_section.dart.
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
@@ -93,9 +96,9 @@ patrol:
   app_name: Filmio
   test_directory: integration_test
   android:
-    package_name: com.example.filmio
+    package_name: com.dogukan.filmio
   ios:
-    bundle_id: com.example.filmio
+    bundle_id: com.dogukan.filmio
 
 # The following section is specific to Flutter packages.
 flutter:

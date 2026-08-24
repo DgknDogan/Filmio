@@ -79,12 +79,18 @@ void main() {
   });
 
   group('host', () {
-    test('a Vimeo video is as playable as a YouTube one', () async {
-      stub([video(key: '12345', site: VideoSite.vimeo, size: 1080)]);
+    test('a Vimeo video is skipped: only YouTube can be handed off', () async {
+      stub([video(key: '12345', site: VideoSite.vimeo, size: 1080), video(key: 'youtube', size: 360)]);
 
       final trailer = await pick();
-      expect(trailer?.key, '12345');
-      expect(trailer?.site, VideoSite.vimeo);
+      expect(trailer?.key, 'youtube');
+      expect(trailer?.site, VideoSite.youtube);
+    });
+
+    test('a title whose only video is on Vimeo has no trailer at all', () async {
+      stub([video(key: '12345', site: VideoSite.vimeo, size: 1080)]);
+
+      expect(await pick(), isNull);
     });
 
     test('a host the app cannot open is skipped even when it is the largest', () async {

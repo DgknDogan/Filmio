@@ -181,6 +181,12 @@ abstract class AppLocalizations {
   /// **'Sign in'**
   String get authSignIn;
 
+  /// Enters the app as a guest, from the login screen
+  ///
+  /// In en, this message translates to:
+  /// **'Look around without an account'**
+  String get authContinueAsGuest;
+
   /// Submit button on the login screen
   ///
   /// In en, this message translates to:
@@ -283,6 +289,42 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get accountTitle;
 
+  /// Stands in for the name on the account tab when there is no account
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get guestName;
+
+  /// Explains on the account tab what an account adds
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account to keep the films and series you like, and to get recommendations built from them.'**
+  String get guestAccountPrompt;
+
+  /// Leaves the guest session for the sign-in screen
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account'**
+  String get guestCreateAccount;
+
+  /// Dismisses the prompt to create an account
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get guestNotNow;
+
+  /// Headline of the prompt shown when a guest taps the heart
+  ///
+  /// In en, this message translates to:
+  /// **'Keep this one?'**
+  String get guestLikeTitle;
+
+  /// Explains why the heart needs an account
+  ///
+  /// In en, this message translates to:
+  /// **'Liking a title needs an account — it is where your list lives, and what the recommendations are built from.'**
+  String get guestLikeBody;
+
   /// Title of the series tab
   ///
   /// In en, this message translates to:
@@ -312,6 +354,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recommended for you'**
   String get recommendedForYou;
+
+  /// Shown at the head of the films tab when the recommendation service has nothing to suggest yet
+  ///
+  /// In en, this message translates to:
+  /// **'Like a few films and we\'ll have something to recommend.'**
+  String get recommendedEmpty;
 
   /// Heading of the overview block on a details screen
   ///
@@ -403,23 +451,17 @@ abstract class AppLocalizations {
   /// **'Trailer'**
   String get trailerTitle;
 
-  /// Opens the trailer player
+  /// Accessibility label of the trailer card, which hands the video to YouTube
   ///
   /// In en, this message translates to:
-  /// **'Play trailer'**
+  /// **'Play trailer on YouTube'**
   String get trailerPlay;
 
-  /// Shown when the player cannot open the video the title points at
+  /// Shown when the device has nothing that can open a YouTube link
   ///
   /// In en, this message translates to:
-  /// **'The trailer could not be loaded.'**
-  String get trailerLoadFailed;
-
-  /// Shown when a video is on a host other than YouTube or Vimeo
-  ///
-  /// In en, this message translates to:
-  /// **'This trailer is hosted somewhere the app cannot play.'**
-  String get trailerUnsupported;
+  /// **'Could not open YouTube on this device.'**
+  String get trailerOpenFailed;
 
   /// Heading of the reviews block on a details screen
   ///
@@ -456,6 +498,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Anonymous'**
   String get reviewsUnknownAuthor;
+
+  /// Shown in place of a review the content filter flagged
+  ///
+  /// In en, this message translates to:
+  /// **'This review may contain offensive language.'**
+  String get reviewsFlaggedWarning;
+
+  /// Opens a review that was folded behind the offensive-language warning
+  ///
+  /// In en, this message translates to:
+  /// **'Show anyway'**
+  String get reviewsShowAnyway;
+
+  /// Accessibility label of the menu button on a review card
+  ///
+  /// In en, this message translates to:
+  /// **'Report or hide this review'**
+  String get reviewsMoreActions;
+
+  /// Menu action that opens the report dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Report review'**
+  String get reviewsReport;
+
+  /// Menu action that blocks everything one author writes
+  ///
+  /// In en, this message translates to:
+  /// **'Hide reviews by this author'**
+  String get reviewsBlockAuthor;
+
+  /// Confirms that an author has been blocked
+  ///
+  /// In en, this message translates to:
+  /// **'You will not see reviews by {author} again.'**
+  String reviewsAuthorBlocked(String author);
+
+  /// Headline of the report dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Report this review'**
+  String get reportTitle;
+
+  /// Line under the report dialog's headline
+  ///
+  /// In en, this message translates to:
+  /// **'Pick what is wrong with it. Reports are read by a person, and we answer within three days.'**
+  String get reportBody;
+
+  /// Report reason
+  ///
+  /// In en, this message translates to:
+  /// **'Offensive language'**
+  String get reportReasonOffensiveLanguage;
+
+  /// Report reason
+  ///
+  /// In en, this message translates to:
+  /// **'Hate speech or harassment'**
+  String get reportReasonHateOrHarassment;
+
+  /// Report reason
+  ///
+  /// In en, this message translates to:
+  /// **'Spam or advertising'**
+  String get reportReasonSpam;
+
+  /// Report reason
+  ///
+  /// In en, this message translates to:
+  /// **'Unmarked spoiler'**
+  String get reportReasonSpoiler;
+
+  /// Report reason
+  ///
+  /// In en, this message translates to:
+  /// **'Something else'**
+  String get reportReasonOther;
+
+  /// Confirms a report was filed
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you. That review is hidden and we will look at it.'**
+  String get reportSent;
+
+  /// Shown when filing a report did not work
+  ///
+  /// In en, this message translates to:
+  /// **'Could not send the report. Try again.'**
+  String get reportFailed;
 
   /// Heading of the similar series row on a series' details screen
   ///
@@ -553,6 +685,216 @@ abstract class AppLocalizations {
   /// **'Log Out'**
   String get settingsLogOut;
 
+  /// Takes a guest to the sign-in screen; stands where Log Out does for an account
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get settingsLeaveGuest;
+
+  /// Heading of the credits section in settings
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAbout;
+
+  /// Attribution TMDB's API terms of use require every app calling the API to display
+  ///
+  /// In en, this message translates to:
+  /// **'This product uses the TMDB API but is not endorsed or certified by TMDB.'**
+  String get settingsTmdbAttribution;
+
+  /// Row in settings that opens the privacy policy
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get settingsPrivacyPolicy;
+
+  /// Row in settings that opens a mail draft to the support address
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get settingsSupport;
+
+  /// Shown when the device cannot open a mail draft, with the address to write to by hand
+  ///
+  /// In en, this message translates to:
+  /// **'No mail app to open. Write to {address}.'**
+  String settingsSupportFailed(String address);
+
+  /// Subject line of the mail draft the support row opens
+  ///
+  /// In en, this message translates to:
+  /// **'Filmio support'**
+  String get settingsSupportSubject;
+
+  /// Heading of the destructive section at the foot of settings
+  ///
+  /// In en, this message translates to:
+  /// **'Account removal'**
+  String get settingsDangerZone;
+
+  /// Opens the confirmation dialog that deletes the account
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get settingsDeleteAccount;
+
+  /// Headline of the delete-account confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your account?'**
+  String get deleteAccountTitle;
+
+  /// What deleting the account actually removes
+  ///
+  /// In en, this message translates to:
+  /// **'Your account, the films and series you have liked, and everything else stored against it will be removed permanently. This cannot be undone.'**
+  String get deleteAccountBody;
+
+  /// Line above the password field in the delete-account dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password to confirm.'**
+  String get deleteAccountPasswordPrompt;
+
+  /// Destructive action of the delete-account dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get deleteAccountConfirm;
+
+  /// Dismisses the search screen
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// Line above the register button, before the link to the privacy policy
+  ///
+  /// In en, this message translates to:
+  /// **'By creating an account you agree to the'**
+  String get authConsentPrompt;
+
+  /// Title of the privacy policy screen
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyTitle;
+
+  /// When the policy was last changed
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated 24 August 2026'**
+  String get privacyUpdated;
+
+  /// Opening paragraph of the privacy policy
+  ///
+  /// In en, this message translates to:
+  /// **'Filmio is a catalogue for browsing films and series. This policy explains what the app stores about you, why, and how to get rid of it.'**
+  String get privacyIntro;
+
+  /// Heading of the data collection section
+  ///
+  /// In en, this message translates to:
+  /// **'What we collect'**
+  String get privacyCollectTitle;
+
+  /// Body of the data collection section
+  ///
+  /// In en, this message translates to:
+  /// **'When you create an account we store your e-mail address, the display name you choose, and which of the app\'s built-in avatars you pick. As you use the app we store the films and series you like, against an account identifier issued by Firebase Authentication. That is everything. Filmio asks for no access to your location, contacts, photos, camera, or microphone, and contains no analytics or advertising software.'**
+  String get privacyCollectBody;
+
+  /// Heading of the data use section
+  ///
+  /// In en, this message translates to:
+  /// **'What it is used for'**
+  String get privacyUseTitle;
+
+  /// Body of the data use section
+  ///
+  /// In en, this message translates to:
+  /// **'Your e-mail address and password identify you when you sign in. Your name and avatar appear on your own account screen. Your liked titles fill your lists and feed the recommendations on the home screen. None of it is used for advertising, profiling, or sold to anyone.'**
+  String get privacyUseBody;
+
+  /// Heading of the data sharing section
+  ///
+  /// In en, this message translates to:
+  /// **'Who else sees it'**
+  String get privacyShareTitle;
+
+  /// Body of the data sharing section
+  ///
+  /// In en, this message translates to:
+  /// **'Google Firebase hosts the sign-in service and the database, so your account data is stored on their infrastructure under their own privacy terms. Filmio\'s recommendation service receives the titles you have liked, so that it can suggest others; it is operated by us and keeps no copy beyond the request. Catalogue data — posters, synopses, ratings, reviews — comes from TMDB, and requests for it carry nothing that identifies you.'**
+  String get privacyShareBody;
+
+  /// Heading of the retention section
+  ///
+  /// In en, this message translates to:
+  /// **'How long it is kept'**
+  String get privacyKeepTitle;
+
+  /// Body of the retention section
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is kept for as long as the account exists. Deleting your account removes the account and everything stored against it immediately and permanently — there is no backup we can restore it from.'**
+  String get privacyKeepBody;
+
+  /// Heading of the user rights section
+  ///
+  /// In en, this message translates to:
+  /// **'Your choices'**
+  String get privacyRightsTitle;
+
+  /// Body of the user rights section
+  ///
+  /// In en, this message translates to:
+  /// **'You can see what is stored about you on the account screen, and you can delete all of it from Settings, under Account removal. If you would rather have a copy of your data, or want anything corrected, write to us and we will answer within thirty days.'**
+  String get privacyRightsBody;
+
+  /// Heading of the children section
+  ///
+  /// In en, this message translates to:
+  /// **'Children'**
+  String get privacyChildrenTitle;
+
+  /// Body of the children section
+  ///
+  /// In en, this message translates to:
+  /// **'Filmio is not directed at children under 13 and we do not knowingly collect anything from them. If you believe a child has created an account, write to us and we will remove it.'**
+  String get privacyChildrenBody;
+
+  /// Heading of the policy changes section
+  ///
+  /// In en, this message translates to:
+  /// **'Changes'**
+  String get privacyChangesTitle;
+
+  /// Body of the policy changes section
+  ///
+  /// In en, this message translates to:
+  /// **'If this policy changes, the new version appears here with a new date. Continuing to use the app after that means the new version applies.'**
+  String get privacyChangesBody;
+
+  /// Heading of the contact section
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get privacyContactTitle;
+
+  /// Line introducing the contact address
+  ///
+  /// In en, this message translates to:
+  /// **'Questions about this policy, or about your data, go to:'**
+  String get privacyContactBody;
+
+  /// The address users write to about privacy and support. App Review guideline 1.5 requires it to be reachable, so it must stay a monitored inbox.
+  ///
+  /// In en, this message translates to:
+  /// **'support.filmio@gmail.com'**
+  String get privacyContactEmail;
+
   /// Always use the light theme
   ///
   /// In en, this message translates to:
@@ -582,12 +924,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No results found.'**
   String get searchNoResults;
-
-  /// Dismisses the search screen
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get cancel;
 
   /// Retries the request that failed
   ///

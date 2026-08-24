@@ -20,6 +20,7 @@ class AuthFooter extends StatelessWidget {
     return Padding(
       padding: AppInsets.authHorizontal,
       child: Row(
+        spacing: AppSpacing.md,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Flexible(child: Text(prompt, style: context.styles.footerPrompt)),

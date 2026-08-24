@@ -18,3 +18,22 @@ final class SettingsSigningOut extends SettingsState {
 final class SettingsSignedOut extends SettingsState {
   const SettingsSignedOut();
 }
+
+final class SettingsDeletingAccount extends SettingsState {
+  const SettingsDeletingAccount();
+}
+
+/// The account and everything stored against it are gone. The screen leaves
+/// for the login page on this state; there is nothing signed in to show.
+final class SettingsAccountDeleted extends SettingsState {
+  const SettingsAccountDeleted();
+}
+
+final class SettingsDeleteFailed extends SettingsState {
+  final String message;
+
+  const SettingsDeleteFailed(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

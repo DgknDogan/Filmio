@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:640047605009:android:9e5d537869c831b10d18b0",
+        "android_client_info": {
+          "package_name": "com.dogukan.filmio"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC07RtO2wf7NfHNPe7hoLZR4Jw7-qJV9vI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:640047605009:android:826779897f5c522d0d18b0",
         "android_client_info": {
           "package_name": "com.example.filmio"

@@ -6,7 +6,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../config/routes/app_router.gr.dart';
 import '../../../../config/theme/app_decorations.dart';
 import '../../../../config/theme/app_spacing.dart';
+import '../../../../core/cubit/session_cubit.dart';
 import '../../../../core/custom/circle_icon_button.dart';
+import '../../../../core/custom/custom_button.dart';
+import '../../../../core/custom/guest_prompt.dart';
 import '../../../../core/extensions/context_extension.dart';
 import '../cubit/account_cubit.dart';
 
@@ -24,20 +27,66 @@ class AccountPage extends StatelessWidget {
           AppGap.vertical(AppSpacing.sm),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-            child: Column(
-              children: [
-                _AccountRow(
-                  icon: Icons.favorite_border_rounded,
-                  label: context.l10n.likedMovies,
-                  onTap: () => context.router.push(const LikedMoviesRoute()),
-                ),
-                AppGap.vertical(AppSpacing.md),
-                _AccountRow(
-                  icon: Icons.tv_outlined,
-                  label: context.l10n.likedSeries,
-                  onTap: () => context.router.push(const LikedSeriesRoute()),
-                ),
-              ],
+            // A guest has no lists to open — the rows would lead to two empty
+            // screens and no explanation. What goes there instead is the
+            // reason they are empty.
+            child: BlocSelector<SessionCubit, SessionState, bool>(
+              selector: (state) => state.isGuest,
+              builder: (context, isGuest) => isGuest ? const _GuestInvitation() : const _Lists(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The two lists an account keeps.
+class _Lists extends StatelessWidget {
+  const _Lists();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _AccountRow(
+          icon: Icons.favorite_border_rounded,
+          label: context.l10n.likedMovies,
+          onTap: () => context.router.push(const LikedMoviesRoute()),
+        ),
+        AppGap.vertical(AppSpacing.md),
+        _AccountRow(
+          icon: Icons.tv_outlined,
+          label: context.l10n.likedSeries,
+          onTap: () => context.router.push(const LikedSeriesRoute()),
+        ),
+      ],
+    );
+  }
+}
+
+/// What a guest gets in place of their lists: what an account would add, and
+/// one way to get one.
+class _GuestInvitation extends StatelessWidget {
+  const _GuestInvitation();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(AppSpacing.lg),
+      decoration: AppDecorations(context.palette).panel,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(context.l10n.guestAccountPrompt, style: context.styles.paragraph),
+          AppGap.vertical(AppSpacing.lg),
+          CustomButton(
+            text: context.l10n.guestCreateAccount,
+            onPressed: () => showGuestPrompt(
+              context,
+              title: context.l10n.guestCreateAccount,
+              body: context.l10n.guestAccountPrompt,
             ),
           ),
         ],
@@ -88,36 +137,56 @@ class _Identity extends StatelessWidget {
 class _Profile extends StatelessWidget {
   const _Profile();
 
+  /// The initial of the word standing in for a name, where a picture would be.
+  static Widget? _avatarMark(BuildContext context, {required bool isGuest, required String? photoUrl}) {
+    if (isGuest) {
+      return Text(
+        context.l10n.guestName.characters.first.toUpperCase(),
+        style: context.styles.screenTitle.copyWith(color: context.palette.textSecondary),
+      );
+    }
+
+    if (photoUrl != null) return null;
+
+    return Icon(Icons.person_outline_rounded, color: context.palette.textSecondary, size: AppSpacing.xxxl);
+  }
+
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
 
+    final isGuest = context.select((SessionCubit cubit) => cubit.state.isGuest);
+
     return BlocBuilder<AccountCubit, AccountState>(
       builder: (context, state) {
         final loaded = state is AccountLoaded ? state : null;
+        final name = isGuest ? context.l10n.guestName : loaded?.name;
 
         return Row(
           children: [
             Container(
               height: 70.r,
               width: 70.r,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: palette.tagNeutralBackground,
                 border: Border.all(color: palette.inputBorder),
-                image: loaded?.photoUrl == null ? null : DecorationImage(image: AssetImage(loaded!.photoUrl!), fit: BoxFit.cover),
+                image: isGuest || loaded?.photoUrl == null ? null : DecorationImage(image: AssetImage(loaded!.photoUrl!), fit: BoxFit.cover),
               ),
-              child: loaded?.photoUrl != null ? null : Icon(Icons.person_outline_rounded, color: palette.textSecondary, size: AppSpacing.xxxl),
+              child: _avatarMark(context, isGuest: isGuest, photoUrl: loaded?.photoUrl),
             ),
             AppGap.horizontal(AppSpacing.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (loaded?.name case final name?) Text(name, style: context.styles.screenTitle),
-                  if (loaded?.email case final email?) ...[
+                  if (name case final name?) Text(name, style: context.styles.screenTitle),
+                  // A guest has no address to print, and an empty line where
+                  // one usually is reads as something that failed to load.
+                  if (!isGuest && loaded?.email != null) ...[
                     AppGap.vertical(AppSpacing.xs),
-                    Text(email, style: context.styles.meta),
+                    Text(loaded!.email!, style: context.styles.meta),
                   ],
                 ],
               ),
@@ -152,7 +221,7 @@ class _AccountRow extends StatelessWidget {
             Icon(icon, size: AppSpacing.xl, color: palette.accentSoft),
             AppGap.horizontal(AppSpacing.lg),
             Expanded(child: Text(label, style: context.textTheme.bodyMedium)),
-            Icon(Icons.chevron_right_rounded, size: AppSpacing.xl, color: palette.inputBorder),
+            Icon(Icons.chevron_right_rounded, size: AppSpacing.xl, color: palette.textSecondary),
           ],
         ),
       ),

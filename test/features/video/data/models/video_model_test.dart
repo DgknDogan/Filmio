@@ -84,9 +84,10 @@ void main() {
   });
 
   group('isPlayable', () {
-    test('needs both a supported host and a key', () {
+    test('needs a YouTube video and a key', () {
       expect(const VideoEntity(site: VideoSite.youtube, key: 'abc').isPlayable, isTrue);
-      expect(const VideoEntity(site: VideoSite.vimeo, key: '12345').isPlayable, isTrue);
+      // Recognised, but nothing the app offers to open.
+      expect(const VideoEntity(site: VideoSite.vimeo, key: '12345').isPlayable, isFalse);
       expect(const VideoEntity(site: VideoSite.unknown, key: 'abc').isPlayable, isFalse);
       expect(const VideoEntity(site: VideoSite.youtube).isPlayable, isFalse);
       expect(const VideoEntity(site: VideoSite.youtube, key: '').isPlayable, isFalse);

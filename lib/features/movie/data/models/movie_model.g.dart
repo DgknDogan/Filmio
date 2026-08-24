@@ -9,9 +9,7 @@ part of 'movie_model.dart';
 MovieModel _$MovieModelFromJson(Map<String, dynamic> json) => MovieModel(
       adult: json['adult'] as bool?,
       backdropPath: json['backdrop_path'] as String?,
-      genreIds: (json['genre_ids'] as List<dynamic>?)
-          ?.map((e) => (e as num).toInt())
-          .toList(),
+      genreIds: (json['genre_ids'] as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
       id: (json['id'] as num?)?.toInt(),
       originalLanguage: json['original_language'] as String?,
       originalTitle: json['original_title'] as String?,
@@ -25,8 +23,7 @@ MovieModel _$MovieModelFromJson(Map<String, dynamic> json) => MovieModel(
       voteCount: (json['vote_count'] as num?)?.toInt(),
     );
 
-Map<String, dynamic> _$MovieModelToJson(MovieModel instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$MovieModelToJson(MovieModel instance) => <String, dynamic>{
       'adult': instance.adult,
       'backdrop_path': instance.backdropPath,
       'genre_ids': instance.genreIds,

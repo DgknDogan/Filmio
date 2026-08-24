@@ -10,12 +10,19 @@ import '../../../../core/utils/validators.dart';
 class AuthEmailField extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSubmitted;
+  final String hintText;
 
-  const AuthEmailField({super.key, required this.controller, required this.onSubmitted});
+  const AuthEmailField({
+    super.key,
+    required this.controller,
+    required this.onSubmitted,
+    required this.hintText,
+  });
 
   @override
   Widget build(BuildContext context) {
     return CustomTextField(
+      hintText: hintText,
       controller: controller,
       text: context.l10n.authEmail,
       hasError: false,
@@ -40,6 +47,7 @@ class AuthPasswordField extends StatelessWidget {
   final String? Function(String?) validator;
   final VoidCallback onSubmitted;
   final FocusNode? focusNode;
+  final String hintText;
 
   const AuthPasswordField({
     super.key,
@@ -49,12 +57,14 @@ class AuthPasswordField extends StatelessWidget {
     required this.textInputAction,
     required this.validator,
     required this.onSubmitted,
+    required this.hintText,
     this.focusNode,
   });
 
   @override
   Widget build(BuildContext context) {
     return CustomTextField(
+      hintText: hintText,
       controller: controller,
       text: label,
       hasError: false,
