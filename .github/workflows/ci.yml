@@ -134,8 +134,141 @@ jobs:
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           # Not a secret — it is already in the committed google-services.json.
-          appId: 1:640047605009:android:826779897f5c522d0d18b0
+          # This is the com.dogukan.filmio client; the com.example.filmio one
+          # that used to be here is the placeholder app, and distributing to it
+          # now fails on a package name mismatch.
+          appId: 1:640047605009:android:9e5d537869c831b10d18b0
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           groups: testers
           releaseNotes: ${{ github.event.head_commit.message }}
           file: build/app/outputs/flutter-apk/app-release.apk
+
+  ios:
+    name: iOS TestFlight
+    needs: verify
+    if: github.event_name == 'push'
+    # macOS is the only runner that can build for iOS, and on a private
+    # repository it bills at ten times the Linux rate. That is the reason this
+    # job runs on a push to master and never on a pull request.
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Dependencies
+        run: flutter pub get
+
+      # Same as the Android leg: env.json is gitignored and written here from
+      # the repository secret. Without TMDB_TOKEN the app throws on launch, so
+      # a build that skipped this would reach TestFlight and crash on open.
+      - name: Write env.json
+        env:
+          TMDB_TOKEN: ${{ secrets.TMDB_TOKEN }}
+        run: |
+          cat > env.json <<JSON
+          {"TMDB_TOKEN": "$TMDB_TOKEN"}
+          JSON
+
+      # Skipped until the App Store Connect key exists, so the pipeline stays
+      # green from the first run and gains the TestFlight leg the moment the
+      # three secrets are added.
+      - name: Is the App Store Connect key set?
+        id: appstore
+        env:
+          KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+        run: |
+          if [ -n "$KEY" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::APPSTORE_PRIVATE_KEY is not set — nothing was sent to TestFlight."
+          fi
+
+      # The key authenticates three separate things: creating the signing
+      # certificate, downloading the provisioning profile, and the upload. It
+      # is the reason no .p12 has to be exported from a Mac and kept as a
+      # secret. altool reads it from this exact path, by key id.
+      - name: Install the App Store Connect key
+        if: steps.appstore.outputs.ready == 'true'
+        env:
+          KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          printf '%s' "$PRIVATE_KEY" > ~/.appstoreconnect/private_keys/AuthKey_$KEY_ID.p8
+          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_$KEY_ID.p8
+
+      # Compiles the Dart and writes the dart-defines into Generated.xcconfig,
+      # which is what the Xcode build phase below reads. Archiving straight
+      # from Xcode without this step is how a build reaches TestFlight with an
+      # empty TMDB_TOKEN.
+      #
+      # The build number is the run number: TestFlight rejects a second upload
+      # carrying a build number it has already seen, and pubspec's `+1` would
+      # only ever work once.
+      - name: Compile
+        if: steps.appstore.outputs.ready == 'true'
+        run: |
+          flutter build ios \
+            --release \
+            --no-codesign \
+            --build-number=${{ github.run_number }} \
+            --dart-define-from-file=env.json
+
+      - name: Archive
+        if: steps.appstore.outputs.ready == 'true'
+        env:
+          KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+        run: |
+          xcodebuild archive \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_$KEY_ID.p8 \
+            -authenticationKeyID "$KEY_ID" \
+            -authenticationKeyIssuerID "$ISSUER_ID"
+
+      - name: Export the ipa
+        if: steps.appstore.outputs.ready == 'true'
+        env:
+          KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -exportPath "$RUNNER_TEMP/ipa" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_$KEY_ID.p8 \
+            -authenticationKeyID "$KEY_ID" \
+            -authenticationKeyIssuerID "$ISSUER_ID"
+
+      # Uploading is what puts the build in TestFlight. Processing takes a few
+      # minutes after this step goes green, and the build appears in App Store
+      # Connect on its own.
+      - name: Upload to TestFlight
+        if: steps.appstore.outputs.ready == 'true'
+        env:
+          KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+        run: |
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$RUNNER_TEMP"/ipa/*.ipa \
+            --apiKey "$KEY_ID" \
+            --apiIssuer "$ISSUER_ID"
+
+      - uses: actions/upload-artifact@v4
+        if: steps.appstore.outputs.ready == 'true'
+        with:
+          name: filmio-ipa
+          path: ${{ runner.temp }}/ipa/*.ipa
+          retention-days: 14
+

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- How the archive is exported for upload. `app-store-connect` is what
+	     Xcode 15.4 and later call it; older Xcode wants `app-store`. Nothing
+	     here is a secret — the team identifier is public in every build. -->
+	<key>method</key>
+	<string>app-store-connect</string>
+	<key>teamID</key>
+	<string>B95382Y2GK</string>
+	<!-- Xcode picks the distribution certificate and provisioning profile
+	     itself. On CI that works because the archive and export steps run with
+	     `-allowProvisioningUpdates` and an App Store Connect API key, so no
+	     certificate has to be exported from a Mac and stored as a secret. -->
+	<key>signingStyle</key>
+	<string>automatic</string>
+	<key>destination</key>
+	<string>export</string>
+	<!-- Symbols go up with the build so crash reports come back readable. -->
+	<key>uploadSymbols</key>
+	<true/>
+	<!-- Let Apple thin the binary per device rather than shipping one fat one. -->
+	<key>stripSwiftSymbols</key>
+	<true/>
+</dict>
+</plist>
