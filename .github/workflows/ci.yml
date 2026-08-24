@@ -227,6 +227,24 @@ jobs:
             --build-number=${{ github.run_number }} \
             --dart-define-from-file=env.json
 
+      # Two settings here exist to keep automatic signing off the device-scoped
+      # path, and both are load-bearing on a runner:
+      #
+      # `-destination generic/platform=iOS` — without it xcodebuild resolves a
+      # concrete destination, which on CI is the runner machine itself. Signing
+      # then tries to put that machine into the provisioning profile and fails
+      # with `Device "sjc20-cw711-..." isn't registered in your developer
+      # account`. A generic destination has no device to register.
+      #
+      # `CODE_SIGN_IDENTITY=Apple Distribution` — the project still carries the
+      # Flutter template's `CODE_SIGN_IDENTITY[sdk=iphoneos*] = "iPhone
+      # Developer"`, which asks for an *iOS App Development* profile. Those are
+      # device-scoped, so on a runner with no registered devices Xcode reports
+      # `No profiles for 'com.dogukan.filmio' were found`. App Store
+      # distribution profiles are not tied to devices. The override is passed on
+      # the command line rather than edited into the project so that a local
+      # `flutter run` on a real device keeps signing with a development
+      # certificate; command-line settings outrank the project's conditional.
       - name: Archive
         if: steps.appstore.outputs.ready == 'true'
         env:
@@ -237,11 +255,14 @@ jobs:
             -workspace ios/Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
+            -destination 'generic/platform=iOS' \
             -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
             -allowProvisioningUpdates \
             -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_$KEY_ID.p8 \
             -authenticationKeyID "$KEY_ID" \
-            -authenticationKeyIssuerID "$ISSUER_ID"
+            -authenticationKeyIssuerID "$ISSUER_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            CODE_SIGN_IDENTITY="Apple Distribution"
 
       - name: Export the ipa
         if: steps.appstore.outputs.ready == 'true'
