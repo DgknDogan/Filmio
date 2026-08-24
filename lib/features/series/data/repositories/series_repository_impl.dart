@@ -73,10 +73,12 @@ class SeriesRepositoryImpl extends SeriesRepository {
 
   @override
   Future<Either<Failure, List<int>>> getRecommendedSeriesIds({int? limit}) async {
+    // A guest is browsing without an account, which is a supported way to use
+    // the app rather than something to report: there is nothing to recommend
+    // from, so the caller falls back the same way it does for an account that
+    // has liked nothing yet.
     final user = _auth.currentUser;
-    if (user == null) {
-      return const Left(AuthFailure('Sign in to see what we would recommend.'));
-    }
+    if (user == null) return const Right([]);
 
     try {
       final token = await user.getIdToken();

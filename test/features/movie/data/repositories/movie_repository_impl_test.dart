@@ -189,12 +189,12 @@ void main() {
       expect((await repository.getRecommendedMovieIds()).getRight().toNullable(), isEmpty);
     });
 
-    test('nobody signed in is an AuthFailure, and the service is never called', () async {
+    test('a guest gets no ids rather than a failure, and the service is never called', () async {
       when(() => auth.currentUser).thenReturn(null);
 
-      final failure = (await repository.getRecommendedMovieIds()).getLeft().toNullable();
-
-      expect(failure, isA<AuthFailure>());
+      // Browsing without an account is a supported way to use the app: the tab
+      // falls back to a top-rated title rather than telling the reader off.
+      expect((await repository.getRecommendedMovieIds()).getRight().toNullable(), isEmpty);
       verifyNever(() => api.getRecommendations(authorization: any(named: 'authorization'), limit: any(named: 'limit')));
     });
 

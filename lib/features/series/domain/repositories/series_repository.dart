@@ -16,7 +16,10 @@ abstract class SeriesRepository {
   Future<Either<Failure, SeriesEntity>> getSeriesDetails({required int seriesId});
 
   /// The ids Filmio's recommendation service picks for the signed-in user,
-  /// best first. Empty when it has too little to go on.
+  /// best first.
+  ///
+  /// Empty when there is nothing to go on — the service had too little to work
+  /// with, or nobody is signed in at all. Browsing as a guest is not a failure.
   ///
   /// [limit] overrides the count the service would choose by itself.
   Future<Either<Failure, List<int>>> getRecommendedSeriesIds({int? limit});

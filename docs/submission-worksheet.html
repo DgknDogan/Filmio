@@ -1,0 +1,832 @@
+<title>Filmio Submission Worksheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --paper:      #F2F2F5;
+    --card:       #FFFFFF;
+    --card-alt:   #ECECF1;
+    --ink:        #17181F;
+    --ink-soft:   #55576A;
+    --ink-faint:  #8A8CA0;
+    --rule:       #DCDCE4;
+    --accent:     #5546C8;
+    --accent-bg:  #ECE9FB;
+    --signal:     #B04408;
+    --signal-bg:  #FBEDE3;
+    --good:       #14664A;
+    --good-bg:    #E2F0EA;
+    --code-bg:    #1B1C25;
+    --code-ink:   #E6E6EE;
+
+    --step: clamp(1.35rem, 1.1rem + 1.1vw, 1.9rem);
+    --h2:   clamp(1.05rem, 0.95rem + 0.4vw, 1.25rem);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:     #101119;
+      --card:      #191A24;
+      --card-alt:  #21222E;
+      --ink:       #ECECF2;
+      --ink-soft:  #A6A8BC;
+      --ink-faint: #70728A;
+      --rule:      #2C2D3A;
+      --accent:    #A79BFF;
+      --accent-bg: #23213A;
+      --signal:    #F0A46A;
+      --signal-bg: #33241A;
+      --good:      #6FD3AC;
+      --good-bg:   #16302A;
+      --code-bg:   #0A0B11;
+      --code-ink:  #DCDCE6;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:     #101119;
+    --card:      #191A24;
+    --card-alt:  #21222E;
+    --ink:       #ECECF2;
+    --ink-soft:  #A6A8BC;
+    --ink-faint: #70728A;
+    --rule:      #2C2D3A;
+    --accent:    #A79BFF;
+    --accent-bg: #23213A;
+    --signal:    #F0A46A;
+    --signal-bg: #33241A;
+    --good:      #6FD3AC;
+    --good-bg:   #16302A;
+    --code-bg:   #0A0B11;
+    --code-ink:  #DCDCE6;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    font-size: 15.5px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 1rem + 2vw, 3.5rem) clamp(1rem, 0.6rem + 2vw, 2.5rem) 5rem;
+    display: grid;
+    gap: clamp(1.5rem, 1rem + 2vw, 3rem);
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 940px) {
+    .wrap { grid-template-columns: 200px minmax(0, 1fr); align-items: start; }
+    .masthead { grid-column: 1 / -1; }
+  }
+
+  /* ---- masthead ---- */
+
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1.25rem; }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 0.5rem;
+  }
+
+  h1 {
+    font-family: Archivo, ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.9rem, 1.4rem + 2.4vw, 3rem);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    margin: 0 0 0.6rem;
+    text-wrap: balance;
+  }
+
+  .standfirst {
+    margin: 0;
+    max-width: 62ch;
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+  }
+
+  /* ---- index rail ---- */
+
+  nav { position: sticky; top: 1.5rem; }
+
+  nav ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  nav a {
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: 5px;
+    text-decoration: none;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+    line-height: 1.35;
+  }
+
+  nav a:hover, nav a:focus-visible { background: var(--card-alt); color: var(--ink); }
+  nav a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  nav .n {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    padding-top: 0.1em;
+  }
+
+  @media (max-width: 939px) {
+    nav { position: static; }
+    nav ol { flex-direction: row; flex-wrap: wrap; gap: 0.3rem; }
+    nav a { background: var(--card); border: 1px solid var(--rule); }
+  }
+
+  /* ---- sections ---- */
+
+  main { display: flex; flex-direction: column; gap: 2.75rem; min-width: 0; }
+
+  section { scroll-margin-top: 1.5rem; }
+
+  .step-head { display: flex; gap: 0.85rem; align-items: baseline; margin-bottom: 0.35rem; }
+
+  .step-num {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    padding-top: 0.35em;
+  }
+
+  h2 {
+    font-family: Archivo, ui-sans-serif, system-ui, sans-serif;
+    font-weight: 600;
+    font-size: var(--step);
+    letter-spacing: -0.018em;
+    line-height: 1.15;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .where {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    margin: 0 0 1.1rem 2.35rem;
+  }
+
+  @media (max-width: 600px) { .where { margin-left: 0; } }
+
+  h3 {
+    font-family: Archivo, ui-sans-serif, system-ui, sans-serif;
+    font-weight: 600;
+    font-size: var(--h2);
+    letter-spacing: -0.01em;
+    margin: 0 0 0.5rem;
+  }
+
+  p { margin: 0 0 0.9rem; max-width: 68ch; }
+  p:last-child { margin-bottom: 0; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 1.15rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .card:last-child { margin-bottom: 0; }
+
+  /* ---- chips ---- */
+
+  .chip {
+    display: inline-block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.18em 0.55em;
+    border-radius: 4px;
+    vertical-align: 0.12em;
+    white-space: nowrap;
+  }
+
+  .chip--paste  { background: var(--accent-bg); color: var(--accent); }
+  .chip--decide { background: var(--signal-bg); color: var(--signal); }
+  .chip--done   { background: var(--good-bg);   color: var(--good); }
+
+  /* ---- tables ---- */
+
+  .scroller { overflow-x: auto; margin-bottom: 1rem; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    min-width: 460px;
+  }
+
+  th {
+    text-align: left;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 500;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom: 1px solid var(--ink);
+    padding: 0 0.7rem 0.45rem 0;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.55rem 0.7rem 0.55rem 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+
+  td:first-child { font-weight: 500; }
+
+  .val {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.82rem;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .why { color: var(--ink-soft); font-size: 0.86rem; }
+
+  /* ---- copy blocks ---- */
+
+  .block { margin-bottom: 1rem; }
+
+  .block-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: var(--card-alt);
+    border: 1px solid var(--rule);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    padding: 0.45rem 0.5rem 0.45rem 0.85rem;
+  }
+
+  .block-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+  }
+
+  .count { color: var(--ink-faint); }
+
+  button.copy {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 5px;
+    padding: 0.3em 0.7em;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  button.copy:hover { border-color: var(--accent); color: var(--accent); }
+  button.copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.copy[data-state="ok"] { color: var(--good); border-color: var(--good); }
+
+  pre {
+    margin: 0;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    border: 1px solid var(--rule);
+    border-radius: 0 0 8px 8px;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.81rem;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.86em;
+    background: var(--card-alt);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+  }
+
+  .fill { color: var(--signal); font-weight: 500; }
+
+  /* ---- lists ---- */
+
+  ul { margin: 0 0 0.9rem; padding-left: 1.15rem; max-width: 68ch; }
+  li { margin-bottom: 0.35rem; }
+  li:last-child { margin-bottom: 0; }
+
+  .note {
+    border-left: 3px solid var(--signal);
+    background: var(--signal-bg);
+    border-radius: 0 8px 8px 0;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.92rem;
+  }
+
+  .note strong { color: var(--signal); }
+
+  footer {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--rule);
+    padding-top: 1.25rem;
+    color: var(--ink-faint);
+    font-size: 0.85rem;
+  }
+
+  a { color: var(--accent); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Filmio · iOS 1.0.0 (1) · com.dogukan.filmio</p>
+    <h1>App Store Connect Worksheet</h1>
+    <p class="standfirst">
+      Every answer the submission forms ask for, in the order they ask. Purple blocks are
+      ready to paste; orange ones need a decision or a value only you have.
+    </p>
+  </header>
+
+  <nav aria-label="Steps">
+    <ol>
+      <li><a href="#privacy"><span class="n">01</span><span>App Privacy</span></a></li>
+      <li><a href="#age"><span class="n">02</span><span>Age Rating</span></a></li>
+      <li><a href="#listing"><span class="n">03</span><span>Store Listing</span></a></li>
+      <li><a href="#shots"><span class="n">04</span><span>Screenshots</span></a></li>
+      <li><a href="#notes"><span class="n">05</span><span>Review Notes</span></a></li>
+      <li><a href="#final"><span class="n">06</span><span>Before Submit</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- 01 -->
+    <section id="privacy">
+      <div class="step-head">
+        <span class="step-num">01</span>
+        <h2>App Privacy <span class="chip chip--paste">ready to paste</span></h2>
+      </div>
+      <p class="where">App Store Connect → App Privacy → Get Started</p>
+
+      <p>
+        These answers must match <code>ios/Runner/PrivacyInfo.xcprivacy</code> exactly. Apple
+        compares the two, and a mismatch is a rejection that costs a whole review cycle.
+      </p>
+
+      <div class="card">
+        <h3>The two gate questions</h3>
+        <div class="scroller">
+          <table>
+            <thead>
+              <tr><th>Question</th><th>Answer</th><th>Why</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Do you or your third-party partners collect data from this app?</td>
+                <td class="val">Yes</td>
+                <td class="why">Firebase stores the account and the liked titles.</td>
+              </tr>
+              <tr>
+                <td>Is any collected data used to track the user?</td>
+                <td class="val">No</td>
+                <td class="why">No ad networks, no analytics, no data brokers. This is why there is no ATT prompt.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>The four data types to declare</h3>
+        <p>Everything else in the list stays unticked. For each of these: <strong>linked to
+        the user — yes</strong>, <strong>used for tracking — no</strong>.</p>
+        <div class="scroller">
+          <table>
+            <thead>
+              <tr><th>Category</th><th>Data type</th><th>Purpose(s)</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Contact Info</td>
+                <td class="val">Email Address</td>
+                <td class="why">App Functionality</td>
+              </tr>
+              <tr>
+                <td>Contact Info</td>
+                <td class="val">Name</td>
+                <td class="why">App Functionality</td>
+              </tr>
+              <tr>
+                <td>Identifiers</td>
+                <td class="val">User ID</td>
+                <td class="why">App Functionality</td>
+              </tr>
+              <tr>
+                <td>User Content</td>
+                <td class="val">Other User Content</td>
+                <td class="why">App Functionality <em>and</em> Product Personalization</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="why" style="margin-top:0.9rem">
+          <strong>Other User Content</strong> is the liked films and series. It carries the
+          second purpose because those likes are what the recommendation service reads.
+        </p>
+      </div>
+
+      <div class="note">
+        <strong>Do not tick:</strong> Location, Contacts, Photos, Health, Financial Info,
+        Browsing History, Search History, Diagnostics, Usage Data, Purchases, Sensitive Info.
+        The app asks for none of them, and claiming more than you collect is its own problem.
+      </div>
+    </section>
+
+    <!-- 02 -->
+    <section id="age">
+      <div class="step-head">
+        <span class="step-num">02</span>
+        <h2>Age Rating <span class="chip chip--decide">read before answering</span></h2>
+      </div>
+      <p class="where">App Store Connect → your app → Age Rating → Edit</p>
+
+      <p>
+        The one that matters is user-generated content. Filmio shows TMDB's reviews, written
+        by strangers, so the honest answer is yes — and the moderation you built is what makes
+        that answer safe rather than damaging.
+      </p>
+
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>Question</th><th>Answer</th><th>Reasoning</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>User-generated content</td>
+              <td class="val">Yes</td>
+              <td class="why">TMDB reviews. Follow-ups will ask about moderation — you have filtering, reporting, blocking and a published contact address.</td>
+            </tr>
+            <tr>
+              <td>Profanity or crude humour</td>
+              <td class="val">Infrequent / Mild</td>
+              <td class="why">The word filter folds flagged reviews, but a word list is never complete.</td>
+            </tr>
+            <tr>
+              <td>Horror or fear themes</td>
+              <td class="val">Infrequent / Mild</td>
+              <td class="why">Horror posters and synopses appear in the catalogue.</td>
+            </tr>
+            <tr>
+              <td>Violence — realistic or cartoon</td>
+              <td class="val">Infrequent / Mild</td>
+              <td class="why">Film artwork and plot summaries describe it; the app shows no footage of its own.</td>
+            </tr>
+            <tr>
+              <td>Alcohol, tobacco or drug references</td>
+              <td class="val">Infrequent / Mild</td>
+              <td class="why">Same reason — it turns up in synopses.</td>
+            </tr>
+            <tr>
+              <td>Sexual content or nudity</td>
+              <td class="val">None</td>
+              <td class="why"><code>include_adult=false</code> is sent on every search and discover call.</td>
+            </tr>
+            <tr>
+              <td>Unrestricted web access</td>
+              <td class="val">No</td>
+              <td class="why">No in-app browser. A trailer is handed to the YouTube app or Safari, which is not web access <em>inside</em> the app.</td>
+            </tr>
+            <tr>
+              <td>Gambling, contests, medical info</td>
+              <td class="val">No</td>
+              <td class="why">None present.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <strong>Expect 12+ or higher.</strong> Do not try to talk it down to 4+ — a catalogue
+        app carrying unmoderated third-party reviews cannot honestly claim 4+, and being caught
+        understating it is worse than the rating itself. Apple revised this questionnaire
+        recently, so the wording you see may differ from the labels above; answer by meaning.
+      </div>
+    </section>
+
+    <!-- 03 -->
+    <section id="listing">
+      <div class="step-head">
+        <span class="step-num">03</span>
+        <h2>Store Listing Copy <span class="chip chip--paste">ready to paste</span></h2>
+      </div>
+      <p class="where">App Store Connect → your app → 1.0 Prepare for Submission</p>
+
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>Field</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Primary category</td><td class="val">Entertainment</td></tr>
+            <tr><td>Secondary category</td><td class="val">Reference</td></tr>
+            <tr><td>Privacy Policy URL</td><td class="val">dgkndogan.github.io/Filmio/privacy-policy.html</td></tr>
+            <tr><td>Support URL</td><td class="val">dgkndogan.github.io/Filmio/privacy-policy.html</td></tr>
+            <tr><td>Copyright</td><td class="val">2026 Doğukan</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <strong>Support URL.</strong> Pointing it at the privacy policy works because that page
+        carries the contact address, but a one-page support page with the same address and a
+        line about response time reads better. Either way, guideline 1.5 wants a reachable
+        human behind it.
+      </div>
+
+      <div class="block">
+        <div class="block-bar">
+          <span class="block-name">Subtitle <span class="count">· 29 / 30</span></span>
+          <button class="copy" type="button">Copy</button>
+        </div>
+        <pre>Films, series and what's next</pre>
+      </div>
+
+      <div class="block">
+        <div class="block-bar">
+          <span class="block-name">Promotional text <span class="count">· 148 / 170</span></span>
+          <button class="copy" type="button">Copy</button>
+        </div>
+        <pre>Browse the whole catalogue without an account. Create one when you want your likes kept and the recommendations built from them.</pre>
+      </div>
+
+      <div class="block">
+        <div class="block-bar">
+          <span class="block-name">Description</span>
+          <button class="copy" type="button">Copy</button>
+        </div>
+<pre>Filmio is a catalogue for people who spend longer choosing than watching.
+
+Search the whole of TMDB, or narrow it down: filter by genre, by rating, by
+the years you care about, and sort by what is popular now or what has held up.
+Every title opens on the artwork, the synopsis, the score, the cast of genres
+it belongs to, its trailer and what other people made of it.
+
+Like the ones you want to keep. Your films and series stay in two lists on your
+account, and they are also what the recommendation at the head of the films tab
+is built from — the more you like, the closer it gets.
+
+No account needed to look around. Tap "Look around without an account" and the
+catalogue, search, filters, details, trailers and reviews are all there. Sign up
+only when you want a list of your own.
+
+WHAT YOU GET
+• The full TMDB catalogue — films and series, searchable and filterable
+• Trailers, opened in YouTube
+• Reviews, with a report and a block for the ones that should not be there
+• Two lists of your own, and recommendations built from them
+• Light, dark, or whatever your phone is doing
+
+No adverts. No tracking. No subscription. Delete your account, and everything
+saved against it goes with it.
+
+This product uses the TMDB API but is not endorsed or certified by TMDB.</pre>
+      </div>
+
+      <div class="block">
+        <div class="block-bar">
+          <span class="block-name">Keywords <span class="count">· 96 / 100</span></span>
+          <button class="copy" type="button">Copy</button>
+        </div>
+        <pre>movie,film,series,tv,show,cinema,watchlist,trailer,review,rating,discover,imdb,catalog,genre</pre>
+      </div>
+
+      <div class="note">
+        <strong>One keyword to check.</strong> <code>imdb</code> is somebody else's trademark.
+        It is common in keyword fields and usually passes, but if you would rather not argue
+        the point at review, drop it and add <code>streaming</code>.
+      </div>
+    </section>
+
+    <!-- 04 -->
+    <section id="shots">
+      <div class="step-head">
+        <span class="step-num">04</span>
+        <h2>Screenshots <span class="chip chip--decide">you capture</span></h2>
+      </div>
+      <p class="where">Simulator → iPhone 17 Pro Max → ⌘S saves to the desktop</p>
+
+      <p>
+        The 6.9-inch set is the one that is required — <span class="val">1320 × 2868</span>
+        portrait. App Store Connect scales that down for smaller devices, so one set is enough
+        unless you want to art-direct the others. Up to ten; three good ones beat ten dull ones.
+      </p>
+
+      <div class="card">
+        <h3>The five to take, in this order</h3>
+        <ol>
+          <li><strong>Films tab, scrolled to the top</strong> — the recommended title filling the head of the page. This is the shot that says what the app is.</li>
+          <li><strong>A details screen</strong> — artwork, score, genres, synopsis. Pick a title with good artwork; it is doing half the work.</li>
+          <li><strong>The filter sheet, open</strong> — genre chips selected, a year range set. This is the feature that separates you from every other TMDB client.</li>
+          <li><strong>A browse result</strong> — the filtered grid with the result count visible.</li>
+          <li><strong>Account tab, signed in</strong> — the two lists with real likes in them.</li>
+        </ol>
+      </div>
+
+      <div class="note">
+        <strong>Never the sign-in screen.</strong> Guideline 2.3.3 treats a login screen as a
+        screenshot of nothing. It is also the least interesting thing you built.
+      </div>
+    </section>
+
+    <!-- 05 -->
+    <section id="notes">
+      <div class="step-head">
+        <span class="step-num">05</span>
+        <h2>Notes for App Review <span class="chip chip--decide">fill in two lines</span></h2>
+      </div>
+      <p class="where">Prepare for Submission → App Review Information → Notes</p>
+
+      <p>
+        This is the highest-value box on the whole form. Every guideline finding you fixed is
+        answered here before the reviewer has to go looking for it — and the two things they
+        will definitely try, guest mode and account deletion, are the first two things they read.
+      </p>
+
+      <div class="note">
+        <strong>Fill in the demo account yourself.</strong> I have left the two credential
+        lines blank on purpose — passwords are not something to hand around. Use a real account
+        you are happy to have deleted, because they will delete it.
+      </div>
+
+      <div class="block">
+        <div class="block-bar">
+          <span class="block-name">Review notes</span>
+          <button class="copy" type="button">Copy</button>
+        </div>
+<pre>BROWSING WITHOUT AN ACCOUNT
+The app can be used without signing in. On the sign-in screen, tap
+"Look around without an account". The full catalogue is available in this
+mode: films, series, search, filters, details, trailers and reviews.
+
+DEMO ACCOUNT
+Account-based features — liking titles, the two personal lists,
+recommendations and account deletion — need an account:
+
+  E-mail:   <span class="fill">[FILL IN]</span>
+  Password: <span class="fill">[FILL IN]</span>
+
+ACCOUNT DELETION (guideline 5.1.1(v))
+Account tab -> gear icon (top right) -> "ACCOUNT REMOVAL" -> "Delete account".
+The password is asked for again to confirm. Deletion removes the account and
+the user's stored data — liked films and series — permanently.
+
+PRIVACY POLICY (guideline 5.1.1(i))
+In the app: Account tab -> gear icon -> "ABOUT" -> "Privacy Policy".
+On the web: https://dgkndogan.github.io/Filmio/privacy-policy.html
+
+USER-GENERATED CONTENT (guideline 1.2)
+Reviews are supplied by the TMDB API and are written by TMDB's users. Each
+review card has a "..." menu offering:
+  - Report review — five reasons; a report is filed to a moderation queue that
+    is read by a person and answered within three days, and the review is
+    hidden on that device immediately
+  - Hide reviews by this author — blocks that author on the device
+A word filter also folds any review containing offensive language behind a
+warning, which the reader can open deliberately.
+Contact address for reports and support: support.filmio@gmail.com — also shown
+in the app under gear icon -> "ABOUT" -> "Contact support".
+
+TRAILERS (guideline 5.2.3)
+Filmio embeds no video player and re-streams nothing. Tapping a trailer hands
+the YouTube watch link to the system, which opens the YouTube app if it is
+installed and Safari if it is not. Nothing is downloaded, extracted or cached.
+
+THIRD-PARTY DATA (guideline 5.2.2)
+Catalogue data comes from the TMDB API. The attribution TMDB's terms require is
+shown in the app under gear icon -> "ABOUT".
+
+WHAT THE APP DOES NOT DO
+No in-app purchases, no subscriptions, no advertising, no analytics SDK, no
+tracking and no App Tracking Transparency prompt. No permission is requested
+for location, contacts, photos, camera or microphone.
+
+The app is iPhone only.</pre>
+      </div>
+    </section>
+
+    <!-- 06 -->
+    <section id="final">
+      <div class="step-head">
+        <span class="step-num">06</span>
+        <h2>Before You Hit Submit</h2>
+      </div>
+      <p class="where">The last pass, in ten minutes</p>
+
+      <div class="card">
+        <h3>Already true <span class="chip chip--done">verified</span></h3>
+        <ul>
+          <li>Bundle ID <code>com.dogukan.filmio</code> across iOS, Android and Firebase</li>
+          <li>Privacy manifest ships inside <code>Runner.app</code>; every third-party SDK carries its own</li>
+          <li><code>ITSAppUsesNonExemptEncryption</code> set to false — no export compliance prompt</li>
+          <li>iPhone only; no iPad screenshots needed</li>
+          <li>App icon in all fifteen sizes, no alpha channel</li>
+          <li>Privacy policy live at the URL above</li>
+          <li>380 tests green, analyzer clean, release build succeeds</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Check by hand <span class="chip chip--decide">five minutes</span></h3>
+        <ul>
+          <li><strong>Build the release with the token.</strong> <code>--dart-define-from-file=env.json</code> must be in the archive command. Without <code>TMDB_TOKEN</code> the app throws on launch, and that is an instant 2.1 rejection.</li>
+          <li><strong>Report a review once</strong> and confirm the document lands in the <code>ReviewReport</code> collection. If the Firestore rule is wrong you get <code>permission-denied</code> and the reviewer will find it.</li>
+          <li><strong>Open the trailer</strong> on a real device and confirm YouTube takes over.</li>
+          <li><strong>Read the App Privacy answers back</strong> against the four rows in step 01.</li>
+          <li><strong>Watch the support inbox</strong> from the day you submit. Review does write to it sometimes.</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    Written against the App Store Review Guidelines as published on
+    developer.apple.com, 24 August 2026. Apple changes the forms more often than the
+    guidelines — where a field name here does not match what you see, answer by meaning.
+  </footer>
+
+</div>
+
+<script>
+  document.querySelectorAll("button.copy").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var pre = button.closest(".block").querySelector("pre");
+      var text = pre.innerText;
+
+      function done(label) {
+        button.textContent = label;
+        button.dataset.state = "ok";
+        setTimeout(function () {
+          button.textContent = "Copy";
+          delete button.dataset.state;
+        }, 2200);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(
+          function () { done("Copied"); },
+          function () { select(pre, done); }
+        );
+      } else {
+        select(pre, done);
+      }
+    });
+  });
+
+  // Clipboard access can be blocked; selecting the text is the honest fallback.
+  function select(pre, done) {
+    var range = document.createRange();
+    range.selectNodeContents(pre);
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    done("Selected — ⌘C");
+  }
+</script>

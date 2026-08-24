@@ -155,6 +155,10 @@ class _SplashAnimation extends StatefulWidget {
 
 class _SplashAnimationState extends State<_SplashAnimation> with SingleTickerProviderStateMixin {
   late final AnimationController _splashController;
+
+  /// Set once the cover has left, so it stops being built at all.
+  bool _gone = false;
+
   @override
   void initState() {
     _splashController = AnimationController(vsync: this, duration: 2000.ms);
@@ -162,37 +166,52 @@ class _SplashAnimationState extends State<_SplashAnimation> with SingleTickerPro
   }
 
   @override
+  void dispose() {
+    _splashController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (!_splashController.isAnimating) {
-      return Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          color: context.palette.surface,
+    if (_gone) return const SizedBox.shrink();
+
+    // How far the cover has to travel is the screen, not a number. A fixed
+    // offset is only ever right for the phone it was measured on: on a taller
+    // one the head of the cover never leaves, and what is left of it reads as
+    // a band of ground across the top of the tab — over the status bar, and
+    // swallowing anything tapped in it.
+    final travel = MediaQuery.sizeOf(context).height;
+
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: context.palette.surface,
+      ),
+      child: Center(
+        child: Assets.logo.image(
+          height: 250.h,
+          color: context.palette.textPrimary,
         ),
-        child: Center(
-          child: Assets.logo.image(
-            height: 250.h,
-            color: context.palette.textPrimary,
-          ),
+      ),
+    ).animate(
+      controller: _splashController,
+      // Taken out of the tree once it has left rather than left parked above
+      // the screen: off-screen it is still a full-screen layer the tabs are
+      // built under, and a rebuild that caught it mid-flight would otherwise
+      // put it back.
+      onComplete: (controller) {
+        if (mounted) setState(() => _gone = true);
+      },
+      effects: [
+        MoveEffect(
+          begin: Offset.zero,
+          end: Offset(0, -travel),
+          duration: 2500.ms,
+          curve: Curves.easeInOutCubic,
+          delay: 1500.ms,
         ),
-      ).animate(
-        controller: _splashController,
-        onComplete: (controller) {
-          controller.dispose();
-        },
-        effects: [
-          MoveEffect(
-            begin: const Offset(0, 0),
-            end: const Offset(0, -900),
-            duration: 2500.ms,
-            curve: Curves.easeInOutCubic,
-            delay: 1500.ms,
-          ),
-        ],
-      );
-    } else {
-      return const SizedBox();
-    }
+      ],
+    );
   }
 }
