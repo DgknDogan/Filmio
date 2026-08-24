@@ -127,6 +127,10 @@ abstract final class ContentFilter {
       buffer.write(_substitutions[character] ?? character);
     }
 
-    return buffer.toString().replaceAllMapped(RegExp(r'(.)\1{2,}'), (match) => match[1]!).split(RegExp(r'[^a-z.]+')).where((token) => token.isNotEmpty);
+    return buffer
+        .toString()
+        .replaceAllMapped(RegExp(r'(.)\1{2,}'), (match) => match[1]!)
+        .split(RegExp(r'[^a-z.]+'))
+        .where((token) => token.isNotEmpty);
   }
 }

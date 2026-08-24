@@ -42,8 +42,8 @@ void main() {
 
     blocTest<SettingsCubit, SettingsState>(
       'surfaces the failure message so the screen can announce it',
-      setUp: () =>
-          when(() => deleteAccountUseCase.call(params: any(named: 'params'))).thenAnswer((_) async => const Left(AuthFailure('Wrong e-mail or password.'))),
+      setUp: () => when(() => deleteAccountUseCase.call(params: any(named: 'params')))
+          .thenAnswer((_) async => const Left(AuthFailure('Wrong e-mail or password.'))),
       build: build,
       act: (cubit) => cubit.deleteAccount('not-the-password'),
       expect: () => const [SettingsDeletingAccount(), SettingsDeleteFailed('Wrong e-mail or password.')],
