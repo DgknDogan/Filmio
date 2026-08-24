@@ -16,6 +16,12 @@ env:
   # unrelated push into a red build.
   FLUTTER_VERSION: "3.44.4"
 
+  # Same reasoning, and App Store Connect makes it sharper: it rejects any
+  # upload built against an SDK older than iOS 26, and the macOS runner image
+  # still selects Xcode 16.4 by default. This is the version installed on the
+  # image that matches the one used locally.
+  XCODE_VERSION: "26.2"
+
 jobs:
   verify:
     name: Format, analyze, test
@@ -161,6 +167,17 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+
+      # Without this the whole job runs on the image's default Xcode 16.4,
+      # which builds against the iOS 18.5 SDK. Everything up to and including
+      # the export succeeds; the upload is what fails, at the very end of the
+      # longest job in the pipeline, with `SDK version issue. This app was
+      # built with the iOS 18.5 SDK`. Selecting the toolchain first is what
+      # keeps that failure from being discovered forty minutes in.
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+          xcodebuild -version
 
       - uses: subosito/flutter-action@v2
         with:
