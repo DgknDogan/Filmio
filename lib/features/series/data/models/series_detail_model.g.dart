@@ -6,18 +6,13 @@ part of 'series_detail_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-SeriesDetailModel _$SeriesDetailModelFromJson(Map<String, dynamic> json) =>
-    SeriesDetailModel(
+SeriesDetailModel _$SeriesDetailModelFromJson(Map<String, dynamic> json) => SeriesDetailModel(
       backdropPath: json['backdrop_path'] as String?,
       firstAirDate: json['first_air_date'] as String?,
-      genres: (json['genres'] as List<dynamic>?)
-          ?.map((e) => GenreModel.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      genres: (json['genres'] as List<dynamic>?)?.map((e) => GenreModel.fromJson(e as Map<String, dynamic>)).toList(),
       id: (json['id'] as num?)?.toInt(),
       name: json['name'] as String?,
-      originCountry: (json['origin_country'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
+      originCountry: (json['origin_country'] as List<dynamic>?)?.map((e) => e as String).toList(),
       originalLanguage: json['original_language'] as String?,
       originalName: json['original_name'] as String?,
       overview: json['overview'] as String?,
@@ -27,8 +22,7 @@ SeriesDetailModel _$SeriesDetailModelFromJson(Map<String, dynamic> json) =>
       voteCount: (json['vote_count'] as num?)?.toInt(),
     );
 
-Map<String, dynamic> _$SeriesDetailModelToJson(SeriesDetailModel instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$SeriesDetailModelToJson(SeriesDetailModel instance) => <String, dynamic>{
       'backdrop_path': instance.backdropPath,
       'first_air_date': instance.firstAirDate,
       'genres': instance.genres,

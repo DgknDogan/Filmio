@@ -6,13 +6,10 @@ part of 'movie_detail_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-MovieDetailModel _$MovieDetailModelFromJson(Map<String, dynamic> json) =>
-    MovieDetailModel(
+MovieDetailModel _$MovieDetailModelFromJson(Map<String, dynamic> json) => MovieDetailModel(
       adult: json['adult'] as bool?,
       backdropPath: json['backdrop_path'] as String?,
-      genres: (json['genres'] as List<dynamic>?)
-          ?.map((e) => GenreModel.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      genres: (json['genres'] as List<dynamic>?)?.map((e) => GenreModel.fromJson(e as Map<String, dynamic>)).toList(),
       id: (json['id'] as num?)?.toInt(),
       originalLanguage: json['original_language'] as String?,
       originalTitle: json['original_title'] as String?,
@@ -26,8 +23,7 @@ MovieDetailModel _$MovieDetailModelFromJson(Map<String, dynamic> json) =>
       voteCount: (json['vote_count'] as num?)?.toInt(),
     );
 
-Map<String, dynamic> _$MovieDetailModelToJson(MovieDetailModel instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$MovieDetailModelToJson(MovieDetailModel instance) => <String, dynamic>{
       'adult': instance.adult,
       'backdrop_path': instance.backdropPath,
       'genres': instance.genres,

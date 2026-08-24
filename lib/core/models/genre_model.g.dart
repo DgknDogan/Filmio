@@ -11,8 +11,7 @@ GenreModel _$GenreModelFromJson(Map<String, dynamic> json) => GenreModel(
       name: json['name'] as String?,
     );
 
-Map<String, dynamic> _$GenreModelToJson(GenreModel instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$GenreModelToJson(GenreModel instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
     };

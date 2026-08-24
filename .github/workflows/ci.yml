@@ -56,10 +56,18 @@ jobs:
       # Reproducing a failure locally needs `dart run build_runner clean` first:
       # with a warm cache build_runner writes nothing and a stale file looks
       # current.
+      #
+      # build_runner formats what it writes at dart_style's default 80 columns
+      # and ignores the `formatter: page_width: 150` in analysis_options.yaml,
+      # so the files it emits are not the files `dart format` produces. The
+      # committed copies are the formatted ones; reformatting here is what
+      # keeps this step comparing content instead of column widths.
       - name: Generated code is current
         run: |
           dart run build_runner build
           flutter gen-l10n
+          dart format \
+            $(git ls-files '*.dart' | grep -E '\.(g|gr|gen)\.dart$|app_localizations')
           git diff --exit-code
 
   android:
