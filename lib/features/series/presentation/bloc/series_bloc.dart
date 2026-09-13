@@ -55,10 +55,14 @@ class SeriesBloc extends Bloc<SeriesEvent, SeriesState> {
     );
   }
 
-  /// Two calls: Filmio's service names the ids, TMDB tells us what the first
-  /// of them is. The rest of the ids are the fallbacks the service ranked
-  /// lower — the head of the tab shows one series, so only the best is
-  /// fetched.
+  /// Filmio's service names the ids, best first; TMDB tells us what each of
+  /// them is. The head of the tab steps through every one, so all of them are
+  /// fetched — together, since none waits on another — and kept in the order
+  /// the service ranked them.
+  ///
+  /// A series TMDB cannot answer for is left out rather than sinking the rest.
+  /// Only when none comes back does the head of the tab fail, and then with
+  /// the best-ranked series' reason.
   Future<void> onGetRecommendedSeries(GetRecommendedSeries event, Emitter<SeriesState> emit) async {
     final idsResult = await _getRecommendedSeriesIdsUseCase.call();
 
@@ -69,11 +73,17 @@ class SeriesBloc extends Bloc<SeriesEvent, SeriesState> {
           return _emitRecommended(const RecommendedSeriesEmpty(), emit);
         }
 
-        final detailsResult = await _getSeriesDetailsUseCase.call(params: seriesIds.first);
+        final results = await Future.wait(seriesIds.map((id) => _getSeriesDetailsUseCase.call(params: id)));
 
-        detailsResult.fold(
-          (failure) => _emitRecommended(RecommendedSeriesFailure(failure.message), emit),
-          (series) => _emitRecommended(RecommendedSeriesLoaded(series), emit),
+        final series = <SeriesEntity>[];
+        final failures = <Failure>[];
+        for (final result in results) {
+          result.fold(failures.add, series.add);
+        }
+
+        _emitRecommended(
+          series.isEmpty ? RecommendedSeriesFailure(failures.first.message) : RecommendedSeriesLoaded(series),
+          emit,
         );
       },
     );
@@ -95,11 +105,12 @@ class SeriesBloc extends Bloc<SeriesEvent, SeriesState> {
   /// The service having nothing to suggest is not a reason for the tab to open
   /// on an empty block: an account that has liked too little yet gets a
   /// top-rated series, which is what the head of the tab held before there was
-  /// a service to ask. A failure is left as it is — that one is worth saying.
+  /// a service to ask. Only the one: a stand-in is not a list of suggestions
+  /// to step through. A failure is left as it is — that one is worth saying.
   RecommendedSeriesState _resolve(RecommendedSeriesState recommended, List<SeriesEntity> topRated) {
     if (recommended is! RecommendedSeriesEmpty || topRated.isEmpty) return recommended;
 
-    return RecommendedSeriesLoaded(topRated[Random().nextInt(topRated.length)]);
+    return RecommendedSeriesLoaded([topRated[Random().nextInt(topRated.length)]]);
   }
 
   SeriesState _success(List<SeriesEntity> popularSeries, List<SeriesEntity> topRatedSeries) {

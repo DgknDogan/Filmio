@@ -17,6 +17,11 @@ void main() {
   const withPoster = SeriesEntity(id: 1, name: 'A', posterPath: '/a.jpg');
   const withoutPoster = SeriesEntity(id: 2, name: 'B');
   const recommended = SeriesEntity(id: 66732, name: 'Stranger Things', posterPath: '/st.jpg');
+  const secondPick = SeriesEntity(id: 1399, name: 'Game of Thrones', posterPath: '/got.jpg');
+  const thirdPick = SeriesEntity(id: 82856, name: 'The Mandalorian', posterPath: '/tm.jpg');
+
+  /// What TMDB answers for each id the service can rank.
+  const seriesById = {66732: recommended, 1399: secondPick, 82856: thirdPick};
 
   /// Several, so that a fallback picked at random has somewhere to vary.
   const topRatedList = [
@@ -53,16 +58,23 @@ void main() {
     when(() => getTopRated.call()).thenAnswer((_) => answer(topRated));
   }
 
+  /// [failing] names the ids TMDB cannot answer for; every other id resolves
+  /// to its own series, so a test can tell which were fetched and in what
+  /// order they were kept.
   void stubRecommendation({
     Either<Failure, List<int>> ids = const Right([66732]),
-    Either<Failure, SeriesEntity> details = const Right(recommended),
+    Map<int, Failure> failing = const {},
     Duration? delay,
   }) {
     when(() => getRecommendedIds.call()).thenAnswer((_) async {
       if (delay != null) await Future<void>.delayed(delay);
       return ids;
     });
-    when(() => getDetails.call(params: any(named: 'params'))).thenAnswer((_) async => details);
+    when(() => getDetails.call(params: any(named: 'params'))).thenAnswer((invocation) async {
+      final id = invocation.namedArguments[#params] as int;
+      final failure = failing[id];
+      return failure == null ? Right(seriesById[id]!) : Left(failure);
+    });
   }
 
   group('the rows', () {
@@ -112,7 +124,7 @@ void main() {
     );
 
     blocTest<SeriesBloc, SeriesState>(
-      'is the first id the service ranked, fetched from TMDB by id',
+      'is every series the service ranked, fetched from TMDB and kept in its order',
       build: build,
       setUp: () {
         stub(popular: const Right([withPoster]), topRated: const Right([withPoster]));
@@ -120,11 +132,32 @@ void main() {
       },
       act: (bloc) => bloc.add(GetSeries()),
       verify: (bloc) {
+        // The head of the tab steps through all of them, so none is left out.
         verify(() => getDetails.call(params: 66732)).called(1);
-        // The lower-ranked ids are fallbacks the head of the tab has no room for.
-        verifyNever(() => getDetails.call(params: 1399));
-        expect((bloc.state as SeriesSuccess).recommended, const RecommendedSeriesLoaded(recommended));
+        verify(() => getDetails.call(params: 1399)).called(1);
+        verify(() => getDetails.call(params: 82856)).called(1);
+        expect(
+          (bloc.state as SeriesSuccess).recommended,
+          const RecommendedSeriesLoaded([recommended, secondPick, thirdPick]),
+        );
       },
+    );
+
+    blocTest<SeriesBloc, SeriesState>(
+      'leaves out a series TMDB cannot answer for rather than failing the rest',
+      build: build,
+      setUp: () {
+        stub(popular: const Right([withPoster]), topRated: const Right([withPoster]));
+        stubRecommendation(
+          ids: const Right([66732, 1399, 82856]),
+          failing: const {1399: ServerFailure('Not found.', statusCode: 404)},
+        );
+      },
+      act: (bloc) => bloc.add(GetSeries()),
+      verify: (bloc) => expect(
+        (bloc.state as SeriesSuccess).recommended,
+        const RecommendedSeriesLoaded([recommended, thirdPick]),
+      ),
     );
 
     blocTest<SeriesBloc, SeriesState>(
@@ -136,7 +169,7 @@ void main() {
       },
       act: (bloc) => bloc.add(GetSeries()),
       wait: const Duration(milliseconds: 50),
-      verify: (bloc) => expect((bloc.state as SeriesSuccess).recommended, const RecommendedSeriesLoaded(recommended)),
+      verify: (bloc) => expect((bloc.state as SeriesSuccess).recommended, const RecommendedSeriesLoaded([recommended])),
     );
 
     blocTest<SeriesBloc, SeriesState>(
@@ -150,12 +183,12 @@ void main() {
       wait: const Duration(milliseconds: 50),
       expect: () => const [
         SeriesSuccess([withPoster], [withPoster], RecommendedSeriesLoading()),
-        SeriesSuccess([withPoster], [withPoster], RecommendedSeriesLoaded(recommended)),
+        SeriesSuccess([withPoster], [withPoster], RecommendedSeriesLoaded([recommended])),
       ],
     );
 
     blocTest<SeriesBloc, SeriesState>(
-      'falls back to a top-rated series when the service has nothing to suggest yet',
+      'falls back to one top-rated series when the service has nothing to suggest yet',
       build: build,
       setUp: () {
         stub(popular: const Right([withPoster]), topRated: const Right(topRatedList));
@@ -164,8 +197,10 @@ void main() {
       act: (bloc) => bloc.add(GetSeries()),
       verify: (bloc) {
         final state = bloc.state as SeriesSuccess;
+        // Only one: a stand-in is not a list of suggestions to step through.
         final recommended = state.recommended as RecommendedSeriesLoaded;
-        expect(state.topSeriesList, contains(recommended.series));
+        expect(recommended.series, hasLength(1));
+        expect(state.topSeriesList, contains(recommended.series.single));
         verifyNever(() => getDetails.call(params: any(named: 'params')));
       },
     );
@@ -181,7 +216,7 @@ void main() {
       wait: const Duration(milliseconds: 50),
       verify: (bloc) {
         final state = bloc.state as SeriesSuccess;
-        expect(state.topSeriesList, contains((state.recommended as RecommendedSeriesLoaded).series));
+        expect(state.topSeriesList, contains((state.recommended as RecommendedSeriesLoaded).series.single));
       },
     );
 
@@ -193,7 +228,7 @@ void main() {
         stubRecommendation(ids: const Right([]));
       },
       act: (bloc) => bloc.add(GetSeries()),
-      verify: (bloc) => expect((bloc.state as SeriesSuccess).recommended, const RecommendedSeriesLoaded(withPoster)),
+      verify: (bloc) => expect((bloc.state as SeriesSuccess).recommended, const RecommendedSeriesLoaded([withPoster])),
     );
 
     blocTest<SeriesBloc, SeriesState>(
@@ -212,15 +247,19 @@ void main() {
     );
 
     blocTest<SeriesBloc, SeriesState>(
-      'a title that cannot be fetched fails the head of the tab, not the tab',
+      'no series that can be fetched fails the head of the tab, not the tab',
       build: build,
       setUp: () {
         stub(popular: const Right([withPoster]), topRated: const Right([withPoster]));
-        stubRecommendation(details: const Left(ServerFailure('Not found.', statusCode: 404)));
+        stubRecommendation(
+          ids: const Right([66732, 1399]),
+          failing: const {66732: ServerFailure('Not found.', statusCode: 404), 1399: NetworkFailure('offline')},
+        );
       },
       act: (bloc) => bloc.add(GetSeries()),
       verify: (bloc) {
         expect(bloc.state, isA<SeriesSuccess>());
+        // The best-ranked series' reason is the one reported.
         expect((bloc.state as SeriesSuccess).recommended, const RecommendedSeriesFailure('Not found.'));
       },
     );

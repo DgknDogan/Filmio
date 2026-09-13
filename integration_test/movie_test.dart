@@ -41,8 +41,16 @@ void main() {
       reason: recommended is RecommendedMovieFailure ? 'the recommendation failed: ${recommended.message}' : 'no recommendation resolved',
     );
 
-    // And that the title it resolved to is the one drawn at the head of the tab.
+    // And that the head of the tab opens on the best-ranked of the titles it
+    // resolved to...
     await $(FeaturedHero).waitUntilVisible();
-    expect($((recommended as RecommendedMovieLoaded).movie.title!).exists, true);
+    final movies = (recommended as RecommendedMovieLoaded).movies;
+    expect($(movies.first.title!).exists, true);
+
+    // ...and that the arrow beside Details steps it on to the next one.
+    if (movies.length > 1) {
+      await $(#featuredNext).tap(settlePolicy: SettlePolicy.trySettle);
+      expect($(movies[1].title!).exists, true);
+    }
   });
 }

@@ -607,6 +607,18 @@ abstract class AppLocalizations {
   /// **'Details'**
   String get detailsAction;
 
+  /// Arrow beside the tab hero's Details button that steps back to the previous recommended title
+  ///
+  /// In en, this message translates to:
+  /// **'Previous title'**
+  String get featuredPrevious;
+
+  /// Arrow beside the tab hero's Details button that steps on to the next recommended title
+  ///
+  /// In en, this message translates to:
+  /// **'Next title'**
+  String get featuredNext;
+
   /// Adds a title to the liked list
   ///
   /// In en, this message translates to:

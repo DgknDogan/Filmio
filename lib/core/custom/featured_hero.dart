@@ -7,12 +7,53 @@ import '../../config/theme/app_decorations.dart';
 import '../../config/theme/app_spacing.dart';
 import '../extensions/context_extension.dart';
 import 'app_network_image.dart';
+import 'featured_carousel.dart';
 import 'meta_line.dart';
+import 'numeric_transition_text.dart';
 import 'poster_card.dart';
 
-/// The full-bleed opening of a tab: one title's artwork, with the page's own
+/// One title the featured block can show — everything about it that changes
+/// when the block steps on to another.
+class FeaturedTitle {
+  /// The still behind the whole block.
+  final String imageUrl;
+
+  /// The title's poster, held to the left of the text.
+  ///
+  /// The rows further down the page are rows of posters, so the opening title
+  /// is one too — and it is the poster, not the backdrop, that flies into the
+  /// details screen.
+  final String posterUrl;
+
+  final String title;
+  final double? rating;
+  final List<String?> metaParts;
+
+  /// Different for every title in the block: while the poster cross-fades,
+  /// the old title's and the new one's are both on screen.
+  final Object? heroTag;
+
+  const FeaturedTitle({
+    required this.imageUrl,
+    required this.posterUrl,
+    required this.title,
+    required this.metaParts,
+    this.rating,
+    this.heroTag,
+  });
+}
+
+/// The full-bleed opening of a tab: a title's artwork, with the page's own
 /// ground bleeding back in at the bottom so the rows below continue out of it
 /// rather than starting after it.
+///
+/// Given more than one title, it steps through them without end, by swipe or
+/// by the arrows either side of its action. Only the artwork slides. The
+/// poster and the lines beside it stay where they are and change in place a
+/// moment after it sets off — the poster cross-fading, the name, rating and
+/// genre rolling over a character at a time. The kicker, the action and the
+/// arrows do not change at all: they belong to the block, not to any one
+/// title.
 ///
 /// Everything it draws is held to the foot of the block. The page's bar floats
 /// over the head of it, so the artwork reaches the top of the screen and the
@@ -32,27 +73,16 @@ class FeaturedHero extends StatelessWidget {
   /// The height of the filled action under the text.
   static double get actionHeight => 44.h;
 
-  /// The still behind the whole block.
-  final String imageUrl;
+  /// Best first. With only one, the action has the row to itself.
+  final List<FeaturedTitle> titles;
 
-  /// The title's poster, held to the left of the text.
-  ///
-  /// The rows further down the page are rows of posters, so the opening title
-  /// is one too — and it is the poster, not the backdrop, that flies into the
-  /// details screen.
-  final String posterUrl;
-
+  /// The label over the title — the same whichever one is showing.
   final String kicker;
-  final String title;
-  final double? rating;
-  final List<String?> metaParts;
 
-  /// The one filled action, and the icon buttons beside it.
+  /// The one filled action, handed the index of the title showing when it is
+  /// pressed.
   final String actionLabel;
-  final VoidCallback onAction;
-  final List<Widget> secondaryActions;
-
-  final Object? heroTag;
+  final ValueChanged<int> onAction;
 
   /// How far past the top of the block its artwork reaches.
   ///
@@ -63,16 +93,10 @@ class FeaturedHero extends StatelessWidget {
 
   const FeaturedHero({
     super.key,
-    required this.imageUrl,
-    required this.posterUrl,
+    required this.titles,
     required this.kicker,
-    required this.title,
-    required this.metaParts,
     required this.actionLabel,
     required this.onAction,
-    this.rating,
-    this.secondaryActions = const [],
-    this.heroTag,
     this.stretch = 0,
   });
 
@@ -81,67 +105,142 @@ class FeaturedHero extends StatelessWidget {
     return SizedBox(
       height: height,
       width: double.infinity,
-      child: Stack(
-        fit: StackFit.expand,
-        // The artwork is allowed out of the top of the block, and only the
-        // top: what it grows into is the gap above the first sliver.
-        clipBehavior: Clip.none,
+      child: FeaturedCarousel(
+        count: titles.length,
+        pageBuilder: (context, index) => _Artwork(url: titles[index].imageUrl, stretch: stretch),
+        overlayBuilder: (context, controls) => _Still(
+          index: controls.shown,
+          title: titles[controls.shown],
+          kicker: kicker,
+          actionLabel: actionLabel,
+          onAction: () => onAction(controls.shown),
+          onPrevious: controls.onPrevious,
+          onNext: controls.onNext,
+        ),
+      ),
+    );
+  }
+}
+
+/// One title's artwork, filling the block. This is all that slides.
+class _Artwork extends StatelessWidget {
+  final String url;
+  final double stretch;
+
+  const _Artwork({required this.url, required this.stretch});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      // The artwork is allowed out of the top of the block, and only the top:
+      // what it grows into is the gap above the first sliver.
+      clipBehavior: Clip.none,
+      children: [
+        Positioned(
+          top: -stretch,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          // The scrim travels with the still rather than staying with the
+          // block, or the stretched strip would come out lighter than the rest
+          // and read as a band across the top.
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              _Backdrop(url: url),
+              DecoratedBox(decoration: AppDecorations(context.palette).backdropScrim),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Everything over the artwork, which stays where it is while the artwork
+/// slides: the poster and the lines beside it, changing in place, and the
+/// action with its arrows, not changing at all.
+class _Still extends StatelessWidget {
+  /// Which of the block's titles [title] is — what tells one poster from the
+  /// next while they cross-fade.
+  final int index;
+  final FeaturedTitle title;
+  final String kicker;
+  final String actionLabel;
+  final VoidCallback onAction;
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
+
+  /// How long the poster takes to cross-fade into the next title's.
+  static const Duration _posterFade = Duration(milliseconds: 300);
+
+  const _Still({
+    required this.index,
+    required this.title,
+    required this.kicker,
+    required this.actionLabel,
+    required this.onAction,
+    this.onPrevious,
+    this.onNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Positioned(
-            top: -stretch,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            // The scrim travels with the still rather than staying with the
-            // block, or the stretched strip would come out lighter than the
-            // rest and read as a band across the top.
-            child: Stack(
-              fit: StackFit.expand,
+          const Spacer(),
+          // Drawn over the pages but not in the way of them: a swipe that
+          // starts on the poster or the text still reaches the artwork.
+          IgnorePointer(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                _Backdrop(url: imageUrl),
-                DecoratedBox(decoration: AppDecorations(context.palette).backdropScrim),
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Spacer(),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    SizedBox(
-                      width: posterWidth,
-                      child: PosterCard(
-                        imageUrl: posterUrl,
-                        title: title,
-                        heroTag: heroTag,
-                      ),
+                SizedBox(
+                  width: FeaturedHero.posterWidth,
+                  child: AnimatedSwitcher(
+                    duration: _posterFade,
+                    switchInCurve: Curves.easeInOut,
+                    switchOutCurve: Curves.easeInOut,
+                    child: PosterCard(
+                      key: ValueKey(index),
+                      imageUrl: title.posterUrl,
+                      title: title.title,
+                      heroTag: title.heroTag,
                     ),
-                    AppGap.horizontal(AppSpacing.lg),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(kicker.toUpperCase(), style: context.styles.kicker),
-                          AppGap.vertical(AppSpacing.md),
-                          Text(title, style: context.styles.featureTitle, maxLines: 3, overflow: TextOverflow.ellipsis),
-                          AppGap.vertical(AppSpacing.md),
-                          MetaLine(rating: rating, parts: metaParts, onImage: true),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                AppGap.vertical(AppSpacing.lg),
-                _Actions(label: actionLabel, onPressed: onAction, secondary: secondaryActions),
-                AppGap.vertical(AppSpacing.xxl),
+                AppGap.horizontal(AppSpacing.lg),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(kicker.toUpperCase(), style: context.styles.kicker),
+                      AppGap.vertical(AppSpacing.md),
+                      NumericTransitionText(
+                        title.title,
+                        style: context.styles.featureTitle,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      AppGap.vertical(AppSpacing.md),
+                      MetaLine(rating: title.rating, parts: title.metaParts, onImage: true, rollChanges: true),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
+          AppGap.vertical(AppSpacing.lg),
+          SizedBox(
+            height: FeaturedHero.actionHeight,
+            child: _Actions(label: actionLabel, onPressed: onAction, onPrevious: onPrevious, onNext: onNext),
+          ),
+          AppGap.vertical(AppSpacing.xxl),
         ],
       ),
     );
@@ -207,18 +306,35 @@ ColorFilter _desaturate(double amount, {double brightness = 1}) {
   ]);
 }
 
+/// The filled action, with an arrow either side of it when there is another
+/// title to step to.
 class _Actions extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
-  final List<Widget> secondary;
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
 
-  const _Actions({required this.label, required this.onPressed, required this.secondary});
+  const _Actions({required this.label, required this.onPressed, this.onPrevious, this.onNext});
 
   @override
   Widget build(BuildContext context) {
+    final previous = onPrevious;
+    final next = onNext;
+
     return Row(
+      spacing: AppSpacing.sm,
       children: [
+        if (previous != null)
+          Expanded(
+            child: _StepButton(
+              key: const Key('featuredPrevious'),
+              icon: Icons.arrow_back_ios_new_rounded,
+              label: context.l10n.featuredPrevious,
+              onPressed: previous,
+            ),
+          ),
         Expanded(
+          flex: 4,
           child: SizedBox(
             height: FeaturedHero.actionHeight,
             child: ElevatedButton(
@@ -228,11 +344,44 @@ class _Actions extends StatelessWidget {
             ),
           ),
         ),
-        for (final action in secondary) ...[
-          AppGap.horizontal(AppSpacing.md),
-          action,
-        ],
+        if (next != null)
+          Expanded(
+            child: _StepButton(
+              key: const Key('featuredNext'),
+              icon: Icons.arrow_forward_ios_rounded,
+              label: context.l10n.featuredNext,
+              onPressed: next,
+            ),
+          ),
       ],
+    );
+  }
+}
+
+/// An arrow beside the action, stepping the block to another title.
+class _StepButton extends StatelessWidget {
+  final IconData icon;
+
+  /// What a screen reader says for the arrow, and what a long press shows.
+  final String label;
+  final VoidCallback onPressed;
+
+  const _StepButton({super.key, required this.icon, required this.label, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: label,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        // The theme pads a button for a word; an arrow in a sixth of the row
+        // has no room for that padding.
+        style: ElevatedButton.styleFrom(
+          minimumSize: Size.fromHeight(FeaturedHero.actionHeight),
+          padding: EdgeInsets.zero,
+        ),
+        child: Icon(icon),
+      ),
     );
   }
 }

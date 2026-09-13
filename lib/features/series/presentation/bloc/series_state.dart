@@ -51,8 +51,10 @@ final class RecommendedSeriesLoading extends RecommendedSeriesState {
   const RecommendedSeriesLoading();
 }
 
+/// Every series the service ranked that TMDB could answer for, best first — the
+/// head of the tab steps through them. A top-rated stand-in is a list of one.
 final class RecommendedSeriesLoaded extends RecommendedSeriesState {
-  final SeriesEntity series;
+  final List<SeriesEntity> series;
 
   const RecommendedSeriesLoaded(this.series);
 

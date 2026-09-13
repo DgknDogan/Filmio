@@ -297,6 +297,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailsAction => 'Details';
 
   @override
+  String get featuredPrevious => 'Previous title';
+
+  @override
+  String get featuredNext => 'Next title';
+
+  @override
   String get likeAction => 'Add to liked';
 
   @override

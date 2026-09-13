@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../config/theme/app_spacing.dart';
 import '../extensions/context_extension.dart';
+import 'numeric_transition_text.dart';
 
 /// The one line of facts under a title: a rating behind its star, then the
 /// year, the genre, whatever else the entity carries — separated by a dot in
@@ -16,7 +17,12 @@ class MetaLine extends StatelessWidget {
   /// True where the line is drawn over artwork rather than over the page.
   final bool onImage;
 
-  const MetaLine({super.key, this.rating, required this.parts, this.onImage = false});
+  /// True where the line is one of several the same spot takes turns showing,
+  /// so a new rating or genre rolls into place a character at a time rather
+  /// than swapping in at once.
+  final bool rollChanges;
+
+  const MetaLine({super.key, this.rating, required this.parts, this.onImage = false, this.rollChanges = false});
 
   @override
   Widget build(BuildContext context) {
@@ -24,17 +30,21 @@ class MetaLine extends StatelessWidget {
     final style = onImage ? context.styles.metaOnImage : context.styles.meta;
     final present = parts.nonNulls.where((part) => part.isNotEmpty).toList();
 
+    Widget fragment(String value, {int? maxLines}) => rollChanges
+        ? NumericTransitionText(value, style: style, maxLines: maxLines, overflow: maxLines == null ? TextOverflow.clip : TextOverflow.ellipsis)
+        : Text(value, style: style, maxLines: maxLines, overflow: maxLines == null ? null : TextOverflow.ellipsis);
+
     return Row(
       children: [
         if (rating != null) ...[
           Icon(Icons.star_rounded, size: AppSpacing.lg, color: palette.accentSoft),
           AppGap.horizontal(AppSpacing.xs),
-          Text(rating!.toStringAsFixed(1), style: style),
+          fragment(rating!.toStringAsFixed(1)),
           if (present.isNotEmpty) _Separator(style: style),
         ],
         for (final (index, part) in present.indexed) ...[
           if (index > 0) _Separator(style: style),
-          Flexible(child: Text(part, style: style, maxLines: 1, overflow: TextOverflow.ellipsis)),
+          Flexible(child: fragment(part, maxLines: 1)),
         ],
       ],
     );

@@ -51,13 +51,15 @@ final class RecommendedMovieLoading extends RecommendedMovieState {
   const RecommendedMovieLoading();
 }
 
+/// Every title the service ranked that TMDB could answer for, best first — the
+/// head of the tab steps through them. A top-rated stand-in is a list of one.
 final class RecommendedMovieLoaded extends RecommendedMovieState {
-  final MovieEntity movie;
+  final List<MovieEntity> movies;
 
-  const RecommendedMovieLoaded(this.movie);
+  const RecommendedMovieLoaded(this.movies);
 
   @override
-  List<Object?> get props => [movie];
+  List<Object?> get props => [movies];
 }
 
 /// The service answered but had nothing to suggest, and there was no top-rated

@@ -16,9 +16,9 @@ import '../../domain/entities/series_entity.dart';
 import '../bloc/series_bloc.dart';
 import '../widgets/series_poster_card.dart';
 
-/// The featured title's poster can also appear in a row further down, so its
-/// tag is the banner's own rather than the title's.
-const _featuredHeroTag = 'series_featured_poster';
+/// The featured series' posters can also appear in a row further down, so
+/// their tags are scoped to the banner rather than naming the series.
+const _featuredScope = 'series-featured';
 
 /// The search control and the search screen's field are the same object at two
 /// widths, so they share a tag and the one becomes the other.
@@ -140,26 +140,36 @@ class _NoHero extends StatelessWidget {
   }
 }
 
+/// The head of the tab: [series] in the order they are stepped through.
 class _Hero extends StatelessWidget {
-  final SeriesEntity series;
+  final List<SeriesEntity> series;
   final double stretch;
 
   const _Hero({required this.series, required this.stretch});
 
+  /// By position rather than by id: while the poster cross-fades two series
+  /// are on screen at once, and their positions are what is certain to differ.
+  static String _heroTag(int index) => posterHeroTag(_featuredScope, index: index);
+
   @override
   Widget build(BuildContext context) {
     return FeaturedHero(
-      imageUrl: series.backdropPath?.coverImage ?? series.posterPath?.coverImage ?? '',
-      posterUrl: series.posterPath?.coverImage ?? '',
       kicker: context.l10n.recommendedForYou,
-      title: series.name ?? '',
-      rating: series.voteAverage,
-      metaParts: [series.genreIds.firstSeriesGenre],
-      heroTag: _featuredHeroTag,
+      titles: [
+        for (final (index, entry) in series.indexed)
+          FeaturedTitle(
+            imageUrl: entry.backdropPath?.coverImage ?? entry.posterPath?.coverImage ?? '',
+            posterUrl: entry.posterPath?.coverImage ?? '',
+            title: entry.name ?? '',
+            rating: entry.voteAverage,
+            metaParts: [entry.genreIds.firstSeriesGenre],
+            heroTag: _heroTag(index),
+          ),
+      ],
       actionLabel: context.l10n.detailsAction,
       stretch: stretch,
-      onAction: () => context.router.push(
-        SeriesDetailsRoute(series: series, heroTag: _featuredHeroTag),
+      onAction: (index) => context.router.push(
+        SeriesDetailsRoute(series: series[index], heroTag: _heroTag(index)),
       ),
     );
   }

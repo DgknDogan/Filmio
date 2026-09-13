@@ -35,6 +35,13 @@ void main() {
     );
 
     await $(FeaturedHero).waitUntilVisible();
-    expect($((recommended as RecommendedSeriesLoaded).series.name!).exists, true);
+    final series = (recommended as RecommendedSeriesLoaded).series;
+    expect($(series.first.name!).exists, true);
+
+    // The arrow beside Details steps the head of the tab on to the next one.
+    if (series.length > 1) {
+      await $(#featuredNext).tap(settlePolicy: SettlePolicy.trySettle);
+      expect($(series[1].name!).exists, true);
+    }
   });
 }

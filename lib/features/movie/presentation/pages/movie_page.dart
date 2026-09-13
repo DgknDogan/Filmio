@@ -19,9 +19,9 @@ import '../../domain/entities/movie.dart';
 import '../bloc/movie_bloc.dart';
 import '../widgets/movie_poster_card.dart';
 
-/// The featured title's poster can also appear in a row further down, so its
-/// tag is the banner's own rather than the title's.
-const _featuredHeroTag = 'movie_featured_poster';
+/// The featured titles' posters can also appear in a row further down, so
+/// their tags are scoped to the banner rather than naming the title.
+const _featuredScope = 'movie-featured';
 
 /// The search control and the search screen's field are the same object at two
 /// widths, so they share a tag and the one becomes the other.
@@ -97,7 +97,7 @@ class _Content extends StatelessWidget {
         }
 
         return switch (state.recommended) {
-          RecommendedMovieLoaded(:final movie) => _Hero(movie: movie, stretch: stretch),
+          RecommendedMovieLoaded(:final movies) => _Hero(movies: movies, stretch: stretch),
           RecommendedMovieLoading() => FeaturedHeroSkeleton(stretch: stretch),
           RecommendedMovieEmpty() => _NoHero(message: context.l10n.recommendedEmpty),
           RecommendedMovieFailure(:final message) => _NoHero(message: message),
@@ -193,30 +193,40 @@ class _GuestHeroState extends State<_GuestHero> {
     final pick = _pick;
     if (pick == null) return FeaturedHeroSkeleton(stretch: widget.stretch);
 
-    return _Hero(movie: pick, stretch: widget.stretch);
+    return _Hero(movies: [pick], stretch: widget.stretch);
   }
 }
 
+/// The head of the tab: [movies] in the order they are stepped through.
 class _Hero extends StatelessWidget {
-  final MovieEntity movie;
+  final List<MovieEntity> movies;
   final double stretch;
 
-  const _Hero({required this.movie, required this.stretch});
+  const _Hero({required this.movies, required this.stretch});
+
+  /// By position rather than by id: while the poster cross-fades two titles
+  /// are on screen at once, and their positions are what is certain to differ.
+  static String _heroTag(int index) => posterHeroTag(_featuredScope, index: index);
 
   @override
   Widget build(BuildContext context) {
     return FeaturedHero(
-      imageUrl: movie.backdropPath?.coverImage ?? movie.posterPath?.coverImage ?? '',
-      posterUrl: movie.posterPath?.coverImage ?? '',
       kicker: context.l10n.recommendedForYou,
-      title: movie.title ?? '',
-      rating: movie.voteAverage,
-      metaParts: [movie.genreIds.firstMovieGenre],
-      heroTag: _featuredHeroTag,
+      titles: [
+        for (final (index, movie) in movies.indexed)
+          FeaturedTitle(
+            imageUrl: movie.backdropPath?.coverImage ?? movie.posterPath?.coverImage ?? '',
+            posterUrl: movie.posterPath?.coverImage ?? '',
+            title: movie.title ?? '',
+            rating: movie.voteAverage,
+            metaParts: [movie.genreIds.firstMovieGenre],
+            heroTag: _heroTag(index),
+          ),
+      ],
       actionLabel: context.l10n.detailsAction,
       stretch: stretch,
-      onAction: () => context.router.push(
-        MovieDetailsRoute(movie: movie, heroTag: _featuredHeroTag),
+      onAction: (index) => context.router.push(
+        MovieDetailsRoute(movie: movies[index], heroTag: _heroTag(index)),
       ),
     );
   }
