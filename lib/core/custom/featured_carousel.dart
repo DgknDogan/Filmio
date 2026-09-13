@@ -25,19 +25,18 @@ class FeaturedCarouselControls {
 /// that stays where it is: what changes in place rather than sliding, and
 /// what does not change at all.
 ///
-/// The still layer is told which title to show [followDelay] after the pages
-/// set off towards it — from the press of an arrow, or from the moment a swipe
-/// carries the next page past half way. Arrows pressed faster than that skip
-/// the titles in between rather than flicking through them.
+/// Only the arrows the overlay is handed move the pages; they do not swipe.
+/// The still layer is told which title to show [followDelay] after an arrow
+/// sets the pages off towards it. Arrows pressed faster than that skip the
+/// titles in between rather than flicking through them.
 ///
 /// There is no end in either direction: after the last title comes the first
-/// again, and before the first comes the last, whether the reader swipes or
-/// uses the arrows. Underneath it is a [PageView] with no page count, started
-/// a long way in, that reads each page's title off its number — so there is
-/// always as far to go back as there is to go on.
+/// again, and before the first comes the last. Underneath it is a [PageView]
+/// with no page count, started a long way in, that reads each page's title off
+/// its number — so there is always as far to go back as there is to go on.
 ///
-/// A single title is drawn on its own with nothing to swipe, and the overlay
-/// is handed no arrows: every step would land on the same title again.
+/// A single title is drawn on its own, and the overlay is handed no arrows:
+/// every step would land on the same title again.
 ///
 /// Which title is showing lives here rather than in a bloc, as the page's
 /// scroll does in `BrowseView`: nothing outside the block reads it.
@@ -79,9 +78,6 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
   /// way has to go one further, not land on the same page again.
   late int _targetPage = _pages.initialPage;
 
-  /// From the moment a finger takes the pages until they come to rest.
-  bool _swiping = false;
-
   final ValueNotifier<int> _shown = ValueNotifier(0);
   Timer? _follow;
 
@@ -102,7 +98,6 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
     WidgetsBinding.instance.addPostFrameCallback((_) => previous.dispose());
 
     _targetPage = _pages.initialPage;
-    _swiping = false;
     _follow?.cancel();
     _shown.value = 0;
   }
@@ -132,27 +127,6 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
 
   void _stepOn() => _step(1);
 
-  /// A swipe says where it is going by carrying a page past half way. The
-  /// arrows have already said so when they were pressed, and the pages they
-  /// pass on the way are not destinations.
-  void _pageChanged(int page) {
-    if (_swiping) _followTo(page);
-  }
-
-  bool _watch(ScrollNotification notification) {
-    if (notification.depth != 0) return false;
-
-    if (notification is ScrollStartNotification && notification.dragDetails != null) {
-      _swiping = true;
-    } else if (notification is ScrollEndNotification) {
-      _swiping = false;
-      // Wherever the pages came to rest is where the next arrow steps from.
-      _targetPage = (_pages.page ?? _targetPage.toDouble()).round();
-    }
-
-    return false;
-  }
-
   @override
   Widget build(BuildContext context) {
     final many = widget.count > 1;
@@ -164,22 +138,19 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
       clipBehavior: Clip.none,
       children: [
         if (many)
-          NotificationListener<ScrollNotification>(
-            onNotification: _watch,
-            child: PageView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              // A page view handed a new controller carries its old offset
-              // across into it, which would land the carousel mid-way through
-              // the new titles. Keyed on the count, it is a new page view
-              // instead, and opens where the new controller says.
-              key: ValueKey(widget.count),
-              controller: _pages,
-              // A clipping page view would cut the artwork's stretch off at
-              // its own edge.
-              clipBehavior: Clip.none,
-              onPageChanged: _pageChanged,
-              itemBuilder: (context, page) => widget.pageBuilder(context, page % widget.count),
-            ),
+          PageView.builder(
+            // A page view handed a new controller carries its old offset
+            // across into it, which would land the carousel mid-way through
+            // the new titles. Keyed on the count, it is a new page view
+            // instead, and opens where the new controller says.
+            key: ValueKey(widget.count),
+            controller: _pages,
+            // The arrows are the only way through the titles.
+            physics: const NeverScrollableScrollPhysics(),
+            // A clipping page view would cut the artwork's stretch off at its
+            // own edge.
+            clipBehavior: Clip.none,
+            itemBuilder: (context, page) => widget.pageBuilder(context, page % widget.count),
           )
         else
           widget.pageBuilder(context, 0),

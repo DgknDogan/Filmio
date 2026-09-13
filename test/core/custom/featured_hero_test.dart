@@ -117,13 +117,13 @@ void main() {
     expect(opened, [0, 1]);
   });
 
-  testWidgets('a swipe that starts on the poster still moves the artwork', (tester) async {
+  testWidgets('a swipe does not change the title — only the arrows do', (tester) async {
     await pumpHero(tester);
 
-    await tester.drag(find.byType(PosterCard), const Offset(-300, 0));
+    await tester.drag(find.byType(PageView), const Offset(-300, 0));
     await letItFinish(tester);
 
-    expect(find.text('Title 1'), findsOneWidget);
+    expect(find.text('Title 0'), findsOneWidget);
   });
 
   testWidgets('a single title has the action row to itself', (tester) async {

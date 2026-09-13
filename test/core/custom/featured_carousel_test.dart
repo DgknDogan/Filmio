@@ -119,22 +119,15 @@ void main() {
     expectOn(2);
   });
 
-  testWidgets('swipes as well as stepping, with no end either way', (tester) async {
+  testWidgets('does not swipe: only the arrows step', (tester) async {
     await pumpCarousel(tester, count: 3);
 
     await tester.drag(find.byType(PageView), const Offset(-300, 0));
     await settle(tester);
-    expectOn(1);
+    expectOn(0);
 
-    // An arrow steps on from wherever a swipe left the pages.
     await step(tester, 'next');
-    expectOn(2);
-
-    for (var swipe = 0; swipe < 3; swipe++) {
-      await tester.drag(find.byType(PageView), const Offset(300, 0));
-      await settle(tester);
-    }
-    expectOn(2);
+    expectOn(1);
   });
 
   testWidgets('keeps the still layer where it is while the titles move under it', (tester) async {

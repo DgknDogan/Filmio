@@ -47,13 +47,12 @@ class FeaturedTitle {
 /// ground bleeding back in at the bottom so the rows below continue out of it
 /// rather than starting after it.
 ///
-/// Given more than one title, it steps through them without end, by swipe or
-/// by the arrows either side of its action. Only the artwork slides. The
-/// poster and the lines beside it stay where they are and change in place a
-/// moment after it sets off — the poster cross-fading, the name, rating and
-/// genre rolling over a character at a time. The kicker, the action and the
-/// arrows do not change at all: they belong to the block, not to any one
-/// title.
+/// Given more than one title, it steps through them without end by the arrows
+/// either side of its action. Only the artwork slides. The poster and the
+/// lines beside it stay where they are and change in place a moment after it
+/// sets off — the poster cross-fading, the name, rating and genre rolling over
+/// a character at a time. The kicker, the action and the arrows do not change
+/// at all: they belong to the block, not to any one title.
 ///
 /// Everything it draws is held to the foot of the block. The page's bar floats
 /// over the head of it, so the artwork reaches the top of the screen and the
@@ -193,47 +192,43 @@ class _Still extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Spacer(),
-          // Drawn over the pages but not in the way of them: a swipe that
-          // starts on the poster or the text still reaches the artwork.
-          IgnorePointer(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                SizedBox(
-                  width: FeaturedHero.posterWidth,
-                  child: AnimatedSwitcher(
-                    duration: _posterFade,
-                    switchInCurve: Curves.easeInOut,
-                    switchOutCurve: Curves.easeInOut,
-                    child: PosterCard(
-                      key: ValueKey(index),
-                      imageUrl: title.posterUrl,
-                      title: title.title,
-                      heroTag: title.heroTag,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SizedBox(
+                width: FeaturedHero.posterWidth,
+                child: AnimatedSwitcher(
+                  duration: _posterFade,
+                  switchInCurve: Curves.easeInOut,
+                  switchOutCurve: Curves.easeInOut,
+                  child: PosterCard(
+                    key: ValueKey(index),
+                    imageUrl: title.posterUrl,
+                    title: title.title,
+                    heroTag: title.heroTag,
+                  ),
+                ),
+              ),
+              AppGap.horizontal(AppSpacing.lg),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(kicker.toUpperCase(), style: context.styles.kicker),
+                    AppGap.vertical(AppSpacing.md),
+                    NumericTransitionText(
+                      title.title,
+                      style: context.styles.featureTitle,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
+                    AppGap.vertical(AppSpacing.md),
+                    MetaLine(rating: title.rating, parts: title.metaParts, onImage: true, rollChanges: true),
+                  ],
                 ),
-                AppGap.horizontal(AppSpacing.lg),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(kicker.toUpperCase(), style: context.styles.kicker),
-                      AppGap.vertical(AppSpacing.md),
-                      NumericTransitionText(
-                        title.title,
-                        style: context.styles.featureTitle,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      AppGap.vertical(AppSpacing.md),
-                      MetaLine(rating: title.rating, parts: title.metaParts, onImage: true, rollChanges: true),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
           AppGap.vertical(AppSpacing.lg),
           SizedBox(
