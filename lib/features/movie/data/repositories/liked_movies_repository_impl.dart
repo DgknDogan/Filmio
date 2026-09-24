@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fpdart/fpdart.dart';
 
+import '../../../../core/constants/constants.dart';
 import '../../../../core/extensions/firebase_firestore_extension.dart';
 import '../models/movie_model.dart';
 import '../../../../core/resource/failure.dart';
@@ -54,9 +55,13 @@ class LikedMoviesRepositoryImpl extends LikedMoviesRepository {
     if (doc == null) return const Left(_signedOut);
 
     try {
-      await doc.update({
-        "liked_movies": FieldValue.arrayUnion([MovieModel.fromEntity(movie).toJson()]),
-      });
+      // The array still backs every read, so both are written atomically.
+      await (_firestore.batch()
+            ..update(doc, {
+              "liked_movies": FieldValue.arrayUnion([MovieModel.fromEntity(movie).toJson()]),
+            })
+            ..set(doc.collection(likedMoviesCollection).doc('${movie.id}'), {"id": movie.id}))
+          .commit();
       return const Right(unit);
     } on FirebaseException catch (e) {
       return Left(failureFromFirebase(e));
@@ -69,9 +74,12 @@ class LikedMoviesRepositoryImpl extends LikedMoviesRepository {
     if (doc == null) return const Left(_signedOut);
 
     try {
-      await doc.update({
-        "liked_movies": FieldValue.arrayRemove([MovieModel.fromEntity(movie).toJson()]),
-      });
+      await (_firestore.batch()
+            ..update(doc, {
+              "liked_movies": FieldValue.arrayRemove([MovieModel.fromEntity(movie).toJson()]),
+            })
+            ..delete(doc.collection(likedMoviesCollection).doc('${movie.id}')))
+          .commit();
       return const Right(unit);
     } on FirebaseException catch (e) {
       return Left(failureFromFirebase(e));

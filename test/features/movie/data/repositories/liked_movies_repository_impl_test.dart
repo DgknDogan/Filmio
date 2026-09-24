@@ -23,22 +23,31 @@ class _MockDocument extends Mock implements DocumentReference<Map<String, dynami
 
 class _MockSnapshot extends Mock implements DocumentSnapshot<Map<String, dynamic>> {}
 
+class _MockBatch extends Mock implements WriteBatch {}
+
 void main() {
   late _MockFirestore firestore;
   late _MockAuth auth;
   late _MockDocument document;
   late _MockSnapshot snapshot;
+  late _MockDocument likedDoc;
+  late _MockBatch batch;
   late LikedMoviesRepositoryImpl repository;
 
   const movie = MovieEntity(id: 1, title: 'A', posterPath: '/a.jpg');
 
-  setUpAll(() => registerFallbackValue(<String, dynamic>{}));
+  setUpAll(() {
+    registerFallbackValue(<String, dynamic>{});
+    registerFallbackValue(_MockDocument());
+  });
 
   setUp(() {
     firestore = _MockFirestore();
     auth = _MockAuth();
     document = _MockDocument();
     snapshot = _MockSnapshot();
+    likedDoc = _MockDocument();
+    batch = _MockBatch();
 
     final user = _MockUser();
     when(() => user.uid).thenReturn('uid-1');
@@ -49,6 +58,12 @@ void main() {
     when(() => collection.doc(any())).thenReturn(document);
     when(() => document.get()).thenAnswer((_) async => snapshot);
     when(() => document.update(any())).thenAnswer((_) async {});
+
+    final likedCollection = _MockCollection();
+    when(() => document.collection('LikedMovies')).thenReturn(likedCollection);
+    when(() => likedCollection.doc(any())).thenReturn(likedDoc);
+    when(() => firestore.batch()).thenReturn(batch);
+    when(() => batch.commit()).thenAnswer((_) async {});
 
     repository = LikedMoviesRepositoryImpl(firestore, auth);
   });
@@ -94,8 +109,19 @@ void main() {
     test('writes the movie under the exact keys Firestore already stores', () async {
       await repository.likeMovie(movie: movie);
 
-      final written = verify(() => document.update(captureAny())).captured.single as Map<Object, Object?>;
+      final written = verify(() => batch.update(document, captureAny())).captured.single as Map<Object, Object?>;
       expect(written.keys.single, 'liked_movies');
+    });
+
+    test('also writes LikedMovies/{id} holding only the id, in the same commit', () async {
+      await repository.likeMovie(movie: movie);
+
+      final collection = document.collection('LikedMovies');
+      verify(() => collection.doc('1')).called(1);
+      final written = verify(() => batch.set<Map<String, dynamic>>(likedDoc, captureAny())).captured.single;
+      expect(written, {'id': 1});
+      verify(() => batch.commit()).called(1);
+      verifyNever(() => document.update(any()));
     });
 
     test('accepts a plain entity — the old cast threw here', () async {
@@ -105,15 +131,17 @@ void main() {
     });
 
     test('a Firestore error is mapped rather than escaping', () async {
-      when(() => document.update(any())).thenThrow(FirebaseException(plugin: 'Firestore', code: 'unavailable'));
+      when(() => batch.commit()).thenThrow(FirebaseException(plugin: 'Firestore', code: 'unavailable'));
 
       expect((await repository.likeMovie(movie: movie)).getLeft().toNullable(), isA<NetworkFailure>());
     });
   });
 
-  test('dislikeMovie removes rather than adds', () async {
+  test('dislikeMovie removes from the array and deletes LikedMovies/{id} in one commit', () async {
     await repository.dislikeMovie(movie: movie);
 
-    verify(() => document.update(any())).called(1);
+    verify(() => batch.update(document, any())).called(1);
+    verify(() => batch.delete(likedDoc)).called(1);
+    verify(() => batch.commit()).called(1);
   });
 }

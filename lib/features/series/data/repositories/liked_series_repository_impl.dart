@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fpdart/fpdart.dart';
 
+import '../../../../core/constants/constants.dart';
 import '../../../../core/extensions/firebase_firestore_extension.dart';
 import '../../../../core/resource/failure.dart';
 import '../../../../core/resource/failure_mapper.dart';
@@ -65,9 +66,13 @@ class LikedSeriesRepositoryImpl extends LikedSeriesRepository {
     if (doc == null) return const Left(_signedOut);
 
     try {
-      await doc.update({
-        _field: FieldValue.arrayUnion([SeriesModel.fromEntity(series).toJson()]),
-      });
+      // The array still backs every read, so both are written atomically.
+      await (_firestore.batch()
+            ..update(doc, {
+              _field: FieldValue.arrayUnion([SeriesModel.fromEntity(series).toJson()]),
+            })
+            ..set(doc.collection(likedSeriesCollection).doc('${series.id}'), {"id": series.id}))
+          .commit();
       return const Right(unit);
     } on FirebaseException catch (e) {
       return Left(failureFromFirebase(e));
@@ -80,9 +85,12 @@ class LikedSeriesRepositoryImpl extends LikedSeriesRepository {
     if (doc == null) return const Left(_signedOut);
 
     try {
-      await doc.update({
-        _field: FieldValue.arrayRemove([SeriesModel.fromEntity(series).toJson()]),
-      });
+      await (_firestore.batch()
+            ..update(doc, {
+              _field: FieldValue.arrayRemove([SeriesModel.fromEntity(series).toJson()]),
+            })
+            ..delete(doc.collection(likedSeriesCollection).doc('${series.id}')))
+          .commit();
       return const Right(unit);
     } on FirebaseException catch (e) {
       return Left(failureFromFirebase(e));
