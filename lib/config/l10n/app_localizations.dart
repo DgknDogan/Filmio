@@ -325,6 +325,18 @@ abstract class AppLocalizations {
   /// **'Liking a title needs an account — it is where your list lives, and what the recommendations are built from.'**
   String get guestLikeBody;
 
+  /// Headline of the prompt shown when a guest taps the watchlist button
+  ///
+  /// In en, this message translates to:
+  /// **'Seen this one?'**
+  String get guestWatchlistTitle;
+
+  /// Explains why the watchlist needs an account
+  ///
+  /// In en, this message translates to:
+  /// **'Keeping track of what you have watched needs an account — it is where the list lives.'**
+  String get guestWatchlistBody;
+
   /// Title of the series tab
   ///
   /// In en, this message translates to:
@@ -672,6 +684,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No liked series yet.'**
   String get likedSeriesEmpty;
+
+  /// Title of the watched movies screen, and the account row opening it
+  ///
+  /// In en, this message translates to:
+  /// **'Watched Movies'**
+  String get watchedMovies;
+
+  /// Title of the watched series screen, and the account row opening it
+  ///
+  /// In en, this message translates to:
+  /// **'Watched Series'**
+  String get watchedSeries;
+
+  /// Shown when the user has marked no movie as watched
+  ///
+  /// In en, this message translates to:
+  /// **'No watched movies yet.'**
+  String get watchedMoviesEmpty;
+
+  /// Shown when the user has marked no series as watched
+  ///
+  /// In en, this message translates to:
+  /// **'No watched series yet.'**
+  String get watchedSeriesEmpty;
+
+  /// Button on a details screen that puts the title on the watched list
+  ///
+  /// In en, this message translates to:
+  /// **'Add to watchlist'**
+  String get addToWatchlistAction;
+
+  /// Button on a details screen that takes the title off the watched list
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from watchlist'**
+  String get removeFromWatchlistAction;
 
   /// Title of the settings screen
   ///

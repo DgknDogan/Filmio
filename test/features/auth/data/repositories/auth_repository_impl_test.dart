@@ -15,6 +15,9 @@ void main() {
   late MockUser user;
   late MockCollectionReference collection;
   late MockDocumentReference userDoc;
+  late MockCollectionReference watchedMovies;
+  late MockCollectionReference watchedSeries;
+  late MockDocumentReference watchedEntry;
   late AuthRepositoryImpl repository;
 
   const uid = 'uid-1';
@@ -30,6 +33,9 @@ void main() {
     user = MockUser();
     collection = MockCollectionReference();
     userDoc = MockDocumentReference();
+    watchedMovies = MockCollectionReference();
+    watchedSeries = MockCollectionReference();
+    watchedEntry = MockDocumentReference();
     repository = AuthRepositoryImpl(localDataSource, auth, firestore);
 
     when(() => auth.currentUser).thenReturn(user);
@@ -39,6 +45,20 @@ void main() {
     when(() => collection.doc(uid)).thenReturn(userDoc);
     when(() => user.reauthenticateWithCredential(any())).thenAnswer((_) async => MockUserCredential());
     when(() => userDoc.delete()).thenAnswer((_) async {});
+    when(() => userDoc.collection(watchedMoviesCollection)).thenReturn(watchedMovies);
+    when(() => userDoc.collection(watchedSeriesCollection)).thenReturn(watchedSeries);
+    when(() => watchedEntry.delete()).thenAnswer((_) async {});
+
+    // One film on the watched list, no series.
+    final entry = MockQueryDocumentSnapshot();
+    when(() => entry.reference).thenReturn(watchedEntry);
+    final movies = MockQuerySnapshot();
+    when(() => movies.docs).thenReturn([entry]);
+    when(() => watchedMovies.get()).thenAnswer((_) async => movies);
+    final series = MockQuerySnapshot();
+    when(() => series.docs).thenReturn([]);
+    when(() => watchedSeries.get()).thenAnswer((_) async => series);
+
     when(() => user.delete()).thenAnswer((_) async {});
     when(() => localDataSource.clearRemembered()).thenAnswer((_) async {});
   });
@@ -104,6 +124,16 @@ void main() {
       ]);
     });
 
+    test('empties the watched lists, which the document does not take with it', () async {
+      await repository.deleteAccount(password: password);
+
+      verifyInOrder([
+        () => watchedEntry.delete(),
+        () => userDoc.delete(),
+      ]);
+      verify(() => watchedSeries.get()).called(1);
+    });
+
     test('fails without touching anything when nobody is signed in', () async {
       when(() => auth.currentUser).thenReturn(null);
 
@@ -126,6 +156,7 @@ void main() {
         (failure) => expect(failure.message, 'Wrong e-mail or password.'),
         (_) => fail('expected a failure'),
       );
+      verifyNever(() => watchedEntry.delete());
       verifyNever(() => userDoc.delete());
       verifyNever(() => user.delete());
       verifyNever(() => localDataSource.clearRemembered());

@@ -75,6 +75,10 @@ class DetailsScaffold extends StatefulWidget {
 
   final String? overview;
 
+  /// The one thing to do about the title, set full width between the header
+  /// and the synopsis — putting it on the watchlist.
+  final Widget? primaryAction;
+
   /// Sits opposite the back arrow. A film puts its heart here; a series has
   /// nothing to put there, and the row holds the space open so the title in
   /// the middle stays centred.
@@ -97,6 +101,7 @@ class DetailsScaffold extends StatefulWidget {
     this.genreIds,
     this.isSeries = false,
     this.overview,
+    this.primaryAction,
     this.action,
     this.extras = const [],
   });
@@ -132,6 +137,7 @@ class _DetailsScaffoldState extends State<DetailsScaffold> {
               // over the image still scrolls the page.
               SliverToBoxAdapter(child: SizedBox(height: _BackdropMetrics.reveal)),
               SliverToBoxAdapter(child: _Header(details: widget)),
+              if (widget.primaryAction case final primaryAction?) SliverToBoxAdapter(child: _PrimaryAction(child: primaryAction)),
               SliverToBoxAdapter(child: _Synopsis(overview: widget.overview)),
               for (final extra in widget.extras) SliverToBoxAdapter(child: extra),
               SliverToBoxAdapter(
@@ -266,6 +272,23 @@ class _HeaderInfo extends StatelessWidget {
         AppGap.vertical(AppSpacing.md),
         GenreTags(genreIds: details.genreIds, isSeries: details.isSeries, limit: 2),
       ],
+    );
+  }
+}
+
+class _PrimaryAction extends StatelessWidget {
+  final Widget child;
+
+  const _PrimaryAction({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: context.palette.sheet,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.xl, AppSpacing.xxl, 0),
+        child: child,
+      ),
     );
   }
 }

@@ -41,7 +41,7 @@ class AccountPage extends StatelessWidget {
   }
 }
 
-/// The two lists an account keeps.
+/// The lists an account keeps.
 class _Lists extends StatelessWidget {
   const _Lists();
 
@@ -59,6 +59,18 @@ class _Lists extends StatelessWidget {
           icon: Icons.tv_outlined,
           label: context.l10n.likedSeries,
           onTap: () => context.router.push(const LikedSeriesRoute()),
+        ),
+        AppGap.vertical(AppSpacing.md),
+        _AccountRow(
+          icon: Icons.visibility_outlined,
+          label: context.l10n.watchedMovies,
+          onTap: () => context.router.push(const WatchedMoviesRoute()),
+        ),
+        AppGap.vertical(AppSpacing.md),
+        _AccountRow(
+          icon: Icons.video_library_outlined,
+          label: context.l10n.watchedSeries,
+          onTap: () => context.router.push(const WatchedSeriesRoute()),
         ),
       ],
     );

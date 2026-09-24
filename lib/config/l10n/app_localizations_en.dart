@@ -126,6 +126,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guestLikeBody => 'Liking a title needs an account — it is where your list lives, and what the recommendations are built from.';
 
   @override
+  String get guestWatchlistTitle => 'Seen this one?';
+
+  @override
+  String get guestWatchlistBody => 'Keeping track of what you have watched needs an account — it is where the list lives.';
+
+  @override
   String get seriesTitle => 'Series';
 
   @override
@@ -337,6 +343,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get likedSeriesEmpty => 'No liked series yet.';
+
+  @override
+  String get watchedMovies => 'Watched Movies';
+
+  @override
+  String get watchedSeries => 'Watched Series';
+
+  @override
+  String get watchedMoviesEmpty => 'No watched movies yet.';
+
+  @override
+  String get watchedSeriesEmpty => 'No watched series yet.';
+
+  @override
+  String get addToWatchlistAction => 'Add to watchlist';
+
+  @override
+  String get removeFromWatchlistAction => 'Remove from watchlist';
 
   @override
   String get settingsTitle => 'Settings';

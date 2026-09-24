@@ -9,38 +9,40 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i19;
-import 'package:filmio/core/enums/discover_sort.dart' as _i22;
+import 'package:auto_route/auto_route.dart' as _i21;
+import 'package:filmio/core/enums/discover_sort.dart' as _i24;
 import 'package:filmio/features/account/presentation/pages/account_page.dart' as _i1;
 import 'package:filmio/features/account/presentation/pages/liked_movies_page.dart' as _i2;
 import 'package:filmio/features/account/presentation/pages/liked_series_page.dart' as _i3;
 import 'package:filmio/features/account/presentation/pages/settings_page.dart' as _i16;
+import 'package:filmio/features/account/presentation/pages/watched_movies_page.dart' as _i18;
+import 'package:filmio/features/account/presentation/pages/watched_series_page.dart' as _i19;
 import 'package:filmio/features/auth/presentation/pages/login_page.dart' as _i4;
 import 'package:filmio/features/auth/presentation/pages/register_page.dart' as _i10;
 import 'package:filmio/features/auth/presentation/pages/set_profile_page.dart' as _i15;
 import 'package:filmio/features/landing/presentation/pages/splash_page.dart' as _i17;
-import 'package:filmio/features/landing/presentation/pages/wrapper_page.dart' as _i18;
+import 'package:filmio/features/landing/presentation/pages/wrapper_page.dart' as _i20;
 import 'package:filmio/features/legal/presentation/pages/privacy_policy_page.dart' as _i9;
-import 'package:filmio/features/movie/domain/entities/movie.dart' as _i21;
+import 'package:filmio/features/movie/domain/entities/movie.dart' as _i23;
 import 'package:filmio/features/movie/presentation/pages/movie_details_page.dart' as _i5;
 import 'package:filmio/features/movie/presentation/pages/movie_discover_page.dart' as _i6;
 import 'package:filmio/features/movie/presentation/pages/movie_page.dart' as _i7;
 import 'package:filmio/features/movie/presentation/pages/movie_search_page.dart' as _i8;
-import 'package:filmio/features/series/domain/entities/series_entity.dart' as _i23;
+import 'package:filmio/features/series/domain/entities/series_entity.dart' as _i25;
 import 'package:filmio/features/series/presentation/pages/series_details_page.dart' as _i11;
 import 'package:filmio/features/series/presentation/pages/series_discover_page.dart' as _i12;
 import 'package:filmio/features/series/presentation/pages/series_page.dart' as _i13;
 import 'package:filmio/features/series/presentation/pages/series_search_page.dart' as _i14;
-import 'package:flutter/material.dart' as _i20;
+import 'package:flutter/material.dart' as _i22;
 
 /// generated route for
 /// [_i1.AccountPage]
-class AccountRoute extends _i19.PageRouteInfo<void> {
-  const AccountRoute({List<_i19.PageRouteInfo>? children}) : super(AccountRoute.name, initialChildren: children);
+class AccountRoute extends _i21.PageRouteInfo<void> {
+  const AccountRoute({List<_i21.PageRouteInfo>? children}) : super(AccountRoute.name, initialChildren: children);
 
   static const String name = 'AccountRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i1.AccountPage();
@@ -50,12 +52,12 @@ class AccountRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i2.LikedMoviesPage]
-class LikedMoviesRoute extends _i19.PageRouteInfo<void> {
-  const LikedMoviesRoute({List<_i19.PageRouteInfo>? children}) : super(LikedMoviesRoute.name, initialChildren: children);
+class LikedMoviesRoute extends _i21.PageRouteInfo<void> {
+  const LikedMoviesRoute({List<_i21.PageRouteInfo>? children}) : super(LikedMoviesRoute.name, initialChildren: children);
 
   static const String name = 'LikedMoviesRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i2.LikedMoviesPage();
@@ -65,12 +67,12 @@ class LikedMoviesRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i3.LikedSeriesPage]
-class LikedSeriesRoute extends _i19.PageRouteInfo<void> {
-  const LikedSeriesRoute({List<_i19.PageRouteInfo>? children}) : super(LikedSeriesRoute.name, initialChildren: children);
+class LikedSeriesRoute extends _i21.PageRouteInfo<void> {
+  const LikedSeriesRoute({List<_i21.PageRouteInfo>? children}) : super(LikedSeriesRoute.name, initialChildren: children);
 
   static const String name = 'LikedSeriesRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i3.LikedSeriesPage();
@@ -80,12 +82,12 @@ class LikedSeriesRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i4.LoginPage]
-class LoginRoute extends _i19.PageRouteInfo<void> {
-  const LoginRoute({List<_i19.PageRouteInfo>? children}) : super(LoginRoute.name, initialChildren: children);
+class LoginRoute extends _i21.PageRouteInfo<void> {
+  const LoginRoute({List<_i21.PageRouteInfo>? children}) : super(LoginRoute.name, initialChildren: children);
 
   static const String name = 'LoginRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i4.LoginPage();
@@ -95,12 +97,12 @@ class LoginRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i5.MovieDetailsPage]
-class MovieDetailsRoute extends _i19.PageRouteInfo<MovieDetailsRouteArgs> {
+class MovieDetailsRoute extends _i21.PageRouteInfo<MovieDetailsRouteArgs> {
   MovieDetailsRoute({
-    _i20.Key? key,
-    required _i21.MovieEntity movie,
+    _i22.Key? key,
+    required _i23.MovieEntity movie,
     required String heroTag,
-    List<_i19.PageRouteInfo>? children,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
           MovieDetailsRoute.name,
           args: MovieDetailsRouteArgs(key: key, movie: movie, heroTag: heroTag),
@@ -109,7 +111,7 @@ class MovieDetailsRoute extends _i19.PageRouteInfo<MovieDetailsRouteArgs> {
 
   static const String name = 'MovieDetailsRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<MovieDetailsRouteArgs>();
@@ -129,9 +131,9 @@ class MovieDetailsRouteArgs {
     required this.heroTag,
   });
 
-  final _i20.Key? key;
+  final _i22.Key? key;
 
-  final _i21.MovieEntity movie;
+  final _i23.MovieEntity movie;
 
   final String heroTag;
 
@@ -153,12 +155,12 @@ class MovieDetailsRouteArgs {
 
 /// generated route for
 /// [_i6.MovieDiscoverPage]
-class MovieDiscoverRoute extends _i19.PageRouteInfo<MovieDiscoverRouteArgs> {
+class MovieDiscoverRoute extends _i21.PageRouteInfo<MovieDiscoverRouteArgs> {
   MovieDiscoverRoute({
-    _i20.Key? key,
+    _i22.Key? key,
     required String title,
-    required _i22.DiscoverSort sort,
-    List<_i19.PageRouteInfo>? children,
+    required _i24.DiscoverSort sort,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
           MovieDiscoverRoute.name,
           args: MovieDiscoverRouteArgs(key: key, title: title, sort: sort),
@@ -167,7 +169,7 @@ class MovieDiscoverRoute extends _i19.PageRouteInfo<MovieDiscoverRouteArgs> {
 
   static const String name = 'MovieDiscoverRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<MovieDiscoverRouteArgs>();
@@ -187,11 +189,11 @@ class MovieDiscoverRouteArgs {
     required this.sort,
   });
 
-  final _i20.Key? key;
+  final _i22.Key? key;
 
   final String title;
 
-  final _i22.DiscoverSort sort;
+  final _i24.DiscoverSort sort;
 
   @override
   String toString() {
@@ -211,12 +213,12 @@ class MovieDiscoverRouteArgs {
 
 /// generated route for
 /// [_i7.MoviePage]
-class MovieRoute extends _i19.PageRouteInfo<void> {
-  const MovieRoute({List<_i19.PageRouteInfo>? children}) : super(MovieRoute.name, initialChildren: children);
+class MovieRoute extends _i21.PageRouteInfo<void> {
+  const MovieRoute({List<_i21.PageRouteInfo>? children}) : super(MovieRoute.name, initialChildren: children);
 
   static const String name = 'MovieRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i7.MoviePage();
@@ -226,12 +228,12 @@ class MovieRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i8.MovieSearchPage]
-class MovieSearchRoute extends _i19.PageRouteInfo<MovieSearchRouteArgs> {
+class MovieSearchRoute extends _i21.PageRouteInfo<MovieSearchRouteArgs> {
   MovieSearchRoute({
-    _i20.Key? key,
+    _i22.Key? key,
     required String heroTag,
     required String hintText,
-    List<_i19.PageRouteInfo>? children,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
           MovieSearchRoute.name,
           args: MovieSearchRouteArgs(
@@ -244,7 +246,7 @@ class MovieSearchRoute extends _i19.PageRouteInfo<MovieSearchRouteArgs> {
 
   static const String name = 'MovieSearchRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<MovieSearchRouteArgs>();
@@ -264,7 +266,7 @@ class MovieSearchRouteArgs {
     required this.hintText,
   });
 
-  final _i20.Key? key;
+  final _i22.Key? key;
 
   final String heroTag;
 
@@ -288,12 +290,12 @@ class MovieSearchRouteArgs {
 
 /// generated route for
 /// [_i9.PrivacyPolicyPage]
-class PrivacyPolicyRoute extends _i19.PageRouteInfo<void> {
-  const PrivacyPolicyRoute({List<_i19.PageRouteInfo>? children}) : super(PrivacyPolicyRoute.name, initialChildren: children);
+class PrivacyPolicyRoute extends _i21.PageRouteInfo<void> {
+  const PrivacyPolicyRoute({List<_i21.PageRouteInfo>? children}) : super(PrivacyPolicyRoute.name, initialChildren: children);
 
   static const String name = 'PrivacyPolicyRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i9.PrivacyPolicyPage();
@@ -303,12 +305,12 @@ class PrivacyPolicyRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i10.RegisterPage]
-class RegisterRoute extends _i19.PageRouteInfo<void> {
-  const RegisterRoute({List<_i19.PageRouteInfo>? children}) : super(RegisterRoute.name, initialChildren: children);
+class RegisterRoute extends _i21.PageRouteInfo<void> {
+  const RegisterRoute({List<_i21.PageRouteInfo>? children}) : super(RegisterRoute.name, initialChildren: children);
 
   static const String name = 'RegisterRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i10.RegisterPage();
@@ -318,12 +320,12 @@ class RegisterRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i11.SeriesDetailsPage]
-class SeriesDetailsRoute extends _i19.PageRouteInfo<SeriesDetailsRouteArgs> {
+class SeriesDetailsRoute extends _i21.PageRouteInfo<SeriesDetailsRouteArgs> {
   SeriesDetailsRoute({
-    _i20.Key? key,
-    required _i23.SeriesEntity series,
+    _i22.Key? key,
+    required _i25.SeriesEntity series,
     required String heroTag,
-    List<_i19.PageRouteInfo>? children,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
           SeriesDetailsRoute.name,
           args: SeriesDetailsRouteArgs(
@@ -336,7 +338,7 @@ class SeriesDetailsRoute extends _i19.PageRouteInfo<SeriesDetailsRouteArgs> {
 
   static const String name = 'SeriesDetailsRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<SeriesDetailsRouteArgs>();
@@ -356,9 +358,9 @@ class SeriesDetailsRouteArgs {
     required this.heroTag,
   });
 
-  final _i20.Key? key;
+  final _i22.Key? key;
 
-  final _i23.SeriesEntity series;
+  final _i25.SeriesEntity series;
 
   final String heroTag;
 
@@ -380,12 +382,12 @@ class SeriesDetailsRouteArgs {
 
 /// generated route for
 /// [_i12.SeriesDiscoverPage]
-class SeriesDiscoverRoute extends _i19.PageRouteInfo<SeriesDiscoverRouteArgs> {
+class SeriesDiscoverRoute extends _i21.PageRouteInfo<SeriesDiscoverRouteArgs> {
   SeriesDiscoverRoute({
-    _i20.Key? key,
+    _i22.Key? key,
     required String title,
-    required _i22.DiscoverSort sort,
-    List<_i19.PageRouteInfo>? children,
+    required _i24.DiscoverSort sort,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
           SeriesDiscoverRoute.name,
           args: SeriesDiscoverRouteArgs(key: key, title: title, sort: sort),
@@ -394,7 +396,7 @@ class SeriesDiscoverRoute extends _i19.PageRouteInfo<SeriesDiscoverRouteArgs> {
 
   static const String name = 'SeriesDiscoverRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<SeriesDiscoverRouteArgs>();
@@ -414,11 +416,11 @@ class SeriesDiscoverRouteArgs {
     required this.sort,
   });
 
-  final _i20.Key? key;
+  final _i22.Key? key;
 
   final String title;
 
-  final _i22.DiscoverSort sort;
+  final _i24.DiscoverSort sort;
 
   @override
   String toString() {
@@ -438,12 +440,12 @@ class SeriesDiscoverRouteArgs {
 
 /// generated route for
 /// [_i13.SeriesHomePage]
-class SeriesHomeRoute extends _i19.PageRouteInfo<void> {
-  const SeriesHomeRoute({List<_i19.PageRouteInfo>? children}) : super(SeriesHomeRoute.name, initialChildren: children);
+class SeriesHomeRoute extends _i21.PageRouteInfo<void> {
+  const SeriesHomeRoute({List<_i21.PageRouteInfo>? children}) : super(SeriesHomeRoute.name, initialChildren: children);
 
   static const String name = 'SeriesHomeRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i13.SeriesHomePage();
@@ -453,12 +455,12 @@ class SeriesHomeRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i14.SeriesSearchPage]
-class SeriesSearchRoute extends _i19.PageRouteInfo<SeriesSearchRouteArgs> {
+class SeriesSearchRoute extends _i21.PageRouteInfo<SeriesSearchRouteArgs> {
   SeriesSearchRoute({
-    _i20.Key? key,
+    _i22.Key? key,
     required String heroTag,
     required String hintText,
-    List<_i19.PageRouteInfo>? children,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
           SeriesSearchRoute.name,
           args: SeriesSearchRouteArgs(
@@ -471,7 +473,7 @@ class SeriesSearchRoute extends _i19.PageRouteInfo<SeriesSearchRouteArgs> {
 
   static const String name = 'SeriesSearchRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<SeriesSearchRouteArgs>();
@@ -491,7 +493,7 @@ class SeriesSearchRouteArgs {
     required this.hintText,
   });
 
-  final _i20.Key? key;
+  final _i22.Key? key;
 
   final String heroTag;
 
@@ -515,12 +517,12 @@ class SeriesSearchRouteArgs {
 
 /// generated route for
 /// [_i15.SetProfilePage]
-class SetProfileRoute extends _i19.PageRouteInfo<void> {
-  const SetProfileRoute({List<_i19.PageRouteInfo>? children}) : super(SetProfileRoute.name, initialChildren: children);
+class SetProfileRoute extends _i21.PageRouteInfo<void> {
+  const SetProfileRoute({List<_i21.PageRouteInfo>? children}) : super(SetProfileRoute.name, initialChildren: children);
 
   static const String name = 'SetProfileRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i15.SetProfilePage();
@@ -530,12 +532,12 @@ class SetProfileRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i16.SettingsPage]
-class SettingsRoute extends _i19.PageRouteInfo<void> {
-  const SettingsRoute({List<_i19.PageRouteInfo>? children}) : super(SettingsRoute.name, initialChildren: children);
+class SettingsRoute extends _i21.PageRouteInfo<void> {
+  const SettingsRoute({List<_i21.PageRouteInfo>? children}) : super(SettingsRoute.name, initialChildren: children);
 
   static const String name = 'SettingsRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i16.SettingsPage();
@@ -545,12 +547,12 @@ class SettingsRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i17.SplashPage]
-class SplashRoute extends _i19.PageRouteInfo<void> {
-  const SplashRoute({List<_i19.PageRouteInfo>? children}) : super(SplashRoute.name, initialChildren: children);
+class SplashRoute extends _i21.PageRouteInfo<void> {
+  const SplashRoute({List<_i21.PageRouteInfo>? children}) : super(SplashRoute.name, initialChildren: children);
 
   static const String name = 'SplashRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i17.SplashPage();
@@ -559,16 +561,46 @@ class SplashRoute extends _i19.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i18.WrapperPage]
-class WrapperRoute extends _i19.PageRouteInfo<void> {
-  const WrapperRoute({List<_i19.PageRouteInfo>? children}) : super(WrapperRoute.name, initialChildren: children);
+/// [_i18.WatchedMoviesPage]
+class WatchedMoviesRoute extends _i21.PageRouteInfo<void> {
+  const WatchedMoviesRoute({List<_i21.PageRouteInfo>? children}) : super(WatchedMoviesRoute.name, initialChildren: children);
+
+  static const String name = 'WatchedMoviesRoute';
+
+  static _i21.PageInfo page = _i21.PageInfo(
+    name,
+    builder: (data) {
+      return const _i18.WatchedMoviesPage();
+    },
+  );
+}
+
+/// generated route for
+/// [_i19.WatchedSeriesPage]
+class WatchedSeriesRoute extends _i21.PageRouteInfo<void> {
+  const WatchedSeriesRoute({List<_i21.PageRouteInfo>? children}) : super(WatchedSeriesRoute.name, initialChildren: children);
+
+  static const String name = 'WatchedSeriesRoute';
+
+  static _i21.PageInfo page = _i21.PageInfo(
+    name,
+    builder: (data) {
+      return const _i19.WatchedSeriesPage();
+    },
+  );
+}
+
+/// generated route for
+/// [_i20.WrapperPage]
+class WrapperRoute extends _i21.PageRouteInfo<void> {
+  const WrapperRoute({List<_i21.PageRouteInfo>? children}) : super(WrapperRoute.name, initialChildren: children);
 
   static const String name = 'WrapperRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i18.WrapperPage();
+      return const _i20.WrapperPage();
     },
   );
 }

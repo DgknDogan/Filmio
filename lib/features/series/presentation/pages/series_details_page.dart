@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../config/theme/app_spacing.dart';
 import '../../../../core/cubit/session_cubit.dart';
 import '../../../../core/custom/circle_icon_button.dart';
+import '../../../../core/custom/custom_button.dart';
 import '../../../../core/custom/guest_prompt.dart';
 import '../../../../core/custom/details_scaffold.dart';
 import '../../../../core/custom/section_header.dart';
@@ -21,6 +22,7 @@ import '../../../video/presentation/cubit/trailer_cubit.dart';
 import '../../../video/presentation/widgets/trailer_section.dart';
 import '../../domain/entities/series_entity.dart';
 import '../cubit/series_details_cubit.dart';
+import '../cubit/series_watched_cubit.dart';
 import '../widgets/series_poster_card.dart';
 
 @RoutePage()
@@ -45,6 +47,9 @@ class SeriesDetailsPage extends StatelessWidget {
             getIt(),
             getIt(),
           ),
+        ),
+        BlocProvider(
+          create: (context) => SeriesWatchedCubit(getIt(), getIt(), getIt(), seriesId: series.id),
         ),
         BlocProvider(
           create: (context) => ReviewsCubit(getIt(), mediaId: series.id, mediaType: MediaType.series),
@@ -85,6 +90,7 @@ class _DetailsView extends StatelessWidget {
       genreIds: series.genreIds,
       isSeries: true,
       overview: series.overview,
+      primaryAction: const _WatchlistButton(),
       action: _LikeButton(series: series),
       extras: [
         // The trailer sits directly under the synopsis: it is the one thing on
@@ -122,6 +128,30 @@ class _LikeButton extends StatelessWidget {
               : isLiked
                   ? context.read<SeriesDetailsCubit>().dislikeSeries(series: series)
                   : context.read<SeriesDetailsCubit>().likeSeries(series: series),
+        );
+      },
+    );
+  }
+}
+
+/// Puts the series on the watched list, or takes it off.
+class _WatchlistButton extends StatelessWidget {
+  const _WatchlistButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final isGuest = context.select((SessionCubit cubit) => cubit.state.isGuest);
+
+    return BlocBuilder<SeriesWatchedCubit, SeriesWatchedState>(
+      builder: (context, state) {
+        return CustomButton(
+          text: state.isWatched ? context.l10n.removeFromWatchlistAction : context.l10n.addToWatchlistAction,
+          isLoading: !isGuest && state.isBusy,
+          // Shown to a guest too, for the same reason the heart is: the
+          // prompt behind it is what says the list needs an account.
+          onPressed: () => isGuest
+              ? showGuestPrompt(context, title: context.l10n.guestWatchlistTitle, body: context.l10n.guestWatchlistBody)
+              : context.read<SeriesWatchedCubit>().toggle(),
         );
       },
     );

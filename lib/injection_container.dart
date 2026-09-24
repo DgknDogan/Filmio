@@ -24,8 +24,11 @@ import 'features/landing/presentation/cubit/splash_cubit.dart';
 import 'features/movie/data/datasources/movie_api_service.dart';
 import 'features/movie/data/repositories/liked_movies_repository_impl.dart';
 import 'features/movie/data/repositories/movie_repository_impl.dart';
+import 'features/movie/data/repositories/watched_movies_repository_impl.dart';
 import 'features/movie/domain/repositories/liked_movies_repository.dart';
 import 'features/movie/domain/repositories/movie_repository.dart';
+import 'features/movie/domain/repositories/watched_movies_repository.dart';
+import 'features/movie/domain/usecases/add_watched_movie.dart';
 import 'features/movie/domain/usecases/discover_movies.dart';
 import 'features/movie/domain/usecases/dislike_movie.dart';
 import 'features/movie/domain/usecases/get_liked_movies.dart';
@@ -34,7 +37,10 @@ import 'features/movie/domain/usecases/get_popular_movies.dart';
 import 'features/movie/domain/usecases/get_recommended_movie_ids.dart';
 import 'features/movie/domain/usecases/get_similar_movies.dart';
 import 'features/movie/domain/usecases/get_top_rated_movies.dart';
+import 'features/movie/domain/usecases/get_watched_movies.dart';
+import 'features/movie/domain/usecases/is_movie_watched.dart';
 import 'features/movie/domain/usecases/like_movie.dart';
+import 'features/movie/domain/usecases/remove_watched_movie.dart';
 import 'features/movie/domain/usecases/search_movies.dart';
 import 'features/review/data/datasources/review_api_service.dart';
 import 'features/review/data/datasources/review_moderation_local_datasource.dart';
@@ -47,8 +53,11 @@ import 'features/review/domain/usecases/moderate_reviews.dart';
 import 'features/series/data/datasources/series_api_service.dart';
 import 'features/series/data/repositories/liked_series_repository_impl.dart';
 import 'features/series/data/repositories/series_repository_impl.dart';
+import 'features/series/data/repositories/watched_series_repository_impl.dart';
 import 'features/series/domain/repositories/liked_series_repository.dart';
 import 'features/series/domain/repositories/series_repository.dart';
+import 'features/series/domain/repositories/watched_series_repository.dart';
+import 'features/series/domain/usecases/add_watched_series.dart';
 import 'features/series/domain/usecases/discover_series.dart';
 import 'features/series/domain/usecases/dislike_series.dart';
 import 'features/series/domain/usecases/get_liked_series.dart';
@@ -57,7 +66,10 @@ import 'features/series/domain/usecases/get_recommended_series_ids.dart';
 import 'features/series/domain/usecases/get_series_details.dart';
 import 'features/series/domain/usecases/get_similar_series.dart';
 import 'features/series/domain/usecases/get_top_rated_series.dart';
+import 'features/series/domain/usecases/get_watched_series.dart';
+import 'features/series/domain/usecases/is_series_watched.dart';
 import 'features/series/domain/usecases/like_series.dart';
+import 'features/series/domain/usecases/remove_watched_series.dart';
 import 'features/series/domain/usecases/search_series.dart';
 import 'features/video/data/datasources/video_api_service.dart';
 import 'features/video/data/repositories/video_repository_impl.dart';
@@ -83,11 +95,13 @@ Future<void> initDependencies() async {
   getIt.registerSingleton<MovieRepository>(MovieRepositoryImpl(getIt(), getIt()));
 
   getIt.registerSingleton<LikedMoviesRepository>(LikedMoviesRepositoryImpl(getIt(), getIt()));
+  getIt.registerSingleton<WatchedMoviesRepository>(WatchedMoviesRepositoryImpl(getIt(), getIt()));
 
   getIt.registerSingleton<SeriesApiService>(SeriesApiService(getIt()));
   getIt.registerSingleton<SeriesRepository>(SeriesRepositoryImpl(getIt(), getIt()));
 
   getIt.registerSingleton<LikedSeriesRepository>(LikedSeriesRepositoryImpl(getIt(), getIt()));
+  getIt.registerSingleton<WatchedSeriesRepository>(WatchedSeriesRepositoryImpl(getIt(), getIt()));
 
   // Reviews — one service and one repository for both catalogues.
   getIt.registerSingleton<ReviewApiService>(ReviewApiService(getIt()));
@@ -118,6 +132,10 @@ Future<void> initDependencies() async {
   getIt.registerSingleton<DiscoverMoviesUseCase>(DiscoverMoviesUseCase(getIt()));
   getIt.registerSingleton<GetMovieDetailsUseCase>(GetMovieDetailsUseCase(getIt()));
   getIt.registerSingleton<GetRecommendedMovieIdsUseCase>(GetRecommendedMovieIdsUseCase(getIt()));
+  getIt.registerSingleton<GetWatchedMoviesUseCase>(GetWatchedMoviesUseCase(getIt(), getIt()));
+  getIt.registerSingleton<IsMovieWatchedUseCase>(IsMovieWatchedUseCase(getIt()));
+  getIt.registerSingleton<AddWatchedMovieUseCase>(AddWatchedMovieUseCase(getIt()));
+  getIt.registerSingleton<RemoveWatchedMovieUseCase>(RemoveWatchedMovieUseCase(getIt()));
   getIt.registerSingleton<SearchSeriesUseCase>(SearchSeriesUseCase(getIt()));
 
   getIt.registerSingleton<GetTopRatedSeriesUseCase>(GetTopRatedSeriesUseCase(getIt()));
@@ -129,6 +147,10 @@ Future<void> initDependencies() async {
   getIt.registerSingleton<GetLikedSeriesUseCase>(GetLikedSeriesUseCase(getIt()));
   getIt.registerSingleton<LikeSeriesUseCase>(LikeSeriesUseCase(getIt()));
   getIt.registerSingleton<DislikeSeriesUseCase>(DislikeSeriesUseCase(getIt()));
+  getIt.registerSingleton<GetWatchedSeriesUseCase>(GetWatchedSeriesUseCase(getIt(), getIt()));
+  getIt.registerSingleton<IsSeriesWatchedUseCase>(IsSeriesWatchedUseCase(getIt()));
+  getIt.registerSingleton<AddWatchedSeriesUseCase>(AddWatchedSeriesUseCase(getIt()));
+  getIt.registerSingleton<RemoveWatchedSeriesUseCase>(RemoveWatchedSeriesUseCase(getIt()));
 
   getIt.registerSingleton<GetReviewsUseCase>(GetReviewsUseCase(getIt()));
   getIt.registerSingleton<ReportReviewUseCase>(ReportReviewUseCase(getIt()));

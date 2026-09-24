@@ -15,6 +15,8 @@ import 'package:filmio/features/movie/data/datasources/movie_api_service.dart';
 import 'package:filmio/features/movie/domain/entities/movie.dart';
 import 'package:filmio/features/movie/domain/repositories/liked_movies_repository.dart';
 import 'package:filmio/features/movie/domain/repositories/movie_repository.dart';
+import 'package:filmio/features/movie/domain/repositories/watched_movies_repository.dart';
+import 'package:filmio/features/movie/domain/usecases/add_watched_movie.dart';
 import 'package:filmio/features/movie/domain/usecases/discover_movies.dart';
 import 'package:filmio/features/movie/domain/usecases/dislike_movie.dart';
 import 'package:filmio/features/movie/domain/usecases/get_liked_movies.dart';
@@ -23,7 +25,10 @@ import 'package:filmio/features/movie/domain/usecases/get_popular_movies.dart';
 import 'package:filmio/features/movie/domain/usecases/get_recommended_movie_ids.dart';
 import 'package:filmio/features/movie/domain/usecases/get_similar_movies.dart';
 import 'package:filmio/features/movie/domain/usecases/get_top_rated_movies.dart';
+import 'package:filmio/features/movie/domain/usecases/get_watched_movies.dart';
+import 'package:filmio/features/movie/domain/usecases/is_movie_watched.dart';
 import 'package:filmio/features/movie/domain/usecases/like_movie.dart';
+import 'package:filmio/features/movie/domain/usecases/remove_watched_movie.dart';
 import 'package:filmio/features/movie/domain/usecases/search_movies.dart';
 import 'package:filmio/features/review/data/datasources/review_api_service.dart';
 import 'package:filmio/features/review/data/datasources/review_moderation_local_datasource.dart';
@@ -36,6 +41,8 @@ import 'package:filmio/features/series/data/datasources/series_api_service.dart'
 import 'package:filmio/features/series/domain/entities/series_entity.dart';
 import 'package:filmio/features/series/domain/repositories/liked_series_repository.dart';
 import 'package:filmio/features/series/domain/repositories/series_repository.dart';
+import 'package:filmio/features/series/domain/repositories/watched_series_repository.dart';
+import 'package:filmio/features/series/domain/usecases/add_watched_series.dart';
 import 'package:filmio/features/series/domain/usecases/discover_series.dart';
 import 'package:filmio/features/series/domain/usecases/dislike_series.dart';
 import 'package:filmio/features/series/domain/usecases/get_liked_series.dart';
@@ -44,7 +51,10 @@ import 'package:filmio/features/series/domain/usecases/get_recommended_series_id
 import 'package:filmio/features/series/domain/usecases/get_series_details.dart';
 import 'package:filmio/features/series/domain/usecases/get_similar_series.dart';
 import 'package:filmio/features/series/domain/usecases/get_top_rated_series.dart';
+import 'package:filmio/features/series/domain/usecases/get_watched_series.dart';
+import 'package:filmio/features/series/domain/usecases/is_series_watched.dart';
 import 'package:filmio/features/series/domain/usecases/like_series.dart';
+import 'package:filmio/features/series/domain/usecases/remove_watched_series.dart';
 import 'package:filmio/features/series/domain/usecases/search_series.dart';
 import 'package:filmio/features/video/data/datasources/video_api_service.dart';
 import 'package:filmio/features/video/domain/repositories/video_repository.dart';
@@ -72,6 +82,14 @@ class MockLikeMovieUseCase extends Mock implements LikeMovieUseCase {}
 
 class MockDislikeMovieUseCase extends Mock implements DislikeMovieUseCase {}
 
+class MockGetWatchedMoviesUseCase extends Mock implements GetWatchedMoviesUseCase {}
+
+class MockIsMovieWatchedUseCase extends Mock implements IsMovieWatchedUseCase {}
+
+class MockAddWatchedMovieUseCase extends Mock implements AddWatchedMovieUseCase {}
+
+class MockRemoveWatchedMovieUseCase extends Mock implements RemoveWatchedMovieUseCase {}
+
 class MockGetPopularSeriesUseCase extends Mock implements GetPopularSeriesUseCase {}
 
 class MockGetTopRatedSeriesUseCase extends Mock implements GetTopRatedSeriesUseCase {}
@@ -91,6 +109,14 @@ class MockGetLikedSeriesUseCase extends Mock implements GetLikedSeriesUseCase {}
 class MockLikeSeriesUseCase extends Mock implements LikeSeriesUseCase {}
 
 class MockDislikeSeriesUseCase extends Mock implements DislikeSeriesUseCase {}
+
+class MockGetWatchedSeriesUseCase extends Mock implements GetWatchedSeriesUseCase {}
+
+class MockIsSeriesWatchedUseCase extends Mock implements IsSeriesWatchedUseCase {}
+
+class MockAddWatchedSeriesUseCase extends Mock implements AddWatchedSeriesUseCase {}
+
+class MockRemoveWatchedSeriesUseCase extends Mock implements RemoveWatchedSeriesUseCase {}
 
 class MockGetReviewsUseCase extends Mock implements GetReviewsUseCase {}
 
@@ -132,6 +158,10 @@ class MockMovieRepository extends Mock implements MovieRepository {}
 class MockLikedMoviesRepository extends Mock implements LikedMoviesRepository {}
 
 class MockLikedSeriesRepository extends Mock implements LikedSeriesRepository {}
+
+class MockWatchedMoviesRepository extends Mock implements WatchedMoviesRepository {}
+
+class MockWatchedSeriesRepository extends Mock implements WatchedSeriesRepository {}
 
 class MockAuthRepository extends Mock implements AuthRepository {}
 
@@ -175,6 +205,11 @@ class MockCollectionReference extends Mock implements CollectionReference<Map<St
 
 // ignore: subtype_of_sealed_class
 class MockDocumentReference extends Mock implements DocumentReference<Map<String, dynamic>> {}
+
+class MockQuerySnapshot extends Mock implements QuerySnapshot<Map<String, dynamic>> {}
+
+// ignore: subtype_of_sealed_class
+class MockQueryDocumentSnapshot extends Mock implements QueryDocumentSnapshot<Map<String, dynamic>> {}
 
 /// Registers the values `any()` needs to construct when it stands in for a
 /// non-nullable argument. Call once per test file, in `setUpAll`.

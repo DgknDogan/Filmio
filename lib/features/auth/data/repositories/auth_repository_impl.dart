@@ -122,9 +122,14 @@ class AuthRepositoryImpl extends AuthRepository {
         EmailAuthProvider.credential(email: user.email!, password: password),
       );
 
-      // The document goes first. Once the account is gone the security rules
-      // no longer admit its owner, and the data would outlive the account it
+      // The data goes first. Once the account is gone the security rules no
+      // longer admit its owner, and the data would outlive the account it
       // belongs to — which is the opposite of what deletion promises.
+      //
+      // Firestore does not take a document's sub-collections with it, so the
+      // watched lists are emptied by hand before the document itself.
+      await _clear(_firestore.watchedMovies(user.uid));
+      await _clear(_firestore.watchedSeries(user.uid));
       await _firestore.userDoc(user.uid).delete();
       await user.delete();
       await _localDataSource.clearRemembered();
@@ -133,6 +138,11 @@ class AuthRepositoryImpl extends AuthRepository {
     } on FirebaseException catch (e) {
       return Left(failureFromFirebase(e));
     }
+  }
+
+  Future<void> _clear(CollectionReference<Map<String, dynamic>> collection) async {
+    final entries = await collection.get();
+    await Future.wait(entries.docs.map((doc) => doc.reference.delete()));
   }
 
   @override
