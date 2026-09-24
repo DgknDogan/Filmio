@@ -42,7 +42,7 @@ class SeriesSearchBloc extends Bloc<SeriesSearchEvent, SeriesSearchState> {
 
     result.fold(
       (failure) => emit(SeriesSearchFailure(failure.message)),
-      (series) => emit(SeriesSearchLoaded(series.where((item) => item.posterPath != null).toList())),
+      (series) => emit(SeriesSearchLoaded(series)),
     );
   }
 }

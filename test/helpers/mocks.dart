@@ -12,15 +12,15 @@ import 'package:filmio/features/auth/domain/usecases/register.dart';
 import 'package:filmio/features/auth/domain/usecases/restore_session.dart';
 import 'package:filmio/features/auth/domain/usecases/update_profile.dart';
 import 'package:filmio/features/movie/data/datasources/movie_api_service.dart';
+import 'package:filmio/features/movie/data/datasources/movie_recommendation_local_datasource.dart';
 import 'package:filmio/features/movie/domain/entities/movie.dart';
 import 'package:filmio/features/movie/domain/repositories/liked_movies_repository.dart';
 import 'package:filmio/features/movie/domain/repositories/movie_repository.dart';
 import 'package:filmio/features/movie/domain/usecases/discover_movies.dart';
 import 'package:filmio/features/movie/domain/usecases/dislike_movie.dart';
 import 'package:filmio/features/movie/domain/usecases/get_liked_movies.dart';
-import 'package:filmio/features/movie/domain/usecases/get_movie_details.dart';
 import 'package:filmio/features/movie/domain/usecases/get_popular_movies.dart';
-import 'package:filmio/features/movie/domain/usecases/get_recommended_movie_ids.dart';
+import 'package:filmio/features/movie/domain/usecases/get_recommended_movies.dart';
 import 'package:filmio/features/movie/domain/usecases/get_similar_movies.dart';
 import 'package:filmio/features/movie/domain/usecases/get_top_rated_movies.dart';
 import 'package:filmio/features/movie/domain/usecases/like_movie.dart';
@@ -33,6 +33,7 @@ import 'package:filmio/features/review/domain/repositories/review_repository.dar
 import 'package:filmio/features/review/domain/usecases/get_reviews.dart';
 import 'package:filmio/features/review/domain/usecases/moderate_reviews.dart';
 import 'package:filmio/features/series/data/datasources/series_api_service.dart';
+import 'package:filmio/features/series/data/datasources/series_recommendation_local_datasource.dart';
 import 'package:filmio/features/series/domain/entities/series_entity.dart';
 import 'package:filmio/features/series/domain/repositories/liked_series_repository.dart';
 import 'package:filmio/features/series/domain/repositories/series_repository.dart';
@@ -40,8 +41,7 @@ import 'package:filmio/features/series/domain/usecases/discover_series.dart';
 import 'package:filmio/features/series/domain/usecases/dislike_series.dart';
 import 'package:filmio/features/series/domain/usecases/get_liked_series.dart';
 import 'package:filmio/features/series/domain/usecases/get_popular_series.dart';
-import 'package:filmio/features/series/domain/usecases/get_recommended_series_ids.dart';
-import 'package:filmio/features/series/domain/usecases/get_series_details.dart';
+import 'package:filmio/features/series/domain/usecases/get_recommended_series.dart';
 import 'package:filmio/features/series/domain/usecases/get_similar_series.dart';
 import 'package:filmio/features/series/domain/usecases/get_top_rated_series.dart';
 import 'package:filmio/features/series/domain/usecases/like_series.dart';
@@ -56,9 +56,7 @@ class MockGetPopularMoviesUseCase extends Mock implements GetPopularMoviesUseCas
 
 class MockGetTopRatedMoviesUseCase extends Mock implements GetTopRatedMoviesUseCase {}
 
-class MockGetMovieDetailsUseCase extends Mock implements GetMovieDetailsUseCase {}
-
-class MockGetRecommendedMovieIdsUseCase extends Mock implements GetRecommendedMovieIdsUseCase {}
+class MockGetRecommendedMoviesUseCase extends Mock implements GetRecommendedMoviesUseCase {}
 
 class MockSearchMoviesUseCase extends Mock implements SearchMoviesUseCase {}
 
@@ -76,9 +74,7 @@ class MockGetPopularSeriesUseCase extends Mock implements GetPopularSeriesUseCas
 
 class MockGetTopRatedSeriesUseCase extends Mock implements GetTopRatedSeriesUseCase {}
 
-class MockGetSeriesDetailsUseCase extends Mock implements GetSeriesDetailsUseCase {}
-
-class MockGetRecommendedSeriesIdsUseCase extends Mock implements GetRecommendedSeriesIdsUseCase {}
+class MockGetRecommendedSeriesUseCase extends Mock implements GetRecommendedSeriesUseCase {}
 
 class MockSearchSeriesUseCase extends Mock implements SearchSeriesUseCase {}
 
@@ -155,6 +151,10 @@ class MockVideoRepository extends Mock implements VideoRepository {}
 
 class MockAuthLocalDataSource extends Mock implements AuthLocalDataSource {}
 
+class MockMovieRecommendationCache extends Mock implements MovieRecommendationLocalDataSource {}
+
+class MockSeriesRecommendationCache extends Mock implements SeriesRecommendationLocalDataSource {}
+
 // Firebase — mocked at the SDK surface, because the repositories talk to it
 // directly rather than through a datasource of their own.
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
@@ -182,6 +182,8 @@ void registerCommonFallbacks() {
   registerFallbackValue(MediaType.movie);
   registerFallbackValue(const MovieEntity());
   registerFallbackValue(const SeriesEntity());
+  registerFallbackValue(const <MovieEntity>[]);
+  registerFallbackValue(const <SeriesEntity>[]);
   registerFallbackValue(LoginParams(email: '', password: ''));
   registerFallbackValue(RegisterParams(email: '', password: ''));
   registerFallbackValue(const GetReviewsParams(mediaId: 0, mediaType: MediaType.movie));

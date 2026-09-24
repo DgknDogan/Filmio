@@ -8,41 +8,41 @@ import 'package:mocktail/mocktail.dart';
 
 import '../../../../helpers/mocks.dart';
 
+/// What the bloc is left holding now that the recommendation is one question
+/// the repository answers: which of its three endings reaches the screen, the
+/// stand-in when there is nothing to suggest, and the fact that the rows and
+/// the recommendation can land in either order.
+///
+/// Turning ids into titles, dropping the ones TMDB cannot answer for, and
+/// reading a cache instead of asking at all are the repository's, and are
+/// tested there.
 void main() {
   late MockGetPopularMoviesUseCase getPopular;
   late MockGetTopRatedMoviesUseCase getTopRated;
-  late MockGetRecommendedMovieIdsUseCase getRecommendedIds;
-  late MockGetMovieDetailsUseCase getDetails;
+  late MockGetRecommendedMoviesUseCase getRecommended;
 
-  const withPoster = MovieEntity(id: 1, title: 'A', posterPath: '/a.jpg');
-  const withoutPoster = MovieEntity(id: 2, title: 'B');
-  const recommended = MovieEntity(id: 11, title: 'Star Wars', posterPath: '/sw.jpg');
-  const secondPick = MovieEntity(id: 550, title: 'Fight Club', posterPath: '/fc.jpg');
-  const thirdPick = MovieEntity(id: 912649, title: 'Venom', posterPath: '/v.jpg');
-
-  /// What TMDB answers for each id the service can rank.
-  const titlesById = {11: recommended, 550: secondPick, 912649: thirdPick};
+  const film = MovieEntity(id: 1, title: 'A', posterPath: '/a.jpg', overview: 'A.');
+  const recommended = MovieEntity(id: 11, title: 'Star Wars', posterPath: '/sw.jpg', overview: 'Star Wars.');
+  const secondPick = MovieEntity(id: 550, title: 'Fight Club', posterPath: '/fc.jpg', overview: 'Fight Club.');
 
   /// Several, so that a fallback picked at random has somewhere to vary.
   const topRatedList = [
-    withPoster,
-    MovieEntity(id: 3, title: 'C', posterPath: '/c.jpg'),
-    MovieEntity(id: 4, title: 'D', posterPath: '/d.jpg'),
+    film,
+    MovieEntity(id: 3, title: 'C', posterPath: '/c.jpg', overview: 'C.'),
+    MovieEntity(id: 4, title: 'D', posterPath: '/d.jpg', overview: 'D.'),
   ];
 
   setUp(() {
     getPopular = MockGetPopularMoviesUseCase();
     getTopRated = MockGetTopRatedMoviesUseCase();
-    getRecommendedIds = MockGetRecommendedMovieIdsUseCase();
-    getDetails = MockGetMovieDetailsUseCase();
+    getRecommended = MockGetRecommendedMoviesUseCase();
 
-    // Every build asks for a recommendation, so the two calls behind it have a
-    // default here and each test overrides only what it is about.
-    when(() => getRecommendedIds.call()).thenAnswer((_) async => const Right([]));
-    when(() => getDetails.call(params: any(named: 'params'))).thenAnswer((_) async => const Right(recommended));
+    // Every build asks for a recommendation, so it has a default here and each
+    // test overrides only what it is about.
+    when(() => getRecommended.call()).thenAnswer((_) async => const Right([]));
   });
 
-  MovieBloc build() => MovieBloc(getPopular, getTopRated, getRecommendedIds, getDetails);
+  MovieBloc build() => MovieBloc(getPopular, getTopRated, getRecommended);
 
   void stub({
     required Either<Failure, List<MovieEntity>> popular,
@@ -58,42 +58,30 @@ void main() {
     when(() => getTopRated.call()).thenAnswer((_) => answer(topRated));
   }
 
-  /// [failing] names the ids TMDB cannot answer for; every other id resolves
-  /// to its own title, so a test can tell which were fetched and in what order
-  /// they were kept.
-  void stubRecommendation({
-    Either<Failure, List<int>> ids = const Right([11]),
-    Map<int, Failure> failing = const {},
-    Duration? delay,
-  }) {
-    when(() => getRecommendedIds.call()).thenAnswer((_) async {
+  void stubRecommendation(Either<Failure, List<MovieEntity>> result, {Duration? delay}) {
+    when(() => getRecommended.call()).thenAnswer((_) async {
       if (delay != null) await Future<void>.delayed(delay);
-      return ids;
-    });
-    when(() => getDetails.call(params: any(named: 'params'))).thenAnswer((invocation) async {
-      final id = invocation.namedArguments[#params] as int;
-      final failure = failing[id];
-      return failure == null ? Right(titlesById[id]!) : Left(failure);
+      return result;
     });
   }
 
   group('the rows', () {
     blocTest<MovieBloc, MovieState>(
-      'emits success with both lists filtered to titles that have a poster',
+      'emits success with both lists as the repository handed them over',
       build: build,
-      setUp: () => stub(popular: const Right([withPoster, withoutPoster]), topRated: const Right([withPoster])),
+      setUp: () => stub(popular: const Right([film]), topRated: const Right(topRatedList)),
       act: (bloc) => bloc.add(GetMovies()),
       verify: (bloc) {
         final state = bloc.state as MovieSuccess;
-        expect(state.popularFilmsList, const [withPoster]);
-        expect(state.topFilmsList, const [withPoster]);
+        expect(state.popularFilmsList, const [film]);
+        expect(state.topFilmsList, topRatedList);
       },
     );
 
     blocTest<MovieBloc, MovieState>(
-      'reports a failure rather than indexing an empty list when nothing has a poster',
+      'reports a failure rather than indexing an empty list when nothing came back',
       build: build,
-      setUp: () => stub(popular: const Right([withoutPoster]), topRated: const Right([withoutPoster])),
+      setUp: () => stub(popular: const Right([]), topRated: const Right([])),
       act: (bloc) => bloc.add(GetMovies()),
       verify: (bloc) => expect(bloc.state, isA<MovieError>()),
     );
@@ -101,7 +89,7 @@ void main() {
     blocTest<MovieBloc, MovieState>(
       'a failure in either request becomes an error state',
       build: build,
-      setUp: () => stub(popular: const Left(NetworkFailure('offline')), topRated: const Right([withPoster])),
+      setUp: () => stub(popular: const Left(NetworkFailure('offline')), topRated: const Right([film])),
       act: (bloc) => bloc.add(GetMovies()),
       verify: (bloc) => expect(bloc.state, const MovieError(NetworkFailure('offline'))),
     );
@@ -109,7 +97,7 @@ void main() {
     blocTest<MovieBloc, MovieState>(
       'a failure in the second request also becomes an error state',
       build: build,
-      setUp: () => stub(popular: const Right([withPoster]), topRated: const Left(ServerFailure('boom', statusCode: 500))),
+      setUp: () => stub(popular: const Right([film]), topRated: const Left(ServerFailure('boom', statusCode: 500))),
       act: (bloc) => bloc.add(GetMovies()),
       verify: (bloc) => expect(bloc.state, const MovieError(ServerFailure('boom', statusCode: 500))),
     );
@@ -119,44 +107,20 @@ void main() {
     blocTest<MovieBloc, MovieState>(
       'is asked for as soon as the bloc is built, without waiting for the rows',
       build: build,
-      setUp: () => stubRecommendation(),
-      verify: (_) => verify(() => getRecommendedIds.call()).called(1),
+      verify: (_) => verify(() => getRecommended.call()).called(1),
     );
 
     blocTest<MovieBloc, MovieState>(
-      'is every title the service ranked, fetched from TMDB and kept in its order',
+      'is every title the repository answered with, in its order',
       build: build,
       setUp: () {
-        stub(popular: const Right([withPoster]), topRated: const Right([withPoster]));
-        stubRecommendation(ids: const Right([11, 550, 912649]));
-      },
-      act: (bloc) => bloc.add(GetMovies()),
-      verify: (bloc) {
-        // The head of the tab steps through all of them, so none is left out.
-        verify(() => getDetails.call(params: 11)).called(1);
-        verify(() => getDetails.call(params: 550)).called(1);
-        verify(() => getDetails.call(params: 912649)).called(1);
-        expect(
-          (bloc.state as MovieSuccess).recommended,
-          const RecommendedMovieLoaded([recommended, secondPick, thirdPick]),
-        );
-      },
-    );
-
-    blocTest<MovieBloc, MovieState>(
-      'leaves out a title TMDB cannot answer for rather than failing the rest',
-      build: build,
-      setUp: () {
-        stub(popular: const Right([withPoster]), topRated: const Right([withPoster]));
-        stubRecommendation(
-          ids: const Right([11, 550, 912649]),
-          failing: const {550: ServerFailure('Not found.', statusCode: 404)},
-        );
+        stub(popular: const Right([film]), topRated: const Right([film]));
+        stubRecommendation(const Right([recommended, secondPick]));
       },
       act: (bloc) => bloc.add(GetMovies()),
       verify: (bloc) => expect(
         (bloc.state as MovieSuccess).recommended,
-        const RecommendedMovieLoaded([recommended, thirdPick]),
+        const RecommendedMovieLoaded([recommended, secondPick]),
       ),
     );
 
@@ -166,8 +130,8 @@ void main() {
       // The rows come back slowly, so the recommendation resolves while the
       // state is still MovieLoading and has nowhere to be put yet.
       setUp: () {
-        stub(popular: const Right([withPoster]), topRated: const Right([withPoster]), delay: const Duration(milliseconds: 20));
-        stubRecommendation();
+        stub(popular: const Right([film]), topRated: const Right([film]), delay: const Duration(milliseconds: 20));
+        stubRecommendation(const Right([recommended]));
       },
       act: (bloc) => bloc.add(GetMovies()),
       wait: const Duration(milliseconds: 50),
@@ -178,14 +142,14 @@ void main() {
       'that lands after the rows folds into the state already on screen',
       build: build,
       setUp: () {
-        stub(popular: const Right([withPoster]), topRated: const Right([withPoster]));
-        stubRecommendation(delay: const Duration(milliseconds: 20));
+        stub(popular: const Right([film]), topRated: const Right([film]));
+        stubRecommendation(const Right([recommended]), delay: const Duration(milliseconds: 20));
       },
       act: (bloc) => bloc.add(GetMovies()),
       wait: const Duration(milliseconds: 50),
       expect: () => const [
-        MovieSuccess([withPoster], [withPoster], RecommendedMovieLoading()),
-        MovieSuccess([withPoster], [withPoster], RecommendedMovieLoaded([recommended])),
+        MovieSuccess([film], [film], RecommendedMovieLoading()),
+        MovieSuccess([film], [film], RecommendedMovieLoaded([recommended])),
       ],
     );
 
@@ -193,19 +157,18 @@ void main() {
       'falls back to one top-rated title when the service has nothing to suggest yet',
       build: build,
       setUp: () {
-        stub(popular: const Right([withPoster]), topRated: const Right(topRatedList));
-        stubRecommendation(ids: const Right([]));
+        stub(popular: const Right([film]), topRated: const Right(topRatedList));
+        stubRecommendation(const Right([]));
       },
       act: (bloc) => bloc.add(GetMovies()),
       verify: (bloc) {
         final state = bloc.state as MovieSuccess;
         // An account that has liked nothing yet still opens on a title rather
-        // than on an empty block — no id means there is nothing to fetch. Only
-        // one: a stand-in is not a list of suggestions to step through.
+        // than on an empty block. Only one: a stand-in is not a list of
+        // suggestions to step through.
         final recommended = state.recommended as RecommendedMovieLoaded;
         expect(recommended.movies, hasLength(1));
         expect(state.topFilmsList, contains(recommended.movies.single));
-        verifyNever(() => getDetails.call(params: any(named: 'params')));
       },
     );
 
@@ -213,8 +176,8 @@ void main() {
       'falls back even when the empty answer arrives before the rows do',
       build: build,
       setUp: () {
-        stub(popular: const Right([withPoster]), topRated: const Right(topRatedList), delay: const Duration(milliseconds: 20));
-        stubRecommendation(ids: const Right([]));
+        stub(popular: const Right([film]), topRated: const Right(topRatedList), delay: const Duration(milliseconds: 20));
+        stubRecommendation(const Right([]));
       },
       act: (bloc) => bloc.add(GetMovies()),
       wait: const Duration(milliseconds: 50),
@@ -225,48 +188,17 @@ void main() {
     );
 
     blocTest<MovieBloc, MovieState>(
-      'never falls back to a title with no poster to show',
-      build: build,
-      setUp: () {
-        stub(popular: const Right([withPoster]), topRated: const Right([withoutPoster, withPoster, withoutPoster]));
-        stubRecommendation(ids: const Right([]));
-      },
-      act: (bloc) => bloc.add(GetMovies()),
-      // The head of the tab draws artwork; a posterless stand-in would open the
-      // screen on a blank rectangle.
-      verify: (bloc) => expect((bloc.state as MovieSuccess).recommended, const RecommendedMovieLoaded([withPoster])),
-    );
-
-    blocTest<MovieBloc, MovieState>(
       'failing leaves the rows standing',
       build: build,
       setUp: () {
-        stub(popular: const Right([withPoster]), topRated: const Right([withPoster]));
-        stubRecommendation(ids: const Left(AuthFailure('Sign in again.')));
+        stub(popular: const Right([film]), topRated: const Right([film]));
+        stubRecommendation(const Left(AuthFailure('Sign in again.')));
       },
       act: (bloc) => bloc.add(GetMovies()),
       verify: (bloc) {
         final state = bloc.state as MovieSuccess;
         expect(state.recommended, const RecommendedMovieFailure('Sign in again.'));
-        expect(state.popularFilmsList, const [withPoster]);
-      },
-    );
-
-    blocTest<MovieBloc, MovieState>(
-      'no title that can be fetched fails the head of the tab, not the tab',
-      build: build,
-      setUp: () {
-        stub(popular: const Right([withPoster]), topRated: const Right([withPoster]));
-        stubRecommendation(
-          ids: const Right([11, 550]),
-          failing: const {11: ServerFailure('Not found.', statusCode: 404), 550: NetworkFailure('offline')},
-        );
-      },
-      act: (bloc) => bloc.add(GetMovies()),
-      verify: (bloc) {
-        expect(bloc.state, isA<MovieSuccess>());
-        // The best-ranked title's reason is the one reported.
-        expect((bloc.state as MovieSuccess).recommended, const RecommendedMovieFailure('Not found.'));
+        expect(state.popularFilmsList, const [film]);
       },
     );
   });

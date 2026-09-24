@@ -16,6 +16,10 @@ class SeriesDetailsCubit extends Cubit<SeriesDetailsState> {
   final GetSimilarSeriesUseCase _getSimilarSeriesUseCase;
   final SeriesEntity _series;
 
+  /// Whether the heart has been pressed on this screen. What the reader chose
+  /// outranks what the liked list said when the screen opened.
+  bool _readerHasChosen = false;
+
   SeriesDetailsCubit(
     this._likeSeriesUseCase,
     this._getLikedSeriesUseCase,
@@ -38,13 +42,18 @@ class SeriesDetailsCubit extends Cubit<SeriesDetailsState> {
 
   Future<void> _isSeriesLiked() async {
     final result = await _getLikedSeriesUseCase.call();
-    if (isClosed) return;
+    // The list takes a moment to read, and a reader who pressed the heart
+    // inside that moment has already said what they want. Their answer stands.
+    if (isClosed || _readerHasChosen) return;
 
     result.fold(
       // A failure here is not worth a screen-level error: the page still works,
       // the heart just stays empty.
       (failure) => emit(state.copyWith(isSeriesLiked: false)),
-      (likedSeries) => emit(state.copyWith(isSeriesLiked: likedSeries.contains(_series))),
+      // By id, not by whole title: the entry the list stored was read from a
+      // different endpoint at a different time, so its rating and popularity
+      // have moved on even though it is the same series.
+      (likedSeries) => emit(state.copyWith(isSeriesLiked: likedSeries.any((liked) => liked.id == _series.id))),
     );
   }
 
@@ -64,29 +73,34 @@ class SeriesDetailsCubit extends Cubit<SeriesDetailsState> {
       // would be a hole in the line rather than a title.
       (similarSeries) => emit(
         state.copyWith(
-          similars: SimilarSeriesLoaded(similarSeries.where((series) => series.posterPath != null).toList()),
+          similars: SimilarSeriesLoaded(similarSeries),
         ),
       ),
     );
   }
 
-  Future<void> likeSeries({required SeriesEntity series}) async {
-    final result = await _likeSeriesUseCase.call(params: series);
+  Future<void> likeSeries({required SeriesEntity series}) => _setLiked(true, series);
+
+  Future<void> dislikeSeries({required SeriesEntity series}) => _setLiked(false, series);
+
+  /// Fills or empties the heart at once, then writes it.
+  ///
+  /// The write is a Firestore round trip, and waiting for it left the heart
+  /// unmoved for the best part of a second after the tap — long enough for a
+  /// reader to conclude the button is broken and press it again. The tap is
+  /// also the only thing that can be wrong here: the reader knows what they
+  /// meant, and the only question is whether it reached the server. So the
+  /// heart answers immediately and goes back to where it was if it did not.
+  Future<void> _setLiked(bool isLiked, SeriesEntity series) async {
+    final wasLiked = state.isSeriesLiked;
+    if (wasLiked == isLiked) return;
+
+    _readerHasChosen = true;
+    emit(state.copyWith(isSeriesLiked: isLiked));
+
+    final result = isLiked ? await _likeSeriesUseCase.call(params: series) : await _dislikeSeriesUseCase.call(params: series);
     if (isClosed) return;
 
-    result.fold(
-      (failure) => emit(state.copyWith(isSeriesLiked: state.isSeriesLiked)),
-      (_) => emit(state.copyWith(isSeriesLiked: true)),
-    );
-  }
-
-  Future<void> dislikeSeries({required SeriesEntity series}) async {
-    final result = await _dislikeSeriesUseCase.call(params: series);
-    if (isClosed) return;
-
-    result.fold(
-      (failure) => emit(state.copyWith(isSeriesLiked: state.isSeriesLiked)),
-      (_) => emit(state.copyWith(isSeriesLiked: false)),
-    );
+    result.fold((failure) => emit(state.copyWith(isSeriesLiked: wasLiked)), (_) {});
   }
 }

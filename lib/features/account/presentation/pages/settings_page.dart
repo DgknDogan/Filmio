@@ -215,8 +215,12 @@ class _ThemeOption extends StatelessWidget {
     return Semantics(
       selected: isSelected,
       button: true,
-      child: InkWell(
+      // A plain tap rather than an ink well: the option fills with the
+      // selected colour the moment it is pressed, and a splash spreading
+      // underneath that reads as a second, slower answer to the same tap.
+      child: GestureDetector(
         onTap: onTap,
+        behavior: HitTestBehavior.opaque,
         child: Container(
           padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
           alignment: Alignment.center,

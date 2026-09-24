@@ -14,7 +14,6 @@ void main() {
   late MockSearchMoviesUseCase useCase;
 
   const withPoster = MovieEntity(id: 1, title: 'A', posterPath: '/a.jpg');
-  const withoutPoster = MovieEntity(id: 2, title: 'B');
 
   /// Comfortably past the debounce, so a settled bloc has finished its work.
   const settle = Duration(milliseconds: 450);
@@ -73,9 +72,9 @@ void main() {
   );
 
   blocTest<SearchBloc, SearchState>(
-    'emits loading then results, dropping titles with no poster',
+    'emits loading then the results it was given',
     build: build,
-    setUp: () => when(() => useCase.call(params: any(named: 'params'))).thenAnswer((_) async => const Right([withPoster, withoutPoster])),
+    setUp: () => when(() => useCase.call(params: any(named: 'params'))).thenAnswer((_) async => const Right([withPoster])),
     act: (bloc) => bloc.add(const SearchQueryChanged('matrix')),
     wait: settle,
     expect: () => const [

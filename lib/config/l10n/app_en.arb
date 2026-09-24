@@ -129,7 +129,12 @@
   "browseResultCount": "{count, plural, =0{No titles} =1{1 title} other{{count} titles}}",
   "@browseResultCount": {
     "description": "How many titles the current filters match, across every page",
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": { "count": { "type": "int", "format": "decimalPattern" } }
+  },
+  "browseResultCountCapped": "{count}+ titles",
+  "@browseResultCountCapped": {
+    "description": "Shown instead of browseResultCount when TMDB stops counting: there are more titles than it will say, so the ceiling is given with a plus rather than as an exact figure",
+    "placeholders": { "count": { "type": "int", "format": "decimalPattern" } }
   },
   "browseEmpty": "Nothing matches these filters.",
   "@browseEmpty": { "description": "Shown when a filtered browse returns no titles" },

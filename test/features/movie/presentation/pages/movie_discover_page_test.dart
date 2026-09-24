@@ -80,6 +80,25 @@ void main() {
     expect(find.text('6 TITLES'), findsOneWidget);
   });
 
+  testWidgets('says how far TMDB will count rather than repeating its ceiling as a total', (tester) async {
+    // TMDB stops counting at 20,001 and answers with that for anything
+    // larger, which is why the count used to look stuck however the reader
+    // narrowed the catalogue.
+    stub(Right(page(titles(20), totalPages: 1001, totalResults: 20001)));
+
+    await pumpPage(tester);
+
+    expect(find.text('20,000+ TITLES'), findsOneWidget);
+  });
+
+  testWidgets('a count under that ceiling is given exactly', (tester) async {
+    stub(Right(page(titles(20), totalPages: 471, totalResults: 9417)));
+
+    await pumpPage(tester);
+
+    expect(find.text('9,417 TITLES'), findsOneWidget);
+  });
+
   testWidgets('a failed first page can be retried', (tester) async {
     stub(const Left(NetworkFailure('offline')));
 

@@ -31,6 +31,16 @@ class SeriesEntity with EquatableMixin {
     this.voteCount,
   });
 
+  /// Whether the app can actually draw this title.
+  ///
+  /// TMDB's catalogue is crowd-maintained, so a title can arrive with no
+  /// artwork or no description at all. A poster card with a placeholder where
+  /// the artwork should be, or a details screen with nothing under the
+  /// heading, reads as a broken app rather than a thin entry — so a title
+  /// missing either never reaches the UI. The repository is where it is
+  /// dropped, once, rather than each screen filtering for itself.
+  bool get isShowable => posterPath != null && (overview?.trim().isNotEmpty ?? false);
+
   @override
   List<Object?> get props => [
         backdropPath,

@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import '../../../../core/cubit/load_more_state.dart';
 import '../../../../core/enums/discover_sort.dart';
 import '../../../../core/models/discover_filters.dart';
+import '../../../../core/models/paginated_list.dart';
 import '../../domain/entities/movie.dart';
 import '../../domain/usecases/discover_movies.dart';
 
