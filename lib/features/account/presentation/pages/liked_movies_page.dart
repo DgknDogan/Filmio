@@ -15,6 +15,7 @@ import '../../../../core/extensions/string_extension.dart';
 import '../../../../core/utils/hero_tags.dart';
 import '../../../../injection_container.dart';
 import '../../../movie/domain/entities/movie.dart';
+import '../widgets/collapsing_list.dart';
 import '../cubit/liked_movies_cubit.dart';
 
 @RoutePage()
@@ -40,16 +41,19 @@ class LikedMoviesPage extends StatelessWidget {
                           message: message,
                           onRetry: () => context.read<LikedMoviesCubit>().getLikedMovies(),
                         ),
-                      LikedMoviesLoaded(:final movies) when movies.isEmpty => Center(
-                          child: Text(context.l10n.likedMoviesEmpty, style: context.styles.meta),
-                        ),
-                      LikedMoviesLoaded(:final movies) => ListView.separated(
+                      // The empty message belongs to the list rather than
+                      // standing beside it, so taking back the last like folds
+                      // the row away and leaves the message behind it.
+                      LikedMoviesLoaded(:final movies) => CollapsingList<MovieEntity>(
+                          items: movies,
+                          idOf: (item) => item.id,
                           padding: EdgeInsets.fromLTRB(AppSpacing.xxl, 0, AppSpacing.xxl, AppSpacing.xxl),
-                          itemCount: movies.length,
-                          separatorBuilder: (context, index) => AppGap.vertical(AppSpacing.md),
-                          itemBuilder: (context, index) => _LikedMovieRow(
-                            movie: movies[index],
-                            tag: posterHeroTag('liked-movies', index: index, id: movies[index].id),
+                          emptyBuilder: (context) => Center(
+                            child: Text(context.l10n.likedMoviesEmpty, style: context.styles.meta),
+                          ),
+                          itemBuilder: (context, item, index) => _LikedMovieRow(
+                            movie: item,
+                            tag: posterHeroTag('liked-movies', index: index, id: item.id),
                           ),
                         ),
                     },
@@ -114,7 +118,14 @@ class _LikedMovieRow extends StatelessWidget {
     final palette = context.palette;
 
     return GestureDetector(
-      onTap: () => context.router.push(MovieDetailsRoute(movie: movie, heroTag: tag)),
+      // The film's own screen is where the like can be taken back, so the
+      // list reads itself again once that screen is closed — otherwise the row
+      // stays until the reader leaves and comes back.
+      onTap: () async {
+        final cubit = context.read<LikedMoviesCubit>();
+        await context.router.push(MovieDetailsRoute(movie: movie, heroTag: tag));
+        await cubit.refresh();
+      },
       child: Container(
         padding: EdgeInsets.all(AppSpacing.md),
         decoration: AppDecorations(palette).panel,

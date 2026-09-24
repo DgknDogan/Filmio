@@ -25,6 +25,18 @@ class PaginatedList<T> extends Equatable {
     required this.totalResults,
   });
 
+  /// The most TMDB will ever admit to having: it stops counting at 20,001
+  /// results across 1,001 pages and answers with that ceiling for anything
+  /// larger, whatever was asked for.
+  ///
+  /// Which is why the browse screen's count looked stuck — a genre or a year
+  /// narrows the catalogue from unimaginably many to merely very many, and
+  /// both come back as the same number.
+  static const countCeiling = 20001;
+
+  /// Whether [totalResults] is that ceiling rather than a count.
+  bool get isCountCapped => totalResults >= countCeiling;
+
   /// Whether asking for the page after this one would return anything.
   bool get hasMore => page < totalPages;
 

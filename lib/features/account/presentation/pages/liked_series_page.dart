@@ -15,6 +15,7 @@ import '../../../../core/extensions/string_extension.dart';
 import '../../../../core/utils/hero_tags.dart';
 import '../../../../injection_container.dart';
 import '../../../series/domain/entities/series_entity.dart';
+import '../widgets/collapsing_list.dart';
 import '../cubit/liked_series_cubit.dart';
 
 @RoutePage()
@@ -40,16 +41,19 @@ class LikedSeriesPage extends StatelessWidget {
                           message: message,
                           onRetry: () => context.read<LikedSeriesCubit>().getLikedSeries(),
                         ),
-                      LikedSeriesLoaded(:final series) when series.isEmpty => Center(
-                          child: Text(context.l10n.likedSeriesEmpty, style: context.styles.meta),
-                        ),
-                      LikedSeriesLoaded(:final series) => ListView.separated(
+                      // The empty message belongs to the list rather than
+                      // standing beside it, so taking back the last like folds
+                      // the row away and leaves the message behind it.
+                      LikedSeriesLoaded(:final series) => CollapsingList<SeriesEntity>(
+                          items: series,
+                          idOf: (item) => item.id,
                           padding: EdgeInsets.fromLTRB(AppSpacing.xxl, 0, AppSpacing.xxl, AppSpacing.xxl),
-                          itemCount: series.length,
-                          separatorBuilder: (context, index) => AppGap.vertical(AppSpacing.md),
-                          itemBuilder: (context, index) => _LikedSeriesRow(
-                            series: series[index],
-                            tag: posterHeroTag('liked-series', index: index, id: series[index].id),
+                          emptyBuilder: (context) => Center(
+                            child: Text(context.l10n.likedSeriesEmpty, style: context.styles.meta),
+                          ),
+                          itemBuilder: (context, item, index) => _LikedSeriesRow(
+                            series: item,
+                            tag: posterHeroTag('liked-series', index: index, id: item.id),
                           ),
                         ),
                     },
@@ -116,7 +120,14 @@ class _LikedSeriesRow extends StatelessWidget {
     final palette = context.palette;
 
     return GestureDetector(
-      onTap: () => context.router.push(SeriesDetailsRoute(series: series, heroTag: tag)),
+      // The series' own screen is where the like can be taken back, so the
+      // list reads itself again once that screen is closed — otherwise the row
+      // stays until the reader leaves and comes back.
+      onTap: () async {
+        final cubit = context.read<LikedSeriesCubit>();
+        await context.router.push(SeriesDetailsRoute(series: series, heroTag: tag));
+        await cubit.refresh();
+      },
       child: Container(
         padding: EdgeInsets.all(AppSpacing.md),
         decoration: AppDecorations(palette).panel,

@@ -439,6 +439,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{No titles} =1{1 title} other{{count} titles}}'**
   String browseResultCount(int count);
 
+  /// Shown instead of browseResultCount when TMDB stops counting: there are more titles than it will say, so the ceiling is given with a plus rather than as an exact figure
+  ///
+  /// In en, this message translates to:
+  /// **'{count}+ titles'**
+  String browseResultCountCapped(int count);
+
   /// Shown when a filtered browse returns no titles
   ///
   /// In en, this message translates to:

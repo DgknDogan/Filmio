@@ -16,6 +16,10 @@ class MovieDetailsCubit extends Cubit<MovieDetailsState> {
   final GetSimilarMoviesUseCase _getSimilarMoviesUseCase;
   final MovieEntity _movie;
 
+  /// Whether the heart has been pressed on this screen. What the reader chose
+  /// outranks what the liked list said when the screen opened.
+  bool _readerHasChosen = false;
+
   MovieDetailsCubit(
     this._likeMovieUseCase,
     this._getLikedMoviesUseCase,
@@ -38,13 +42,18 @@ class MovieDetailsCubit extends Cubit<MovieDetailsState> {
 
   Future<void> _isMovieLiked() async {
     final result = await _getLikedMoviesUseCase.call();
-    if (isClosed) return;
+    // The list takes a moment to read, and a reader who pressed the heart
+    // inside that moment has already said what they want. Their answer stands.
+    if (isClosed || _readerHasChosen) return;
 
     result.fold(
       // A failure here is not worth a screen-level error: the page still works,
       // the heart just stays empty.
       (failure) => emit(state.copyWith(isMovieLiked: false)),
-      (likedMovies) => emit(state.copyWith(isMovieLiked: likedMovies.contains(_movie))),
+      // By id, not by whole title: the entry the list stored was read from a
+      // different endpoint at a different time, so its rating and popularity
+      // have moved on even though it is the same film.
+      (likedMovies) => emit(state.copyWith(isMovieLiked: likedMovies.any((liked) => liked.id == _movie.id))),
     );
   }
 
@@ -55,28 +64,33 @@ class MovieDetailsCubit extends Cubit<MovieDetailsState> {
     result.fold(
       (failure) => emit(state.copyWith(similars: SimilarMoviesFailure(failure.message))),
       (similarMovies) => emit(
-        state.copyWith(similars: SimilarMoviesLoaded(similarMovies.where((movie) => movie.posterPath != null).toList())),
+        state.copyWith(similars: SimilarMoviesLoaded(similarMovies)),
       ),
     );
   }
 
-  Future<void> likeMovie({required MovieEntity movie}) async {
-    final result = await _likeMovieUseCase.call(params: movie);
+  Future<void> likeMovie({required MovieEntity movie}) => _setLiked(true, movie);
+
+  Future<void> dislikeMovie({required MovieEntity movie}) => _setLiked(false, movie);
+
+  /// Fills or empties the heart at once, then writes it.
+  ///
+  /// The write is a Firestore round trip, and waiting for it left the heart
+  /// unmoved for the best part of a second after the tap — long enough for a
+  /// reader to conclude the button is broken and press it again. The tap is
+  /// also the only thing that can be wrong here: the reader knows what they
+  /// meant, and the only question is whether it reached the server. So the
+  /// heart answers immediately and goes back to where it was if it did not.
+  Future<void> _setLiked(bool isLiked, MovieEntity movie) async {
+    final wasLiked = state.isMovieLiked;
+    if (wasLiked == isLiked) return;
+
+    _readerHasChosen = true;
+    emit(state.copyWith(isMovieLiked: isLiked));
+
+    final result = isLiked ? await _likeMovieUseCase.call(params: movie) : await _dislikeMovieUseCase.call(params: movie);
     if (isClosed) return;
 
-    result.fold(
-      (failure) => emit(state.copyWith(isMovieLiked: state.isMovieLiked)),
-      (_) => emit(state.copyWith(isMovieLiked: true)),
-    );
-  }
-
-  Future<void> dislikeMovie({required MovieEntity movie}) async {
-    final result = await _dislikeMovieUseCase.call(params: movie);
-    if (isClosed) return;
-
-    result.fold(
-      (failure) => emit(state.copyWith(isMovieLiked: state.isMovieLiked)),
-      (_) => emit(state.copyWith(isMovieLiked: false)),
-    );
+    result.fold((failure) => emit(state.copyWith(isMovieLiked: wasLiked)), (_) {});
   }
 }

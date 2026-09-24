@@ -5,9 +5,8 @@ import 'package:equatable/equatable.dart';
 
 import '../../../../core/resource/failure.dart';
 import '../../domain/entities/movie.dart';
-import '../../domain/usecases/get_movie_details.dart';
 import '../../domain/usecases/get_popular_movies.dart';
-import '../../domain/usecases/get_recommended_movie_ids.dart';
+import '../../domain/usecases/get_recommended_movies.dart';
 import '../../domain/usecases/get_top_rated_movies.dart';
 
 part 'movie_event.dart';
@@ -16,8 +15,7 @@ part 'movie_state.dart';
 class MovieBloc extends Bloc<MovieEvent, MovieState> {
   final GetPopularMoviesUseCase _getPopularMoviesUseCase;
   final GetTopRatedMoviesUseCase _getTopRatedMoviesUseCase;
-  final GetRecommendedMovieIdsUseCase _getRecommendedMovieIdsUseCase;
-  final GetMovieDetailsUseCase _getMovieDetailsUseCase;
+  final GetRecommendedMoviesUseCase _getRecommendedMoviesUseCase;
 
   /// The recommendation and the rows are two independent requests against two
   /// different services, and either can land first. Holding the latest
@@ -28,8 +26,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
   MovieBloc(
     this._getPopularMoviesUseCase,
     this._getTopRatedMoviesUseCase,
-    this._getRecommendedMovieIdsUseCase,
-    this._getMovieDetailsUseCase,
+    this._getRecommendedMoviesUseCase,
   ) : super(const MovieLoading()) {
     on<GetMovies>((event, emit) async {
       await onGetMovies(event, emit);
@@ -55,37 +52,18 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     );
   }
 
-  /// Filmio's service names the ids, best first; TMDB tells us what each of
-  /// them is. The head of the tab steps through every one, so all of them are
-  /// fetched — together, since none waits on another — and kept in the order
-  /// the service ranked them.
-  ///
-  /// A title TMDB cannot answer for is left out rather than sinking the rest.
-  /// Only when none comes back does the head of the tab fail, and then with
-  /// the best-ranked title's reason.
+  /// The block at the head of the tab. Which titles those are — and whether
+  /// they came from the service or from what it last answered — is the
+  /// repository's business; all this has to know is the three ways it can end.
   Future<void> onGetRecommendedMovie(GetRecommendedMovie event, Emitter<MovieState> emit) async {
-    final idsResult = await _getRecommendedMovieIdsUseCase.call();
+    final result = await _getRecommendedMoviesUseCase.call();
 
-    await idsResult.fold(
-      (failure) async => _emitRecommended(RecommendedMovieFailure(failure.message), emit),
-      (movieIds) async {
-        if (movieIds.isEmpty) {
-          return _emitRecommended(const RecommendedMovieEmpty(), emit);
-        }
-
-        final results = await Future.wait(movieIds.map((id) => _getMovieDetailsUseCase.call(params: id)));
-
-        final movies = <MovieEntity>[];
-        final failures = <Failure>[];
-        for (final result in results) {
-          result.fold(failures.add, movies.add);
-        }
-
-        _emitRecommended(
-          movies.isEmpty ? RecommendedMovieFailure(failures.first.message) : RecommendedMovieLoaded(movies),
-          emit,
-        );
-      },
+    result.fold(
+      (failure) => _emitRecommended(RecommendedMovieFailure(failure.message), emit),
+      (movies) => _emitRecommended(
+        movies.isEmpty ? const RecommendedMovieEmpty() : RecommendedMovieLoaded(movies),
+        emit,
+      ),
     );
   }
 
@@ -114,15 +92,12 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
   }
 
   MovieState _success(List<MovieEntity> popularMovies, List<MovieEntity> topRatedMovies) {
-    final withPoster = topRatedMovies.where((movie) => movie.posterPath != null).toList();
-    if (withPoster.isEmpty) {
+    // The repository has already dropped anything the app cannot draw, so an
+    // empty list here means the catalogue answered with nothing usable at all.
+    if (topRatedMovies.isEmpty) {
       return const MovieError(ServerFailure('No movies to show right now.'));
     }
 
-    return MovieSuccess(
-      popularMovies.where((movie) => movie.posterPath != null).toList(),
-      withPoster,
-      _resolve(_recommended, withPoster),
-    );
+    return MovieSuccess(popularMovies, topRatedMovies, _resolve(_recommended, topRatedMovies));
   }
 }

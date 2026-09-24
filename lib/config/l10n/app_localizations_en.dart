@@ -191,14 +191,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String browseResultCount(int count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count titles',
+      other: '$countString titles',
       one: '1 title',
       zero: 'No titles',
     );
     return '$_temp0';
+  }
+
+  @override
+  String browseResultCountCapped(int count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString+ titles';
   }
 
   @override

@@ -7,6 +7,7 @@ import '../../../../core/custom/browse_header.dart';
 import '../../../../core/custom/discover_filter_sheet.dart';
 import '../../../../core/custom/paginated_poster_grid.dart';
 import '../../../../core/enums/discover_sort.dart';
+import '../../../../core/models/paginated_list.dart';
 import '../../../../core/extensions/context_extension.dart';
 import '../../../../core/utils/hero_tags.dart';
 import '../../../../injection_container.dart';
@@ -35,6 +36,11 @@ class SeriesDiscoverPage extends StatelessWidget {
   }
 }
 
+/// The round number the capped count is given as. TMDB's ceiling is 20,001,
+/// and "20,001+ titles" reads as a measurement rather than as the "more than
+/// we will count" it actually means.
+const _countCeiling = PaginatedList.countCeiling - 1;
+
 class _DiscoverView extends StatelessWidget {
   final String title;
 
@@ -58,6 +64,10 @@ class _DiscoverView extends StatelessWidget {
               BrowseHeader(
                 title: title,
                 resultLabel: switch (state) {
+                  // TMDB stops counting at its ceiling, so past it the screen
+                  // says how far it can see rather than repeating a number
+                  // that no filter will ever move.
+                  SeriesDiscoverLoaded(isCountCapped: true) => context.l10n.browseResultCountCapped(_countCeiling),
                   SeriesDiscoverLoaded(:final totalResults) => context.l10n.browseResultCount(totalResults),
                   _ => null,
                 },

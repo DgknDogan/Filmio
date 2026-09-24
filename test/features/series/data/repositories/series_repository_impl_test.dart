@@ -9,6 +9,7 @@ import 'package:filmio/features/series/data/models/series_detail_model.dart';
 import 'package:filmio/features/series/data/models/series_model.dart';
 import 'package:filmio/features/series/data/models/series_recommendation_response.dart';
 import 'package:filmio/features/series/data/repositories/series_repository_impl.dart';
+import 'package:filmio/features/series/domain/entities/series_entity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -21,9 +22,12 @@ class _MockAuth extends Mock implements FirebaseAuth {}
 class _MockUser extends Mock implements User {}
 
 void main() {
+  setUpAll(registerCommonFallbacks);
+
   late MockSeriesApiService api;
   late _MockAuth auth;
   late _MockUser user;
+  late MockSeriesRecommendationCache cache;
   late SeriesRepositoryImpl repository;
 
   final requestOptions = RequestOptions(path: '/discover/tv');
@@ -59,10 +63,35 @@ void main() {
     auth = _MockAuth();
     user = _MockUser();
 
+    cache = MockSeriesRecommendationCache();
+
     when(() => auth.currentUser).thenReturn(user);
+    when(() => user.uid).thenReturn('uid');
     when(() => user.getIdToken()).thenAnswer((_) async => 'id-token');
 
-    repository = SeriesRepositoryImpl(api, auth);
+    // Nothing cached unless a test says otherwise.
+    when(() => cache.read('uid')).thenReturn(null);
+    when(() => cache.read('uid', ignoreAge: true)).thenReturn(null);
+    when(() => cache.write('uid', any())).thenAnswer((_) async {});
+
+    repository = SeriesRepositoryImpl(api, auth, cache);
+  });
+
+  test('drops a title the app has nothing to draw', () async {
+    stubDiscover(
+      page(const [
+        SeriesModel(id: 1, name: 'A', posterPath: '/a.jpg', overview: 'A.'),
+        // TMDB's catalogue is crowd-maintained: an entry can arrive with no
+        // artwork, or with nothing written about it.
+        SeriesModel(id: 2, name: 'B', overview: 'B.'),
+        SeriesModel(id: 3, name: 'C', posterPath: '/c.jpg'),
+        SeriesModel(id: 4, name: 'D', posterPath: '/d.jpg', overview: '   '),
+      ]),
+    );
+
+    final result = await repository.discoverSeries(filters: DiscoverFilters.none, sort: DiscoverSort.popularity, page: 1);
+
+    expect(result.getRight().toNullable()?.items.map((series) => series.id), [1]);
   });
 
   group('getSeriesDetails', () {
@@ -99,16 +128,37 @@ void main() {
     });
   });
 
-  group('getRecommendedSeriesIds', () {
+  group('getRecommendedSeries', () {
+    const strangerThings = SeriesDetailModel(id: 66732, name: 'Stranger Things', posterPath: '/st.jpg', overview: 'Stranger Things.');
+    const thrones = SeriesDetailModel(id: 1399, name: 'Game of Thrones', posterPath: '/got.jpg', overview: 'Game of Thrones.');
+    const mandalorian = SeriesDetailModel(id: 82856, name: 'The Mandalorian', posterPath: '/tm.jpg', overview: 'The Mandalorian.');
+
+    const titlesById = {66732: strangerThings, 1399: thrones, 82856: mandalorian};
+
     void stubRecommendations(SeriesRecommendationResponse body, {int statusCode = 200}) {
       when(() => api.getRecommendations(authorization: any(named: 'authorization'), limit: any(named: 'limit')))
           .thenAnswer((_) async => bodyWith(body, statusCode: statusCode));
     }
 
-    test("sends the signed-in user's ID token as the bearer", () async {
-      stubRecommendations(const SeriesRecommendationResponse(seriesIds: [66732]));
+    /// [failing] names the ids TMDB cannot answer for; every other id resolves
+    /// to its own title, so a test can tell which were fetched and in what
+    /// order they were kept.
+    void stubTitles({Map<int, int> failing = const {}, Map<int, SeriesDetailModel> extra = const {}}) {
+      when(() => api.getSeriesDetails(seriesId: any(named: 'seriesId'), language: any(named: 'language'))).thenAnswer((invocation) async {
+        final id = invocation.namedArguments[#seriesId] as int;
+        final body = extra[id] ?? titlesById[id] ?? const SeriesDetailModel();
 
-      await repository.getRecommendedSeriesIds();
+        return bodyWith(body, statusCode: failing[id] ?? 200);
+      });
+    }
+
+    setUp(() {
+      stubRecommendations(const SeriesRecommendationResponse(seriesIds: [66732]));
+      stubTitles();
+    });
+
+    test("sends the signed-in user's ID token as the bearer", () async {
+      await repository.getRecommendedSeries();
 
       // The service authenticates as the user, not as the app — a TMDB token
       // here would be both wrong and a token sent to somebody else's host.
@@ -116,52 +166,80 @@ void main() {
     });
 
     test('passes a limit through when the caller overrides the count', () async {
-      stubRecommendations(const SeriesRecommendationResponse(seriesIds: [66732]));
-
-      await repository.getRecommendedSeriesIds(limit: 5);
+      await repository.getRecommendedSeries(limit: 5);
 
       verify(() => api.getRecommendations(authorization: 'Bearer id-token', limit: 5)).called(1);
     });
 
-    test('returns the ids in the order the service ranked them', () async {
-      stubRecommendations(const SeriesRecommendationResponse(seriesIds: [66732, 1399], count: 2));
+    test('turns every id the service ranked into a title, in its order', () async {
+      stubRecommendations(const SeriesRecommendationResponse(seriesIds: [66732, 1399, 82856], count: 3));
 
-      expect((await repository.getRecommendedSeriesIds()).getRight().toNullable(), [66732, 1399]);
+      final series = (await repository.getRecommendedSeries()).getRight().toNullable();
+
+      expect(series?.map((entry) => entry.id), [66732, 1399, 82856]);
+    });
+
+    test('leaves out a title TMDB cannot answer for rather than failing the rest', () async {
+      stubRecommendations(const SeriesRecommendationResponse(seriesIds: [66732, 1399, 82856]));
+      stubTitles(failing: const {1399: 404});
+
+      final series = (await repository.getRecommendedSeries()).getRight().toNullable();
+
+      expect(series?.map((entry) => entry.id), [66732, 82856]);
+    });
+
+    test('leaves out a title with nothing to draw', () async {
+      stubRecommendations(const SeriesRecommendationResponse(seriesIds: [66732, 1399]));
+      // A recommendation with no artwork would open the tab on a blank
+      // rectangle, and one with no description on an empty screen.
+      stubTitles(extra: const {1399: SeriesDetailModel(id: 1399, name: 'Game of Thrones')});
+
+      final series = (await repository.getRecommendedSeries()).getRight().toNullable();
+
+      expect(series?.map((entry) => entry.id), [66732]);
+    });
+
+    test('no title that can be fetched fails with the best-ranked one\'s reason', () async {
+      stubRecommendations(const SeriesRecommendationResponse(seriesIds: [66732, 1399]));
+      stubTitles(failing: const {66732: 404, 1399: 500});
+
+      final failure = (await repository.getRecommendedSeries()).getLeft().toNullable();
+
+      expect((failure as ServerFailure).statusCode, 404);
     });
 
     test('an absent id list becomes an empty list, not a crash', () async {
       stubRecommendations(const SeriesRecommendationResponse());
 
-      expect((await repository.getRecommendedSeriesIds()).getRight().toNullable(), isEmpty);
+      expect((await repository.getRecommendedSeries()).getRight().toNullable(), isEmpty);
     });
 
-    test('a guest gets no ids rather than a failure, and the service is never called', () async {
+    test('a guest gets nothing rather than a failure, and the service is never called', () async {
       when(() => auth.currentUser).thenReturn(null);
 
       // Browsing without an account is a supported way to use the app: the tab
       // falls back to a top-rated title rather than telling the reader off.
-      expect((await repository.getRecommendedSeriesIds()).getRight().toNullable(), isEmpty);
+      expect((await repository.getRecommendedSeries()).getRight().toNullable(), isEmpty);
       verifyNever(() => api.getRecommendations(authorization: any(named: 'authorization'), limit: any(named: 'limit')));
     });
 
     test('a session that yields no token is an AuthFailure', () async {
       when(() => user.getIdToken()).thenAnswer((_) async => null);
 
-      expect((await repository.getRecommendedSeriesIds()).getLeft().toNullable(), isA<AuthFailure>());
+      expect((await repository.getRecommendedSeries()).getLeft().toNullable(), isA<AuthFailure>());
     });
 
     test('a Firebase error while minting the token becomes a Failure rather than escaping', () async {
       when(() => user.getIdToken()).thenThrow(FirebaseAuthException(code: 'network-request-failed'));
 
-      expect((await repository.getRecommendedSeriesIds()).getLeft().toNullable(), isA<Failure>());
+      expect((await repository.getRecommendedSeries()).getLeft().toNullable(), isA<Failure>());
     });
 
-    test('a non-200 becomes a ServerFailure carrying the code', () async {
+    test('a non-200 from the service becomes a ServerFailure carrying the code', () async {
       stubRecommendations(const SeriesRecommendationResponse(), statusCode: 401);
 
-      final failure = (await repository.getRecommendedSeriesIds()).getLeft().toNullable();
+      final failure = (await repository.getRecommendedSeries()).getLeft().toNullable();
 
-      expect(failure, isA<ServerFailure>());
       expect((failure as ServerFailure).statusCode, 401);
     });
 
@@ -169,13 +247,56 @@ void main() {
       when(() => api.getRecommendations(authorization: any(named: 'authorization'), limit: any(named: 'limit')))
           .thenThrow(DioException(requestOptions: requestOptions, type: DioExceptionType.connectionError));
 
-      expect((await repository.getRecommendedSeriesIds()).getLeft().toNullable(), isA<NetworkFailure>());
+      expect((await repository.getRecommendedSeries()).getLeft().toNullable(), isA<NetworkFailure>());
+    });
+
+    group('the cache', () {
+      const cached = SeriesEntity(id: 99, name: 'Cached', posterPath: '/c.jpg', overview: 'Cached.');
+
+      test('is answered from instead of the service when it has something recent', () async {
+        when(() => cache.read('uid')).thenReturn(const [cached]);
+
+        expect((await repository.getRecommendedSeries()).getRight().toNullable(), const [cached]);
+        // The whole point: neither service is touched.
+        verifyNever(() => api.getRecommendations(authorization: any(named: 'authorization'), limit: any(named: 'limit')));
+        verifyNever(() => api.getSeriesDetails(seriesId: any(named: 'seriesId'), language: any(named: 'language')));
+      });
+
+      test('is written with what the service answered', () async {
+        await repository.getRecommendedSeries();
+
+        final written = verify(() => cache.write('uid', captureAny())).captured.single as List<SeriesEntity>;
+        expect(written.single.id, 66732);
+      });
+
+      test('remembers an empty answer too, so the next launch does not ask again', () async {
+        stubRecommendations(const SeriesRecommendationResponse(seriesIds: []));
+
+        await repository.getRecommendedSeries();
+
+        verify(() => cache.write('uid', const [])).called(1);
+      });
+
+      test('is served stale rather than failing when the service cannot be reached', () async {
+        when(() => cache.read('uid', ignoreAge: true)).thenReturn(const [cached]);
+        stubRecommendations(const SeriesRecommendationResponse(), statusCode: 503);
+
+        // A yesterday's recommendation reads better than an error where the
+        // tab's opening title should be.
+        expect((await repository.getRecommendedSeries()).getRight().toNullable(), const [cached]);
+      });
+
+      test('fails as usual when the service cannot be reached and nothing was ever cached', () async {
+        stubRecommendations(const SeriesRecommendationResponse(), statusCode: 503);
+
+        expect((await repository.getRecommendedSeries()).getLeft().toNullable(), isA<ServerFailure>());
+      });
     });
   });
 
   group('discoverSeries', () {
     test('sends every filter under the name television gives it', () async {
-      stubDiscover(page(const [SeriesModel(id: 1, name: 'A')]));
+      stubDiscover(page(const [SeriesModel(id: 1, name: 'A', posterPath: '/a.jpg', overview: 'A.')]));
 
       await repository.discoverSeries(
         filters: const DiscoverFilters(genreIds: {18}, minRating: 7, maxRating: 9, minYear: 1990, maxYear: 1999),
@@ -243,7 +364,7 @@ void main() {
     });
 
     test('maps the response to entities and keeps the paging numbers', () async {
-      stubDiscover(page(const [SeriesModel(id: 1, name: 'A')], page: 3, totalPages: 8, totalResults: 150));
+      stubDiscover(page(const [SeriesModel(id: 1, name: 'A', posterPath: '/a.jpg', overview: 'A.')], page: 3, totalPages: 8, totalResults: 150));
 
       final series = (await repository.discoverSeries(
         filters: DiscoverFilters.none,

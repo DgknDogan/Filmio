@@ -2,10 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'config/theme/cubit/theme_cubit.dart';
 import 'core/network/dio_client.dart';
+import 'core/storage/liked_titles_stamp.dart';
 import 'core/storage/theme_local_datasource.dart';
 import 'features/auth/data/datasources/auth_local_datasource.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
@@ -22,6 +24,7 @@ import 'features/auth/domain/usecases/update_profile.dart';
 import 'features/auth/presentation/cubit/login_cubit.dart';
 import 'features/landing/presentation/cubit/splash_cubit.dart';
 import 'features/movie/data/datasources/movie_api_service.dart';
+import 'features/movie/data/datasources/movie_recommendation_local_datasource.dart';
 import 'features/movie/data/repositories/liked_movies_repository_impl.dart';
 import 'features/movie/data/repositories/movie_repository_impl.dart';
 import 'features/movie/domain/repositories/liked_movies_repository.dart';
@@ -29,9 +32,8 @@ import 'features/movie/domain/repositories/movie_repository.dart';
 import 'features/movie/domain/usecases/discover_movies.dart';
 import 'features/movie/domain/usecases/dislike_movie.dart';
 import 'features/movie/domain/usecases/get_liked_movies.dart';
-import 'features/movie/domain/usecases/get_movie_details.dart';
 import 'features/movie/domain/usecases/get_popular_movies.dart';
-import 'features/movie/domain/usecases/get_recommended_movie_ids.dart';
+import 'features/movie/domain/usecases/get_recommended_movies.dart';
 import 'features/movie/domain/usecases/get_similar_movies.dart';
 import 'features/movie/domain/usecases/get_top_rated_movies.dart';
 import 'features/movie/domain/usecases/like_movie.dart';
@@ -45,6 +47,7 @@ import 'features/review/domain/repositories/review_repository.dart';
 import 'features/review/domain/usecases/get_reviews.dart';
 import 'features/review/domain/usecases/moderate_reviews.dart';
 import 'features/series/data/datasources/series_api_service.dart';
+import 'features/series/data/datasources/series_recommendation_local_datasource.dart';
 import 'features/series/data/repositories/liked_series_repository_impl.dart';
 import 'features/series/data/repositories/series_repository_impl.dart';
 import 'features/series/domain/repositories/liked_series_repository.dart';
@@ -53,8 +56,7 @@ import 'features/series/domain/usecases/discover_series.dart';
 import 'features/series/domain/usecases/dislike_series.dart';
 import 'features/series/domain/usecases/get_liked_series.dart';
 import 'features/series/domain/usecases/get_popular_series.dart';
-import 'features/series/domain/usecases/get_recommended_series_ids.dart';
-import 'features/series/domain/usecases/get_series_details.dart';
+import 'features/series/domain/usecases/get_recommended_series.dart';
 import 'features/series/domain/usecases/get_similar_series.dart';
 import 'features/series/domain/usecases/get_top_rated_series.dart';
 import 'features/series/domain/usecases/like_series.dart';
@@ -68,11 +70,22 @@ final getIt = GetIt.instance;
 
 Future<void> initDependencies() async {
   final sharedPreferences = await SharedPreferences.getInstance();
+
+  // Hive, and the one box each catalogue keeps its recommendation in. Opened
+  // here rather than lazily, so a datasource is handed a box that is already
+  // readable and nothing on the way to the first frame has to await one.
+  await Hive.initFlutter();
+  final recommendedMoviesBox = await Hive.openBox<String>(MovieRecommendationLocalDataSource.boxName);
+  final recommendedSeriesBox = await Hive.openBox<String>(SeriesRecommendationLocalDataSource.boxName);
   // Dio — carries the TMDB credentials for every service that shares it.
   getIt.registerSingleton<Dio>(buildTmdbDio());
 
   // Shared Preferences
   getIt.registerSingleton<SharedPreferences>(sharedPreferences);
+
+  // What the recommendation caches below watch: liking a title makes a cached
+  // recommendation wrong however young it is.
+  getIt.registerSingleton<LikedTitlesStamp>(LikedTitlesStamp(sharedPreferences));
 
   // Firebase — registered so repositories take them by constructor and stay mockable.
   getIt.registerSingleton<FirebaseAuth>(FirebaseAuth.instance);
@@ -80,14 +93,16 @@ Future<void> initDependencies() async {
 
   // Dependencies
   getIt.registerSingleton<MovieApiService>(MovieApiService(getIt()));
-  getIt.registerSingleton<MovieRepository>(MovieRepositoryImpl(getIt(), getIt()));
+  getIt.registerSingleton<MovieRecommendationLocalDataSource>(MovieRecommendationLocalDataSource(recommendedMoviesBox, getIt()));
+  getIt.registerSingleton<MovieRepository>(MovieRepositoryImpl(getIt(), getIt(), getIt()));
 
-  getIt.registerSingleton<LikedMoviesRepository>(LikedMoviesRepositoryImpl(getIt(), getIt()));
+  getIt.registerSingleton<LikedMoviesRepository>(LikedMoviesRepositoryImpl(getIt(), getIt(), getIt()));
 
   getIt.registerSingleton<SeriesApiService>(SeriesApiService(getIt()));
-  getIt.registerSingleton<SeriesRepository>(SeriesRepositoryImpl(getIt(), getIt()));
+  getIt.registerSingleton<SeriesRecommendationLocalDataSource>(SeriesRecommendationLocalDataSource(recommendedSeriesBox, getIt()));
+  getIt.registerSingleton<SeriesRepository>(SeriesRepositoryImpl(getIt(), getIt(), getIt()));
 
-  getIt.registerSingleton<LikedSeriesRepository>(LikedSeriesRepositoryImpl(getIt(), getIt()));
+  getIt.registerSingleton<LikedSeriesRepository>(LikedSeriesRepositoryImpl(getIt(), getIt(), getIt()));
 
   // Reviews — one service and one repository for both catalogues.
   getIt.registerSingleton<ReviewApiService>(ReviewApiService(getIt()));
@@ -116,16 +131,14 @@ Future<void> initDependencies() async {
   getIt.registerSingleton<SearchMoviesUseCase>(SearchMoviesUseCase(getIt()));
   getIt.registerSingleton<GetSimilarMoviesUseCase>(GetSimilarMoviesUseCase(getIt()));
   getIt.registerSingleton<DiscoverMoviesUseCase>(DiscoverMoviesUseCase(getIt()));
-  getIt.registerSingleton<GetMovieDetailsUseCase>(GetMovieDetailsUseCase(getIt()));
-  getIt.registerSingleton<GetRecommendedMovieIdsUseCase>(GetRecommendedMovieIdsUseCase(getIt()));
+  getIt.registerSingleton<GetRecommendedMoviesUseCase>(GetRecommendedMoviesUseCase(getIt()));
   getIt.registerSingleton<SearchSeriesUseCase>(SearchSeriesUseCase(getIt()));
 
   getIt.registerSingleton<GetTopRatedSeriesUseCase>(GetTopRatedSeriesUseCase(getIt()));
   getIt.registerSingleton<GetPopularSeriesUseCase>(GetPopularSeriesUseCase(getIt()));
   getIt.registerSingleton<GetSimilarSeriesUseCase>(GetSimilarSeriesUseCase(getIt()));
   getIt.registerSingleton<DiscoverSeriesUseCase>(DiscoverSeriesUseCase(getIt()));
-  getIt.registerSingleton<GetSeriesDetailsUseCase>(GetSeriesDetailsUseCase(getIt()));
-  getIt.registerSingleton<GetRecommendedSeriesIdsUseCase>(GetRecommendedSeriesIdsUseCase(getIt()));
+  getIt.registerSingleton<GetRecommendedSeriesUseCase>(GetRecommendedSeriesUseCase(getIt()));
   getIt.registerSingleton<GetLikedSeriesUseCase>(GetLikedSeriesUseCase(getIt()));
   getIt.registerSingleton<LikeSeriesUseCase>(LikeSeriesUseCase(getIt()));
   getIt.registerSingleton<DislikeSeriesUseCase>(DislikeSeriesUseCase(getIt()));

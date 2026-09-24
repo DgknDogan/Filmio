@@ -43,4 +43,39 @@ void main() {
     wait: const Duration(milliseconds: 10),
     verify: (cubit) => expect(cubit.state, const LikedMoviesFailure('no access')),
   );
+
+  group('refresh', () {
+    /// What the screen calls when a title's own page has been closed. The
+    /// reader is looking at the list as it happens, so a row going is the only
+    /// change they should see.
+    blocTest<LikedMoviesCubit, LikedMoviesState>(
+      'replaces the list without putting a spinner in front of it',
+      build: build,
+      setUp: () => when(() => getLikedMovies.call()).thenAnswer((_) async => const Right([movie])),
+      act: (cubit) async {
+        when(() => getLikedMovies.call()).thenAnswer((_) async => const Right(<MovieEntity>[]));
+        await cubit.refresh();
+      },
+      wait: const Duration(milliseconds: 10),
+      expect: () => const [
+        LikedMoviesLoaded([movie]),
+        // No LikedMoviesLoading in between: that would read as a flicker rather
+        // than as progress.
+        LikedMoviesLoaded(<MovieEntity>[]),
+      ],
+    );
+
+    blocTest<LikedMoviesCubit, LikedMoviesState>(
+      'leaves the list on screen when the read fails',
+      build: build,
+      setUp: () => when(() => getLikedMovies.call()).thenAnswer((_) async => const Right([movie])),
+      act: (cubit) async {
+        when(() => getLikedMovies.call()).thenAnswer((_) async => const Left(NetworkFailure('offline')));
+        await cubit.refresh();
+      },
+      wait: const Duration(milliseconds: 10),
+      // The list already on screen is the better answer to a failed refresh.
+      verify: (cubit) => expect(cubit.state, const LikedMoviesLoaded([movie])),
+    );
+  });
 }

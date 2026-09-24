@@ -42,7 +42,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
     result.fold(
       (failure) => emit(SearchFailure(failure.message)),
-      (movies) => emit(SearchLoaded(movies.where((movie) => movie.posterPath != null).toList())),
+      (movies) => emit(SearchLoaded(movies)),
     );
   }
 }

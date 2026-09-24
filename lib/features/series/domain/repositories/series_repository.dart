@@ -15,14 +15,20 @@ abstract class SeriesRepository {
   /// One series in full, by its TMDB id.
   Future<Either<Failure, SeriesEntity>> getSeriesDetails({required int seriesId});
 
-  /// The ids Filmio's recommendation service picks for the signed-in user,
+  /// The titles Filmio's recommendation service picks for the signed-in user,
   /// best first.
+  ///
+  /// The service names ids; this answers with the titles themselves, because
+  /// the two are one question to everybody who asks it and turning one into
+  /// the other costs a request per title. Answered from a cache where there is
+  /// a recent one, which is the point of keeping the whole thing behind a
+  /// single method.
   ///
   /// Empty when there is nothing to go on — the service had too little to work
   /// with, or nobody is signed in at all. Browsing as a guest is not a failure.
   ///
   /// [limit] overrides the count the service would choose by itself.
-  Future<Either<Failure, List<int>>> getRecommendedSeriesIds({int? limit});
+  Future<Either<Failure, List<SeriesEntity>>> getRecommendedSeries({int? limit});
 
   /// One page of the catalogue, in [sort] order, narrowed by [filters].
   /// [page] is one-based.
