@@ -248,8 +248,6 @@
   "@tasteGenres": { "description": "Label above the genres that come up most in the liked lists" },
   "tasteDecade": "Favourite decade",
   "@tasteDecade": { "description": "Label above the decade most liked titles came out in" },
-  "tasteRating": "Average rating",
-  "@tasteRating": { "description": "Label above what the liked titles score on TMDB on average" },
   "tasteLiked": "Liked",
   "@tasteLiked": { "description": "Label above how many titles the account has liked in total" },
   "tasteWatchlist": "To watch",

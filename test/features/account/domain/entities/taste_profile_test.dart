@@ -14,12 +14,12 @@ const comedy = 35;
 /// both lists.
 const seriesScifi = 10765;
 
-MovieEntity movie({List<int>? genreIds, String? releaseDate, double? voteAverage, int id = 1}) {
-  return MovieEntity(id: id, title: 'A', posterPath: '/a.jpg', genreIds: genreIds, releaseDate: releaseDate, voteAverage: voteAverage);
+MovieEntity movie({List<int>? genreIds, String? releaseDate, int id = 1}) {
+  return MovieEntity(id: id, title: 'A', posterPath: '/a.jpg', genreIds: genreIds, releaseDate: releaseDate);
 }
 
-SeriesEntity series({List<int>? genreIds, String? firstAirDate, double? voteAverage, int id = 1}) {
-  return SeriesEntity(id: id, name: 'A', posterPath: '/a.jpg', genreIds: genreIds, firstAirDate: firstAirDate, voteAverage: voteAverage);
+SeriesEntity series({List<int>? genreIds, String? firstAirDate, int id = 1}) {
+  return SeriesEntity(id: id, name: 'A', posterPath: '/a.jpg', genreIds: genreIds, firstAirDate: firstAirDate);
 }
 
 TasteProfile profileOf({
@@ -60,7 +60,6 @@ void main() {
       expect(profile.hasNoTaste, isTrue);
       expect(profile.topGenres, isEmpty);
       expect(profile.favouriteDecade, isNull);
-      expect(profile.averageRating, isNull);
     });
 
     test('a watchlist alone is not empty, but says nothing about taste', () {
@@ -195,25 +194,6 @@ void main() {
       );
 
       expect(profile.favouriteDecade, '1990s');
-    });
-  });
-
-  group('average rating', () {
-    test('is the mean of the liked titles that carry one', () {
-      final profile = profileOf(
-        likedMovies: [movie(voteAverage: 8), movie(id: 2, voteAverage: 7)],
-        likedSeries: [series(voteAverage: 9)],
-      );
-
-      expect(profile.averageRating, closeTo(8, 0.001));
-    });
-
-    test('is null rather than zero when nothing carries a score', () {
-      final profile = profileOf(likedMovies: [movie(), movie(id: 2, voteAverage: 0)]);
-
-      // An unrated title is not a title rated zero, and averaging it in would
-      // drag the figure toward a number nobody voted for.
-      expect(profile.averageRating, isNull);
     });
   });
 }

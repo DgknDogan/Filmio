@@ -32,10 +32,6 @@ class TasteProfile extends Equatable {
   /// The decade most of the liked titles came out in, as `1990s`.
   final String? favouriteDecade;
 
-  /// What the liked titles average on TMDB. Null when none of them carries a
-  /// score, which is not the same as averaging zero.
-  final double? averageRating;
-
   const TasteProfile({
     required this.likedMovies,
     required this.likedSeries,
@@ -43,7 +39,6 @@ class TasteProfile extends Equatable {
     required this.watchlistSeries,
     required this.topGenres,
     required this.favouriteDecade,
-    required this.averageRating,
   });
 
   /// Nothing in any of the four lists, so there is nothing to say yet.
@@ -63,9 +58,8 @@ class TasteProfile extends Equatable {
   }) {
     final genres = <String, int>{};
     final decades = <int, int>{};
-    final ratings = <double>[];
 
-    void record({required List<int>? genreIds, required String? date, required double? rating, required bool isSeries}) {
+    void record({required List<int>? genreIds, required String? date, required bool isSeries}) {
       for (final id in genreIds ?? const <int>[]) {
         final name = _genreName(id, isSeries: isSeries);
         if (name != null) genres[name] = (genres[name] ?? 0) + 1;
@@ -76,16 +70,14 @@ class TasteProfile extends Equatable {
         final decade = year - year % 10;
         decades[decade] = (decades[decade] ?? 0) + 1;
       }
-
-      if (rating != null && rating > 0) ratings.add(rating);
     }
 
     for (final movie in likedMovies) {
-      record(genreIds: movie.genreIds, date: movie.releaseDate, rating: movie.voteAverage, isSeries: false);
+      record(genreIds: movie.genreIds, date: movie.releaseDate, isSeries: false);
     }
 
     for (final series in likedSeries) {
-      record(genreIds: series.genreIds, date: series.firstAirDate, rating: series.voteAverage, isSeries: true);
+      record(genreIds: series.genreIds, date: series.firstAirDate, isSeries: true);
     }
 
     final rankedDecades = _ranked(decades);
@@ -97,7 +89,6 @@ class TasteProfile extends Equatable {
       watchlistSeries: watchlistSeries.length,
       topGenres: _ranked(genres).take(3).toList(),
       favouriteDecade: rankedDecades.isEmpty ? null : '${rankedDecades.first}s',
-      averageRating: ratings.isEmpty ? null : ratings.reduce((a, b) => a + b) / ratings.length,
     );
   }
 
@@ -135,6 +126,5 @@ class TasteProfile extends Equatable {
         watchlistSeries,
         topGenres,
         favouriteDecade,
-        averageRating,
       ];
 }

@@ -52,7 +52,6 @@ class TasteProfileCard extends StatelessWidget {
                 // between two accounts, and an absent figure is a thing the
                 // catalogue did not say rather than a tile that moved.
                 _Figure(label: context.l10n.tasteDecade, value: profile.favouriteDecade ?? '—'),
-                _Figure(label: context.l10n.tasteRating, value: profile.averageRating?.toStringAsFixed(1) ?? '—'),
                 _Figure(label: context.l10n.tasteLiked, value: '${profile.likedMovies + profile.likedSeries}'),
                 _Figure(label: context.l10n.tasteWatchlist, value: '${profile.watchlistTotal}'),
               ],

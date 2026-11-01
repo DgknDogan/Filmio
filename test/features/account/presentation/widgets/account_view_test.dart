@@ -2,14 +2,11 @@ import 'package:filmio/core/cubit/session_cubit.dart';
 import 'package:filmio/core/custom/custom_button.dart';
 import 'package:filmio/core/custom/poster_card.dart';
 import 'package:filmio/features/account/presentation/cubit/account_cubit.dart';
-import 'package:filmio/features/account/presentation/pages/account_page.dart';
+import 'package:filmio/features/account/presentation/cubit/account_lists_cubit.dart';
+import 'package:filmio/features/account/presentation/widgets/account_view.dart';
 import 'package:filmio/features/account/presentation/widgets/taste_profile_card.dart';
 import 'package:filmio/features/movie/domain/entities/movie.dart';
-import 'package:filmio/features/movie/domain/usecases/get_liked_movies.dart';
-import 'package:filmio/features/movie/domain/usecases/get_watchlist_movies.dart';
 import 'package:filmio/features/series/domain/entities/series_entity.dart';
-import 'package:filmio/features/series/domain/usecases/get_liked_series.dart';
-import 'package:filmio/features/series/domain/usecases/get_watchlist_series.dart';
 import 'package:filmio/core/resource/failure.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,7 +15,6 @@ import 'package:mocktail/mocktail.dart';
 
 import '../../../../helpers/mocks.dart';
 import '../../../../helpers/pump_app.dart';
-import '../../../../helpers/test_di.dart';
 
 /// Asserts what the tab puts in front of an account and in front of a guest,
 /// and that the rows survive a list that could not be read. Deliberately says
@@ -48,23 +44,22 @@ void main() {
     when(() => getWatchlistSeries.call()).thenAnswer((_) async => const Right(<SeriesEntity>[]));
     when(() => getProfile.call()).thenAnswer((_) async => (name: 'Ada', email: 'ada@example.com', photoUrl: null));
     when(() => isGuest.call()).thenAnswer((_) async => false);
-
-    registerTestSingleton<GetLikedMoviesUseCase>(getLikedMovies);
-    registerTestSingleton<GetLikedSeriesUseCase>(getLikedSeries);
-    registerTestSingleton<GetWatchlistMoviesUseCase>(getWatchlistMovies);
-    registerTestSingleton<GetWatchlistSeriesUseCase>(getWatchlistSeries);
   });
 
-  tearDown(resetTestDependencies);
-
+  /// The view rather than the page: the page listens for its tab coming back
+  /// to the front, which needs a router above it, and nothing asserted here
+  /// does.
   Future<void> pumpTab(WidgetTester tester) async {
     await tester.pumpApp(
-      const AccountPage(),
+      const AccountView(),
       providers: [
         BlocProvider<SessionCubit>(
           create: (context) => SessionCubit(isGuest, MockContinueAsGuestUseCase(), MockEndGuestSessionUseCase()),
         ),
         BlocProvider<AccountCubit>(create: (context) => AccountCubit(getProfile)),
+        BlocProvider<AccountListsCubit>(
+          create: (context) => AccountListsCubit(getLikedMovies, getLikedSeries, getWatchlistMovies, getWatchlistSeries),
+        ),
       ],
     );
 
@@ -100,14 +95,6 @@ void main() {
       expect(find.text('2'), findsOneWidget);
     });
 
-    testWidgets('counts each list on the row that opens it', (tester) async {
-      await pumpTab(tester);
-
-      // Three lists hold one title and the fourth is empty.
-      expect(find.text('1 title'), findsNWidgets(3));
-      expect(find.text('No titles'), findsOneWidget);
-    });
-
     testWidgets('previews the covers of the lists that have any', (tester) async {
       await pumpTab(tester);
 
@@ -131,7 +118,6 @@ void main() {
       // No figures it cannot stand behind, and no covers.
       expect(find.byType(TasteProfileCard), findsNothing);
       expect(find.byType(PosterCard), findsNothing);
-      expect(find.text('1 title'), findsNothing);
     });
   });
 

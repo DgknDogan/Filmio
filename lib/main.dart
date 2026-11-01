@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -42,7 +43,12 @@ class MyApp extends StatelessWidget {
                 theme: lightTheme,
                 darkTheme: darkTheme,
                 themeMode: state.mode,
-                routerConfig: _appRouter.config(),
+                // The observer is what makes `AutoRouteAwareStateMixin`
+                // work: without one in this list, a page asking to be told
+                // when its tab comes back to the front is simply never told.
+                routerConfig: _appRouter.config(
+                  navigatorObservers: () => [AutoRouteObserver()],
+                ),
                 localizationsDelegates: AppLocalizations.localizationsDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
                 title: 'Filmio',

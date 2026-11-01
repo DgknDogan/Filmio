@@ -384,9 +384,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tasteDecade => 'Favourite decade';
 
   @override
-  String get tasteRating => 'Average rating';
-
-  @override
   String get tasteLiked => 'Liked';
 
   @override

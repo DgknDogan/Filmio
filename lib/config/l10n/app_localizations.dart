@@ -745,12 +745,6 @@ abstract class AppLocalizations {
   /// **'Favourite decade'**
   String get tasteDecade;
 
-  /// Label above what the liked titles score on TMDB on average
-  ///
-  /// In en, this message translates to:
-  /// **'Average rating'**
-  String get tasteRating;
-
   /// Label above how many titles the account has liked in total
   ///
   /// In en, this message translates to:
