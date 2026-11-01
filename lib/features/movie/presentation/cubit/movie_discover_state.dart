@@ -50,6 +50,12 @@ final class MovieDiscoverLoaded extends MovieDiscoverState {
     this.more = const LoadMoreIdle(),
   }) : super(filters);
 
+  /// Whether [totalResults] is TMDB's ceiling rather than a count — see
+  /// [PaginatedList.countCeiling]. The header says "20,000+" for it, because
+  /// the alternative is a number that does not move however the reader
+  /// narrows the catalogue.
+  bool get isCountCapped => totalResults >= PaginatedList.countCeiling;
+
   bool get hasMore => page < totalPages;
 
   MovieDiscoverLoaded copyWith({

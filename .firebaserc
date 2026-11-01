@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "dev": "filmio-dev",
+    "prod": "filmio-74b41"
+  }
+}

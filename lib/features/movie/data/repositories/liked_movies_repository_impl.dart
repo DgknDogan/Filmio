@@ -2,79 +2,47 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fpdart/fpdart.dart';
 
-import '../../../../core/extensions/firebase_firestore_extension.dart';
-import '../models/movie_model.dart';
+import '../../../../core/constants/constants.dart';
 import '../../../../core/resource/failure.dart';
-import '../../../../core/resource/failure_mapper.dart';
+import '../../../../core/storage/firestore_title_list.dart';
+import '../../../../core/storage/liked_titles_stamp.dart';
 import '../../domain/entities/movie.dart';
 import '../../domain/repositories/liked_movies_repository.dart';
+import '../models/movie_model.dart';
 
+/// The films an account has liked, as an array on its user document.
+///
+/// [FirestoreTitleList] is the whole of how that array is read and rewritten,
+/// and its documentation is where to look for why a title is its id here. What
+/// belongs to this list in particular is the three things configured below:
+/// the field it lives in, the subcollection the recommendation service reads
+/// it through, and the mark that tells the recommendation caches they are out
+/// of date.
 class LikedMoviesRepositoryImpl extends LikedMoviesRepository {
-  final FirebaseFirestore _firestore;
-  final FirebaseAuth _auth;
+  final FirestoreTitleList<MovieEntity> _titles;
 
-  LikedMoviesRepositoryImpl(this._firestore, this._auth);
-
-  /// The signed-in user's document, or null when nobody is signed in.
-  ///
-  /// Nullable rather than a bang: a guest reaches these screens with no
-  /// Firebase user at all, and a list that cannot be read is a failure to
-  /// report, not a crash.
-  DocumentReference<Map<String, dynamic>>? get _userDoc {
-    final uid = _auth.currentUser?.uid;
-    return uid == null ? null : _firestore.userDoc(uid);
-  }
-
-  static const _signedOut = AuthFailure('Sign in to keep the titles you like.');
-
-  @override
-  Future<Either<Failure, List<MovieEntity>>> getLikedMovies() async {
-    final doc = _userDoc;
-    if (doc == null) return const Left(_signedOut);
-
-    try {
-      final userDoc = await doc.get();
-
-      if (!userDoc.exists || userDoc.data() == null) {
-        return const Left(ServerFailure('That record no longer exists.'));
-      }
-
-      final List<dynamic> likedMoviesDynamic = userDoc.data()!["liked_movies"] ?? const [];
-      final likedMovies = likedMoviesDynamic.map((movie) => MovieModel.fromJson(Map<String, dynamic>.from(movie)).toEntity()).toList();
-
-      return Right(likedMovies);
-    } on FirebaseException catch (e) {
-      return Left(failureFromFirebase(e));
-    }
-  }
+  /// [likes] is marked on every change, because the recommendation each tab
+  /// opens on is derived from this list and a cached one written before the
+  /// change is answering an out-of-date question.
+  LikedMoviesRepositoryImpl(FirebaseFirestore firestore, FirebaseAuth auth, LikedTitlesStamp likes)
+      : _titles = FirestoreTitleList(
+          firestore: firestore,
+          auth: auth,
+          field: 'liked_movies',
+          mirrorCollection: likedMoviesCollection,
+          idOf: (movie) => movie.id,
+          toJson: (movie) => MovieModel.fromEntity(movie).toJson(),
+          fromJson: (json) => MovieModel.fromJson(json).toEntity(),
+          signedOutMessage: 'Sign in to keep the titles you like.',
+          onChanged: likes.markChanged,
+        );
 
   @override
-  Future<Either<Failure, Unit>> likeMovie({required MovieEntity movie}) async {
-    final doc = _userDoc;
-    if (doc == null) return const Left(_signedOut);
-
-    try {
-      await doc.update({
-        "liked_movies": FieldValue.arrayUnion([MovieModel.fromEntity(movie).toJson()]),
-      });
-      return const Right(unit);
-    } on FirebaseException catch (e) {
-      return Left(failureFromFirebase(e));
-    }
-  }
+  Future<Either<Failure, List<MovieEntity>>> getLikedMovies() => _titles.read();
 
   @override
-  Future<Either<Failure, Unit>> dislikeMovie({required MovieEntity movie}) async {
-    final doc = _userDoc;
-    if (doc == null) return const Left(_signedOut);
+  Future<Either<Failure, Unit>> likeMovie({required MovieEntity movie}) => _titles.write(movie, include: true);
 
-    try {
-      await doc.update({
-        "liked_movies": FieldValue.arrayRemove([MovieModel.fromEntity(movie).toJson()]),
-      });
-      return const Right(unit);
-    } on FirebaseException catch (e) {
-      return Left(failureFromFirebase(e));
-    }
-  }
+  @override
+  Future<Either<Failure, Unit>> dislikeMovie({required MovieEntity movie}) => _titles.write(movie, include: false);
 }

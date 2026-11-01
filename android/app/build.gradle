@@ -33,6 +33,36 @@ android {
         versionName = flutter.versionName
     }
 
+    // Which Firebase project a build talks to.
+    //
+    // The flavor is the single switch for it. Gradle resolves
+    // `src/<flavor>/google-services.json` from the flavor name, and Flutter
+    // hands that same name to Dart as `appFlavor`, which is what
+    // `AppFlavor.resolve` reads — so the native SDK and the Dart options
+    // cannot be pointed at two different projects by forgetting one of them.
+    //
+    // There is deliberately no `google-services.json` beside this file any
+    // more. The plugin falls back to one in the module root for any flavor
+    // that has none of its own, and that fallback is how a dev build ends up
+    // carrying the production configuration without saying so.
+    flavorDimensions = ["environment"]
+
+    productFlavors {
+        dev {
+            dimension "environment"
+            // Its own application id, so dev and prod sit side by side on one
+            // device and a dev build can never install over somebody's real
+            // one.
+            applicationIdSuffix ".dev"
+            resValue "string", "app_name", "Filmio dev"
+        }
+
+        prod {
+            dimension "environment"
+            resValue "string", "app_name", "Filmio"
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

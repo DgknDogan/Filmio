@@ -21,6 +21,7 @@ import '../../../video/presentation/cubit/trailer_cubit.dart';
 import '../../../video/presentation/widgets/trailer_section.dart';
 import '../../domain/entities/movie.dart';
 import '../cubit/movie_details_cubit.dart';
+import '../cubit/movie_watchlist_cubit.dart';
 import '../widgets/movie_poster_card.dart';
 
 @RoutePage()
@@ -46,6 +47,13 @@ class MovieDetailsPage extends StatelessWidget {
             getIt(),
           ),
         ),
+        // The bookmark gets a cubit of its own rather than another three
+        // dependencies on the one above: whether this film is on the
+        // watchlist is independent of everything that screen's cubit already
+        // tracks.
+        BlocProvider(
+          create: (context) => MovieWatchlistCubit(getIt(), getIt(), getIt(), movie),
+        ),
         BlocProvider(
           create: (context) => ReviewsCubit(getIt(), mediaId: movie.id, mediaType: MediaType.movie),
         ),
@@ -64,8 +72,9 @@ class MovieDetailsPage extends StatelessWidget {
   }
 }
 
-/// The shared details screen with the two things only a film has hung off it:
-/// the heart in the bar, and the row of similar titles under the synopsis.
+/// The shared details screen with the things only a film has hung off it: the
+/// heart and the bookmark in the bar, and the row of similar titles under the
+/// synopsis.
 class _DetailsView extends StatelessWidget {
   final MovieEntity movie;
   final String heroTag;
@@ -86,7 +95,14 @@ class _DetailsView extends StatelessWidget {
       voteCount: movie.voteCount,
       genreIds: movie.genreIds,
       overview: movie.overview,
-      action: _LikeButton(movie: movie),
+      action: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _WatchlistButton(movie: movie),
+          AppGap.horizontal(AppSpacing.sm),
+          _LikeButton(movie: movie),
+        ],
+      ),
       extras: [
         // The trailer sits directly under the synopsis: it is the one thing on
         // this page you can actually watch.
@@ -123,6 +139,41 @@ class _LikeButton extends StatelessWidget {
               : isLiked
                   ? context.read<MovieDetailsCubit>().dislikeMovie(movie: movie)
                   : context.read<MovieDetailsCubit>().likeMovie(movie: movie),
+        );
+      },
+    );
+  }
+}
+
+/// Puts the film on the watchlist, or takes it back off.
+///
+/// Deliberately not the same question as the heart beside it: a like says
+/// something about a film already seen, and this says only that the reader
+/// means to get to it. Both can be true, and neither implies the other, so
+/// pressing one leaves the other where it is.
+class _WatchlistButton extends StatelessWidget {
+  final MovieEntity movie;
+
+  const _WatchlistButton({required this.movie});
+
+  @override
+  Widget build(BuildContext context) {
+    final isGuest = context.select((SessionCubit cubit) => cubit.state.isGuest);
+
+    return BlocBuilder<MovieWatchlistCubit, bool>(
+      builder: (context, isOnWatchlist) {
+        return CircleIconButton(
+          icon: isOnWatchlist ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+          label: isOnWatchlist ? context.l10n.watchlistRemoveAction : context.l10n.watchlistAddAction,
+          iconColor: context.palette.accentSoft,
+          // Present for a guest rather than hidden, for the same reason the
+          // heart is: a control that is not there cannot say what an account
+          // would add.
+          onPressed: () => isGuest
+              ? showGuestPrompt(context, title: context.l10n.guestWatchlistTitle, body: context.l10n.guestWatchlistBody)
+              : isOnWatchlist
+                  ? context.read<MovieWatchlistCubit>().remove()
+                  : context.read<MovieWatchlistCubit>().add(),
         );
       },
     );

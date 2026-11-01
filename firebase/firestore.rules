@@ -1,0 +1,107 @@
+rules_version = '2';
+
+// Filmio's Firestore rules.
+//
+// Deny by default: a path with no `allow` is closed, and an `allow` cannot be
+// cancelled by a later rule — rules are OR'd together, so there is no point
+// writing `allow read, write: if false` anywhere below. A collection that is
+// absent from this file is already unreachable from the app, which is how a
+// new feature is forced to come here and say what it needs.
+//
+// The recommendation service reads these documents with the Admin SDK, which
+// bypasses rules entirely. Nothing here applies to it.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // One document per account, holding the liked titles as two arrays.
+    //
+    // `get` but not `list`: an account is only ever read by its own id, and
+    // leaving `list` closed means nobody can walk the collection to find out
+    // who has an account here.
+    match /User/{uid} {
+      allow get: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validUser(request.resource.data);
+      allow delete: if isOwner(uid);
+
+      // The whole title lands in the array, so what a valid entry looks like
+      // is the whole TMDB record — too large a shape to restate here, and it
+      // would have to be kept in step with `MovieModel` by hand. The arrays
+      // are type-checked and bounded instead; the per-field tightening comes
+      // with the move to one document per title, where the shape is small
+      // enough to describe.
+      function validUser(data) {
+        return validTitleArray(data, 'liked_movies')
+          && validTitleArray(data, 'liked_series')
+          && validTitleArray(data, 'watchlist_movies')
+          && validTitleArray(data, 'watchlist_series');
+      }
+
+      // 2000 titles is far past anything a person likes by hand, and it is
+      // what keeps a client from using its own account document as storage:
+      // the document limit is 1MB, and hitting it would break that account's
+      // likes for good.
+      function validTitleArray(data, field) {
+        return !(field in data) || (data[field] is list && data[field].size() <= 2000);
+      }
+
+      // The projection the recommendation service reads: one document per
+      // liked title, holding its TMDB id and nothing else. The id is also the
+      // document name, and the two have to agree — otherwise the same title
+      // can be filed under any number of names.
+      match /LikedMovies/{titleId} {
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validLikedTitle(request.resource.data, titleId);
+        allow delete: if isOwner(uid);
+      }
+
+      match /LikedSeries/{titleId} {
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validLikedTitle(request.resource.data, titleId);
+        allow delete: if isOwner(uid);
+      }
+
+      function validLikedTitle(data, titleId) {
+        return data.keys().hasOnly(['id']) && data.id is int && string(data.id) == titleId;
+      }
+    }
+
+    // Reported reviews. A moderation queue for a person to read in the
+    // console — the app files reports and never reads them back, so there is
+    // no `get` and no `list` here, for anybody.
+    //
+    // Create is open to an unsigned caller because a guest can report a
+    // review: `continueAsGuest` signs out of Firebase, so there is no `uid`
+    // behind the report, and requiring one would silently break reporting for
+    // everyone browsing without an account. The validation below is therefore
+    // the only thing standing between this collection and anyone holding the
+    // app's API key. Tighten it with App Check rather than by adding fields.
+    match /ReviewReport/{reportId} {
+      allow create: if validReport(request.resource.data);
+    }
+
+    function validReport(data) {
+      return data.keys().hasOnly(['review_id', 'author', 'media_id', 'media_type', 'reason', 'excerpt', 'reported_by', 'created_at'])
+        && data.keys().hasAll(['review_id', 'author', 'media_id', 'media_type', 'reason', 'excerpt', 'reported_by', 'created_at'])
+        && data.review_id is string && data.review_id.size() > 0 && data.review_id.size() <= 128
+        && data.author is string && data.author.size() <= 128
+        && data.media_id is int
+        && data.media_type in ['movie', 'series']
+        && data.reason in ['offensiveLanguage', 'hateOrHarassment', 'spam', 'spoiler', 'other']
+        && data.excerpt is string && data.excerpt.size() <= 500
+        // Set from the server clock, so a report cannot be backdated to bury
+        // it at the bottom of the queue.
+        && data.created_at == request.time
+        // Either the account that filed it, or nothing at all for a guest.
+        // What it cannot be is somebody else's uid.
+        && (data.reported_by == null || data.reported_by == request.auth.uid);
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "migrate-liked-subcollections",
+  "private": true,
+  "description": "One-off backfill of User/{uid}/LikedMovies and LikedSeries from the liked_movies / liked_series arrays.",
+  "scripts": {
+    "test": "node --test",
+    "migrate": "node migrate.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}

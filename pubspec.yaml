@@ -52,6 +52,13 @@ dependencies:
   # Local storage
   shared_preferences: ^2.5.2
 
+  # The cached recommendation the tabs open on. A box of JSON rather than
+  # typed adapters: the cache holds what the API already answered with, so
+  # `MovieModel.fromJson` is the reader and no generated adapter has to be
+  # kept in step with it.
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
   # Localization
   flutter_localizations:
     sdk: flutter

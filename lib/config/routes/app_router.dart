@@ -55,6 +55,12 @@ class AppRouter extends RootStackRouter {
         AutoRoute(
           page: LikedSeriesRoute.page,
         ),
+        AutoRoute(
+          page: WatchlistMoviesRoute.page,
+        ),
+        AutoRoute(
+          page: WatchlistSeriesRoute.page,
+        ),
         CustomRoute(
           page: MovieSearchRoute.page,
           transitionsBuilder: TransitionsBuilders.fadeIn,

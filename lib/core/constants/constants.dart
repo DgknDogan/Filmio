@@ -18,6 +18,11 @@ const tmdbBaseUrl = "https://api.themoviedb.org/3";
 /// Firestore collection holding one document per user.
 const userCollection = "User";
 
+/// Subcollections under a user document, one document per liked title keyed
+/// by its TMDB id and holding only that id.
+const likedMoviesCollection = "LikedMovies";
+const likedSeriesCollection = "LikedSeries";
+
 /// Firestore collection every reported review lands in. It is a moderation
 /// queue for a person to read — nothing in the app reads it back.
 const reviewReportCollection = "ReviewReport";

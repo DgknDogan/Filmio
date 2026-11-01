@@ -22,12 +22,19 @@ class PosterCard extends StatelessWidget {
   final Object? heroTag;
   final VoidCallback? onTap;
 
+  /// What the picture is decoded to. The default suits a card at the size a
+  /// row or a grid draws one; a preview a few millimetres across passes
+  /// something smaller rather than decoding a full poster to throw most of it
+  /// away.
+  final int memCacheHeight;
+
   const PosterCard({
     super.key,
     required this.imageUrl,
     required this.title,
     this.heroTag,
     this.onTap,
+    this.memCacheHeight = 600,
   });
 
   @override
@@ -38,7 +45,7 @@ class PosterCard extends StatelessWidget {
         borderRadius: AppRadius.mdAll,
         child: AspectRatio(
           aspectRatio: 2 / 3,
-          child: AppNetworkImage(url: imageUrl, fit: BoxFit.cover, memCacheHeight: 600),
+          child: AppNetworkImage(url: imageUrl, fit: BoxFit.cover, memCacheHeight: memCacheHeight),
         ),
       ),
     );

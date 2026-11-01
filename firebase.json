@@ -1,1 +1,47 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"filmio-74b41","appId":"1:640047605009:android:9e5d537869c831b10d18b0","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"filmio-74b41","configurations":{"android":"1:640047605009:android:9e5d537869c831b10d18b0","ios":"1:640047605009:ios:273bf836227885260d18b0"}}},"ios":{"default":{"projectId":"filmio-74b41","appId":"1:640047605009:ios:273bf836227885260d18b0","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "prod": {
+          "projectId": "filmio-74b41",
+          "appId": "1:640047605009:android:9e5d537869c831b10d18b0",
+          "fileOutput": "android/app/src/prod/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "filmio-74b41",
+          "configurations": {
+            "android": "1:640047605009:android:9e5d537869c831b10d18b0",
+            "ios": "1:640047605009:ios:273bf836227885260d18b0"
+          }
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "filmio-74b41",
+          "appId": "1:640047605009:ios:273bf836227885260d18b0",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firebase/firestore.rules",
+    "indexes": "firebase/firestore.indexes.json"
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    },
+    "singleProjectMode": true
+  }
+}

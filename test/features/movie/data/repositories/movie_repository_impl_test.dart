@@ -9,6 +9,7 @@ import 'package:filmio/features/movie/data/models/movie_detail_model.dart';
 import 'package:filmio/features/movie/data/models/movie_model.dart';
 import 'package:filmio/features/movie/data/models/movie_recommendation_response.dart';
 import 'package:filmio/features/movie/data/repositories/movie_repository_impl.dart';
+import 'package:filmio/features/movie/domain/entities/movie.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -21,9 +22,12 @@ class _MockAuth extends Mock implements FirebaseAuth {}
 class _MockUser extends Mock implements User {}
 
 void main() {
+  setUpAll(registerCommonFallbacks);
+
   late MockMovieApiService api;
   late _MockAuth auth;
   late _MockUser user;
+  late MockMovieRecommendationCache cache;
   late MovieRepositoryImpl repository;
 
   final requestOptions = RequestOptions(path: '/movie/popular');
@@ -41,16 +45,24 @@ void main() {
     auth = _MockAuth();
     user = _MockUser();
 
+    cache = MockMovieRecommendationCache();
+
     when(() => auth.currentUser).thenReturn(user);
+    when(() => user.uid).thenReturn('uid');
     when(() => user.getIdToken()).thenAnswer((_) async => 'id-token');
 
-    repository = MovieRepositoryImpl(api, auth);
+    // Nothing cached unless a test says otherwise.
+    when(() => cache.read('uid')).thenReturn(null);
+    when(() => cache.read('uid', ignoreAge: true)).thenReturn(null);
+    when(() => cache.write('uid', any())).thenAnswer((_) async {});
+
+    repository = MovieRepositoryImpl(api, auth, cache);
   });
 
   group('getPopularMovies', () {
     test('maps the response models to entities', () async {
       when(() => api.getPopularMovies(language: any(named: 'language'), page: any(named: 'page')))
-          .thenAnswer((_) async => responseWith(page([const MovieModel(id: 1, title: 'A')])));
+          .thenAnswer((_) async => responseWith(page([const MovieModel(id: 1, title: 'A', posterPath: '/a.jpg', overview: 'A.')])));
 
       final result = await repository.getPopularMovies();
 
@@ -59,6 +71,25 @@ void main() {
       expect(movies.single.title, 'A');
       // The boundary hands back entities, never models.
       expect(movies.single, isNot(isA<MovieModel>()));
+    });
+
+    test('drops a title the app has nothing to draw', () async {
+      when(() => api.getPopularMovies(language: any(named: 'language'), page: any(named: 'page'))).thenAnswer(
+        (_) async => responseWith(
+          page(const [
+            MovieModel(id: 1, title: 'A', posterPath: '/a.jpg', overview: 'A.'),
+            // TMDB's catalogue is crowd-maintained: an entry can arrive with
+            // no artwork, or with nothing written about it.
+            MovieModel(id: 2, title: 'B', overview: 'B.'),
+            MovieModel(id: 3, title: 'C', posterPath: '/c.jpg'),
+            MovieModel(id: 4, title: 'D', posterPath: '/d.jpg', overview: '   '),
+          ]),
+        ),
+      );
+
+      final movies = (await repository.getPopularMovies()).getRight().toNullable();
+
+      expect(movies?.map((movie) => movie.id), [1]);
     });
 
     test('a null results array becomes an empty list, not a crash', () async {
@@ -151,16 +182,37 @@ void main() {
     });
   });
 
-  group('getRecommendedMovieIds', () {
+  group('getRecommendedMovies', () {
+    const starWars = MovieDetailModel(id: 11, title: 'Star Wars', posterPath: '/sw.jpg', overview: 'Star Wars.');
+    const fightClub = MovieDetailModel(id: 550, title: 'Fight Club', posterPath: '/fc.jpg', overview: 'Fight Club.');
+    const venom = MovieDetailModel(id: 912649, title: 'Venom', posterPath: '/v.jpg', overview: 'Venom.');
+
+    const titlesById = {11: starWars, 550: fightClub, 912649: venom};
+
     void stubRecommendations(MovieRecommendationResponse body, {int statusCode = 200}) {
       when(() => api.getRecommendations(authorization: any(named: 'authorization'), limit: any(named: 'limit')))
           .thenAnswer((_) async => bodyWith(body, statusCode: statusCode));
     }
 
-    test('sends the signed-in user\'s ID token as the bearer', () async {
-      stubRecommendations(const MovieRecommendationResponse(movieIds: [11]));
+    /// [failing] names the ids TMDB cannot answer for; every other id resolves
+    /// to its own title, so a test can tell which were fetched and in what
+    /// order they were kept.
+    void stubTitles({Map<int, int> failing = const {}, Map<int, MovieDetailModel> extra = const {}}) {
+      when(() => api.getMovieDetails(movieId: any(named: 'movieId'), language: any(named: 'language'))).thenAnswer((invocation) async {
+        final id = invocation.namedArguments[#movieId] as int;
+        final body = extra[id] ?? titlesById[id] ?? const MovieDetailModel();
 
-      await repository.getRecommendedMovieIds();
+        return bodyWith(body, statusCode: failing[id] ?? 200);
+      });
+    }
+
+    setUp(() {
+      stubRecommendations(const MovieRecommendationResponse(movieIds: [11]));
+      stubTitles();
+    });
+
+    test("sends the signed-in user's ID token as the bearer", () async {
+      await repository.getRecommendedMovies();
 
       // The service authenticates as the user, not as the app — a TMDB token
       // here would be both wrong and a token sent to somebody else's host.
@@ -168,56 +220,80 @@ void main() {
     });
 
     test('passes a limit through when the caller overrides the count', () async {
-      stubRecommendations(const MovieRecommendationResponse(movieIds: [11]));
-
-      await repository.getRecommendedMovieIds(limit: 5);
+      await repository.getRecommendedMovies(limit: 5);
 
       verify(() => api.getRecommendations(authorization: 'Bearer id-token', limit: 5)).called(1);
     });
 
-    test('returns the ids in the order the service ranked them', () async {
+    test('turns every id the service ranked into a title, in its order', () async {
       stubRecommendations(const MovieRecommendationResponse(movieIds: [11, 550, 912649], count: 3));
 
-      final ids = (await repository.getRecommendedMovieIds()).getRight().toNullable();
+      final movies = (await repository.getRecommendedMovies()).getRight().toNullable();
 
-      expect(ids, [11, 550, 912649]);
+      expect(movies?.map((movie) => movie.id), [11, 550, 912649]);
+    });
+
+    test('leaves out a title TMDB cannot answer for rather than failing the rest', () async {
+      stubRecommendations(const MovieRecommendationResponse(movieIds: [11, 550, 912649]));
+      stubTitles(failing: const {550: 404});
+
+      final movies = (await repository.getRecommendedMovies()).getRight().toNullable();
+
+      expect(movies?.map((movie) => movie.id), [11, 912649]);
+    });
+
+    test('leaves out a title with nothing to draw', () async {
+      stubRecommendations(const MovieRecommendationResponse(movieIds: [11, 550]));
+      // A recommendation with no artwork would open the tab on a blank
+      // rectangle, and one with no description on an empty screen.
+      stubTitles(extra: const {550: MovieDetailModel(id: 550, title: 'Fight Club')});
+
+      final movies = (await repository.getRecommendedMovies()).getRight().toNullable();
+
+      expect(movies?.map((movie) => movie.id), [11]);
+    });
+
+    test('no title that can be fetched fails with the best-ranked one\'s reason', () async {
+      stubRecommendations(const MovieRecommendationResponse(movieIds: [11, 550]));
+      stubTitles(failing: const {11: 404, 550: 500});
+
+      final failure = (await repository.getRecommendedMovies()).getLeft().toNullable();
+
+      expect((failure as ServerFailure).statusCode, 404);
     });
 
     test('an absent id list becomes an empty list, not a crash', () async {
       stubRecommendations(const MovieRecommendationResponse());
 
-      expect((await repository.getRecommendedMovieIds()).getRight().toNullable(), isEmpty);
+      expect((await repository.getRecommendedMovies()).getRight().toNullable(), isEmpty);
     });
 
-    test('a guest gets no ids rather than a failure, and the service is never called', () async {
+    test('a guest gets nothing rather than a failure, and the service is never called', () async {
       when(() => auth.currentUser).thenReturn(null);
 
       // Browsing without an account is a supported way to use the app: the tab
       // falls back to a top-rated title rather than telling the reader off.
-      expect((await repository.getRecommendedMovieIds()).getRight().toNullable(), isEmpty);
+      expect((await repository.getRecommendedMovies()).getRight().toNullable(), isEmpty);
       verifyNever(() => api.getRecommendations(authorization: any(named: 'authorization'), limit: any(named: 'limit')));
     });
 
     test('a session that yields no token is an AuthFailure', () async {
       when(() => user.getIdToken()).thenAnswer((_) async => null);
 
-      expect((await repository.getRecommendedMovieIds()).getLeft().toNullable(), isA<AuthFailure>());
+      expect((await repository.getRecommendedMovies()).getLeft().toNullable(), isA<AuthFailure>());
     });
 
     test('a Firebase error while minting the token becomes a Failure rather than escaping', () async {
       when(() => user.getIdToken()).thenThrow(FirebaseAuthException(code: 'network-request-failed'));
 
-      final failure = (await repository.getRecommendedMovieIds()).getLeft().toNullable();
-
-      expect(failure, isA<Failure>());
+      expect((await repository.getRecommendedMovies()).getLeft().toNullable(), isA<Failure>());
     });
 
-    test('a non-200 becomes a ServerFailure carrying the code', () async {
+    test('a non-200 from the service becomes a ServerFailure carrying the code', () async {
       stubRecommendations(const MovieRecommendationResponse(), statusCode: 401);
 
-      final failure = (await repository.getRecommendedMovieIds()).getLeft().toNullable();
+      final failure = (await repository.getRecommendedMovies()).getLeft().toNullable();
 
-      expect(failure, isA<ServerFailure>());
       expect((failure as ServerFailure).statusCode, 401);
     });
 
@@ -225,7 +301,50 @@ void main() {
       when(() => api.getRecommendations(authorization: any(named: 'authorization'), limit: any(named: 'limit')))
           .thenThrow(DioException(requestOptions: requestOptions, type: DioExceptionType.connectionError));
 
-      expect((await repository.getRecommendedMovieIds()).getLeft().toNullable(), isA<NetworkFailure>());
+      expect((await repository.getRecommendedMovies()).getLeft().toNullable(), isA<NetworkFailure>());
+    });
+
+    group('the cache', () {
+      const cached = MovieEntity(id: 99, title: 'Cached', posterPath: '/c.jpg', overview: 'Cached.');
+
+      test('is answered from instead of the service when it has something recent', () async {
+        when(() => cache.read('uid')).thenReturn(const [cached]);
+
+        expect((await repository.getRecommendedMovies()).getRight().toNullable(), const [cached]);
+        // The whole point: neither service is touched.
+        verifyNever(() => api.getRecommendations(authorization: any(named: 'authorization'), limit: any(named: 'limit')));
+        verifyNever(() => api.getMovieDetails(movieId: any(named: 'movieId'), language: any(named: 'language')));
+      });
+
+      test('is written with what the service answered', () async {
+        await repository.getRecommendedMovies();
+
+        final written = verify(() => cache.write('uid', captureAny())).captured.single as List<MovieEntity>;
+        expect(written.single.id, 11);
+      });
+
+      test('remembers an empty answer too, so the next launch does not ask again', () async {
+        stubRecommendations(const MovieRecommendationResponse(movieIds: []));
+
+        await repository.getRecommendedMovies();
+
+        verify(() => cache.write('uid', const [])).called(1);
+      });
+
+      test('is served stale rather than failing when the service cannot be reached', () async {
+        when(() => cache.read('uid', ignoreAge: true)).thenReturn(const [cached]);
+        stubRecommendations(const MovieRecommendationResponse(), statusCode: 503);
+
+        // A yesterday's recommendation reads better than an error where the
+        // tab's opening title should be.
+        expect((await repository.getRecommendedMovies()).getRight().toNullable(), const [cached]);
+      });
+
+      test('fails as usual when the service cannot be reached and nothing was ever cached', () async {
+        stubRecommendations(const MovieRecommendationResponse(), statusCode: 503);
+
+        expect((await repository.getRecommendedMovies()).getLeft().toNullable(), isA<ServerFailure>());
+      });
     });
   });
 
@@ -248,7 +367,7 @@ void main() {
     }
 
     test('sends every filter under the name TMDB gives it', () async {
-      stubDiscover(page(const [MovieModel(id: 1, title: 'A')]));
+      stubDiscover(page(const [MovieModel(id: 1, title: 'A', posterPath: '/a.jpg', overview: 'A.')]));
 
       await repository.discoverMovies(
         filters: const DiscoverFilters(genreIds: {28}, minRating: 7, maxRating: 9, minYear: 1990, maxYear: 1999),
@@ -319,7 +438,7 @@ void main() {
       stubDiscover(
         MovieApiResponse(
           page: 2,
-          results: const [MovieModel(id: 1, title: 'A')],
+          results: const [MovieModel(id: 1, title: 'A', posterPath: '/a.jpg', overview: 'A.')],
           totalPages: 5,
           totalResults: 97,
         ),

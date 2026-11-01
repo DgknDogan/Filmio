@@ -1,12 +1,11 @@
+import 'package:filmio/config/firebase/firebase_setup.dart';
 import 'package:filmio/config/routes/app_router.dart';
 import 'package:filmio/core/custom/custom_button.dart';
+import 'package:filmio/core/enums/app_flavor.dart';
 import 'package:filmio/features/auth/presentation/pages/login_page.dart';
 import 'package:filmio/features/auth/presentation/widgets/auth_fields.dart';
-import 'package:filmio/firebase_options.dart';
 import 'package:filmio/injection_container.dart';
 import 'package:filmio/main.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
@@ -24,8 +23,18 @@ bool get hasTestAccount => testEmail.isNotEmpty && testPassword.isNotEmpty;
 /// Nothing here is mocked on purpose: unit tests already prove each layer in
 /// isolation, and the only thing they cannot catch is a wrong wire between two
 /// of them. That is what these tests are for.
+///
+/// Firebase comes up through the app's own [initializeFirebase] rather than a
+/// second [Firebase.initializeApp] here. That is what puts these tests on the
+/// same switch as every other build: a run that names no flavor gets dev, and
+/// a run with the emulator define never leaves the machine. Initialising
+/// directly with the production options — which is what this used to do — is
+/// how a test suite that signs in, likes titles and un-likes them again ends
+/// up doing it in the account real people share.
 Future<void> createApp(PatrolIntegrationTester $) async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  assertNotProduction();
+
+  await initializeFirebase();
   await ScreenUtil.ensureScreenSize();
   await initDependencies();
 
@@ -78,10 +87,25 @@ Future<T?> waitFor<T>(PatrolIntegrationTester $, T? Function() read) async {
   return null;
 }
 
-/// Guards against a test being pointed at anything other than a debug build.
+/// Refuses to run the suite against the production project.
+///
+/// These tests drive a real account through real writes: they sign in, like
+/// titles and take the likes back. Pointed at production that is somebody's
+/// actual list, and a run that fails halfway leaves it half-changed.
+///
+/// Called from [createApp], so there is no way to boot the app in a test
+/// without going past it. It throws rather than `assert`s because an assert is
+/// compiled out of a profile or release build, and a release run is exactly
+/// the one nobody is watching.
 void assertNotProduction() {
-  assert(() {
-    debugPrint('Patrol run: debug build confirmed.');
-    return true;
-  }());
+  if (usesEmulators) return;
+
+  if (currentFlavor == AppFlavor.prod) {
+    fail(
+      'This suite writes to the account it signs in as, so it does not run against the '
+      'production project. Run it against the emulators '
+      '(--dart-define=USE_FIREBASE_EMULATOR=true) or the dev project (--flavor dev, or '
+      '--dart-define=FLAVOR=dev on iOS).',
+    );
+  }
 }
