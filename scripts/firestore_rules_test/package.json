@@ -1,0 +1,15 @@
+{
+  "name": "firestore-rules-test",
+  "private": true,
+  "description": "Rules tests for firebase/firestore.rules, run against the Firestore emulator.",
+  "scripts": {
+    "test": "firebase emulators:exec --only firestore --project demo-filmio --config ../../firebase.json \"node --test\""
+  },
+  "dependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "firebase": "^11.1.0"
+  },
+  "devDependencies": {
+    "firebase-tools": "^14.0.0"
+  }
+}

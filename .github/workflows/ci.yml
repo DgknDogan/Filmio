@@ -76,6 +76,80 @@ jobs:
             $(git ls-files '*.dart' | grep -E '\.(g|gr|gen)\.dart$|app_localizations')
           git diff --exit-code
 
+  rules:
+    name: Firestore rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: scripts/firestore_rules_test/package-lock.json
+
+      # The Firestore emulator is a Java process. The runner image ships a
+      # JDK, and pinning it here keeps an image update from moving it.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Dependencies
+        working-directory: scripts/firestore_rules_test
+        run: npm ci
+
+      # Starts the emulator, runs the tests against firebase/firestore.rules,
+      # shuts it down. No credentials are needed and none are used: the
+      # project id is `demo-filmio`, and the `demo-` prefix is what tells the
+      # tooling there is no cloud project behind it. So this is the one check
+      # here that can prove something about the rules without touching the
+      # data they guard.
+      - name: Test
+        working-directory: scripts/firestore_rules_test
+        run: npm test
+
+  deploy-rules:
+    name: Deploy Firestore rules
+    needs: [verify, rules]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Are deploy credentials set?
+        id: credentials
+        env:
+          CREDENTIALS: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -n "$CREDENTIALS" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set — the rules were not deployed."
+          fi
+
+      # Rules only, never indexes. `firebase/firestore.indexes.json` describes
+      # the indexes this file knows about, and deploying it would offer to
+      # remove every index that is live but absent from it — including any
+      # added from the console. Indexes are deployed by hand, after exporting
+      # what is actually there; docs/firebase-environments.md has the command.
+      #
+      # The service account needs the Firebase Rules Admin role. It is the
+      # same secret the Android job distributes with, which does not imply it
+      # has that role — if this step fails on a permission, that is why.
+      - name: Deploy
+        if: steps.credentials.outputs.ready == 'true'
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/service-account.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/service-account.json"
+          npx --yes firebase-tools@14 deploy --only firestore:rules --project prod --non-interactive
+
   android:
     name: Android APK
     needs: verify
@@ -112,21 +186,31 @@ jobs:
       # env.json is gitignored, so the build writes the same file locally from
       # the repository secret. Never echoed — the heredoc keeps it out of the
       # command line and the log.
+      #
+      # `FLAVOR` is in here as well as on the build command below. On Android
+      # `--flavor` is what counts — it picks both the product flavor and the
+      # `google-services.json` that goes with it — but stating it here too
+      # means the file says which project the build is for, rather than
+      # leaving it to be inferred from a flag further down.
       - name: Write env.json
         env:
           TMDB_TOKEN: ${{ secrets.TMDB_TOKEN }}
         run: |
           cat > env.json <<JSON
-          {"TMDB_TOKEN": "$TMDB_TOKEN"}
+          {"TMDB_TOKEN": "$TMDB_TOKEN", "FLAVOR": "prod", "USE_FIREBASE_EMULATOR": false}
           JSON
 
+      # `--flavor prod` is not optional now that the flavors exist: a build
+      # without it fails, which is the intended behaviour — it is also what
+      # compiles in the production `google-services.json` from
+      # `android/app/src/prod/`.
       - name: Build
-        run: flutter build apk --release --dart-define-from-file=env.json
+        run: flutter build apk --release --flavor prod --dart-define-from-file=env.json
 
       - uses: actions/upload-artifact@v4
         with:
           name: filmio-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-prod-release.apk
           retention-days: 14
 
       # The distribution step below is skipped until the credentials exist, so
@@ -155,7 +239,7 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           groups: testers
           releaseNotes: ${{ github.event.head_commit.message }}
-          file: build/app/outputs/flutter-apk/app-release.apk
+          file: build/app/outputs/flutter-apk/app-prod-release.apk
 
   ios:
     name: iOS TestFlight
@@ -191,12 +275,18 @@ jobs:
       # Same as the Android leg: env.json is gitignored and written here from
       # the repository secret. Without TMDB_TOKEN the app throws on launch, so
       # a build that skipped this would reach TestFlight and crash on open.
+      #
+      # `FLAVOR` is load-bearing here in a way it is not on Android. iOS has
+      # no Xcode scheme named after a flavor yet, so `--flavor` cannot be
+      # passed — `AppFlavor.resolve` has nothing but this define to go on, and
+      # without it the build resolves to dev, where there is no generated
+      # options file. That build reaches TestFlight and throws on launch.
       - name: Write env.json
         env:
           TMDB_TOKEN: ${{ secrets.TMDB_TOKEN }}
         run: |
           cat > env.json <<JSON
-          {"TMDB_TOKEN": "$TMDB_TOKEN"}
+          {"TMDB_TOKEN": "$TMDB_TOKEN", "FLAVOR": "prod", "USE_FIREBASE_EMULATOR": false}
           JSON
 
       # Skipped until the App Store Connect key exists, so the pipeline stays

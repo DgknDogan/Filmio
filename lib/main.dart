@@ -1,21 +1,20 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'config/firebase/firebase_setup.dart';
 import 'config/l10n/app_localizations.dart';
 import 'config/routes/app_router.dart';
 import 'config/theme/cubit/theme_cubit.dart';
 import 'config/theme/theme.dart';
 import 'core/cubit/session_cubit.dart';
-import 'firebase_options.dart';
 import 'injection_container.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Which project this opens — and whether it opens the emulators instead —
+  // is decided in `config/firebase/firebase_setup.dart`, not here.
+  await initializeFirebase();
   await ScreenUtil.ensureScreenSize();
   await initDependencies();
   runApp(const MyApp());

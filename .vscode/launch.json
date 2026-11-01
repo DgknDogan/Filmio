@@ -5,6 +5,11 @@
     //
     // Secrets come from env.json, which is gitignored. Copy env.example.json
     // to env.json and fill in your TMDB token before running.
+    //
+    // env.json also says which Firebase project a run opens. The copied
+    // example says the emulators, so start them first — `firebase emulators:start
+    // --project demo-filmio` — or pick one of the configurations below, which
+    // override the file. docs/firebase-environments.md has the detail.
     "version": "0.2.0",
     "configurations": [
         {
@@ -13,6 +18,33 @@
             "type": "dart",
             "toolArgs": [
                 "--dart-define-from-file=env.json"
+            ]
+        },
+        {
+            "name": "filmio (dev project, no emulators)",
+            "request": "launch",
+            "type": "dart",
+            "toolArgs": [
+                "--dart-define-from-file=env.json",
+                "--dart-define=USE_FIREBASE_EMULATOR=false",
+                "--dart-define=FLAVOR=dev",
+                "--flavor",
+                "dev"
+            ]
+        },
+        {
+            // The production project: real accounts, real liked lists. Nothing
+            // here is reversible, so this is a deliberate choice rather than
+            // the default.
+            "name": "filmio (PRODUCTION data)",
+            "request": "launch",
+            "type": "dart",
+            "toolArgs": [
+                "--dart-define-from-file=env.json",
+                "--dart-define=USE_FIREBASE_EMULATOR=false",
+                "--dart-define=FLAVOR=prod",
+                "--flavor",
+                "prod"
             ]
         },
         {

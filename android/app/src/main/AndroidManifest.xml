@@ -5,7 +5,7 @@
          need the network. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="Filmio"
+        android:label="@string/app_name"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true"

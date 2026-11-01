@@ -15,19 +15,34 @@ cp env.example.json env.json
 
 `env.json` is gitignored.
 
-### 2. Run
+### 2. Start the Firebase emulators
+
+The copied `env.json` points the app at the local emulators, so a run out of
+the box cannot read or write anybody's real data:
 
 ```bash
-flutter run --dart-define-from-file=env.json
+firebase emulators:start --project demo-filmio
 ```
 
-The VS Code launch configurations in `.vscode/launch.json` already pass this
-flag, so `F5` works without extra arguments.
+### 3. Run
+
+```bash
+flutter run --flavor dev --dart-define-from-file=env.json
+```
+
+`--flavor` is required: `dev` and `prod` each compile in their own Firebase
+configuration, and a build that names neither is refused rather than guessed
+at. The VS Code launch configurations in `.vscode/launch.json` pass the defines
+for you, including one for running against production on purpose.
 
 Building without the define starts the app but every TMDB request will fail
 with 401; the console prints a reminder on launch.
 
-### 3. Code generation
+[`docs/firebase-environments.md`](docs/firebase-environments.md) is the rest of
+it: which project each build opens, how the security rules are tested and
+deployed, and what is still to do for the dev project and iOS flavors.
+
+### 4. Code generation
 
 After changing anything annotated (`@RoutePage`, `@RestApi`, `@JsonSerializable`):
 
