@@ -120,11 +120,14 @@ point.
 ## Rules
 
 `firebase/firestore.rules` is the only description of who can read and write
-what. It is deployed from CI on a push to `master`, so the console is not
-where it is edited — an edit made there is overwritten by the next deploy and
-leaves no record of what changed.
+what. It is the file of record, not the console — an edit made there leaves no
+trace of what changed and is overwritten by the next deploy from here.
 
-Test a change before pushing it:
+Neither the test nor the deploy runs in CI. The rules change a few times a
+year, and the two jobs ran on every push regardless, so both are done by hand,
+the same way the indexes are.
+
+Test a change before deploying it:
 
 ```bash
 cd scripts/firestore_rules_test
@@ -136,7 +139,7 @@ That starts the emulator, runs `rules.test.js` against the real rules file, and
 shuts it down. A rule that is loosened without a test proving what it now
 admits is a rule nobody can review.
 
-Deploying by hand, if CI is not an option:
+Then deploy it:
 
 ```bash
 firebase deploy --only firestore:rules --project prod
