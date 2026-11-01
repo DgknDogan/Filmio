@@ -41,7 +41,13 @@ class AccountPage extends StatelessWidget {
   }
 }
 
-/// The two lists an account keeps.
+/// The lists an account keeps: what it liked, and what it means to watch.
+///
+/// The liked pair first, because that is the list the recommendations are
+/// built from and the one the heart on every details screen fills. The
+/// watchlist pair reads as the answer to a different question — not what you
+/// thought of something, but what you have not got to yet — so it sits under
+/// them rather than interleaved by catalogue.
 class _Lists extends StatelessWidget {
   const _Lists();
 
@@ -59,6 +65,18 @@ class _Lists extends StatelessWidget {
           icon: Icons.tv_outlined,
           label: context.l10n.likedSeries,
           onTap: () => context.router.push(const LikedSeriesRoute()),
+        ),
+        AppGap.vertical(AppSpacing.md),
+        _AccountRow(
+          icon: Icons.bookmark_border_rounded,
+          label: context.l10n.watchlistMovies,
+          onTap: () => context.router.push(const WatchlistMoviesRoute()),
+        ),
+        AppGap.vertical(AppSpacing.md),
+        _AccountRow(
+          icon: Icons.bookmark_added_outlined,
+          label: context.l10n.watchlistSeries,
+          onTap: () => context.router.push(const WatchlistSeriesRoute()),
         ),
       ],
     );

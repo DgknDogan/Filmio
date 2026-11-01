@@ -88,6 +88,29 @@ describe('User/{uid}', () => {
     await assertSucceeds(setDoc(doc(db, 'User', OWNER), { liked_movies: [movie], liked_series: [] }));
   });
 
+  it('accepts a watchlist beside the liked lists', async () => {
+    const db = testEnv.authenticatedContext(OWNER).firestore();
+    const movie = { id: 550, title: 'Fight Club', poster_path: '/a.jpg' };
+
+    await assertSucceeds(
+      setDoc(doc(db, 'User', OWNER), {
+        liked_movies: [movie],
+        liked_series: [],
+        watchlist_movies: [movie],
+        watchlist_series: [],
+      }),
+    );
+  });
+
+  it('holds a watchlist to the same shape as a liked list', async () => {
+    const db = testEnv.authenticatedContext(OWNER).firestore();
+    const tooMany = Array.from({ length: 2001 }, (_, index) => ({ id: index }));
+
+    await assertFails(setDoc(doc(db, 'User', OWNER), { watchlist_movies: 'all of them' }));
+    await assertFails(setDoc(doc(db, 'User', OWNER), { watchlist_series: 42 }));
+    await assertFails(setDoc(doc(db, 'User', OWNER), { watchlist_movies: tooMany }));
+  });
+
   it('refuses a liked list that is not a list', async () => {
     const db = testEnv.authenticatedContext(OWNER).firestore();
     await assertFails(setDoc(doc(db, 'User', OWNER), { liked_movies: 'all of them' }));

@@ -325,6 +325,18 @@ abstract class AppLocalizations {
   /// **'Liking a title needs an account — it is where your list lives, and what the recommendations are built from.'**
   String get guestLikeBody;
 
+  /// Headline of the prompt shown when a guest taps the bookmark
+  ///
+  /// In en, this message translates to:
+  /// **'Save it for later?'**
+  String get guestWatchlistTitle;
+
+  /// Explains why the bookmark needs an account
+  ///
+  /// In en, this message translates to:
+  /// **'A watchlist needs an account — it is where the titles you mean to watch are kept, on whichever device you sign in on.'**
+  String get guestWatchlistBody;
+
   /// Title of the series tab
   ///
   /// In en, this message translates to:
@@ -637,6 +649,18 @@ abstract class AppLocalizations {
   /// **'Remove from liked'**
   String get unlikeAction;
 
+  /// Adds a title to the list of things to watch
+  ///
+  /// In en, this message translates to:
+  /// **'Add to watchlist'**
+  String get watchlistAddAction;
+
+  /// Removes a title from the list of things to watch
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from watchlist'**
+  String get watchlistRemoveAction;
+
   /// Returns to the previous screen
   ///
   /// In en, this message translates to:
@@ -661,11 +685,11 @@ abstract class AppLocalizations {
   /// **'Liked Series'**
   String get likedSeries;
 
-  /// How many titles are in the liked list
+  /// How many titles are in one of the account's lists
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =0{No titles} =1{1 title} other{{count} titles}}'**
-  String likedMoviesCount(int count);
+  String titleListCount(int count);
 
   /// Shown when the user has liked nothing
   ///
@@ -678,6 +702,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No liked series yet.'**
   String get likedSeriesEmpty;
+
+  /// Title of the films watchlist screen, and the row opening it
+  ///
+  /// In en, this message translates to:
+  /// **'Films to Watch'**
+  String get watchlistMovies;
+
+  /// Title of the series watchlist screen, and the row opening it
+  ///
+  /// In en, this message translates to:
+  /// **'Series to Watch'**
+  String get watchlistSeries;
+
+  /// Shown when the user has added no films to watch
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing on your film watchlist yet.'**
+  String get watchlistMoviesEmpty;
+
+  /// Shown when the user has added no series to watch
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing on your series watchlist yet.'**
+  String get watchlistSeriesEmpty;
 
   /// Title of the settings screen
   ///
@@ -766,7 +814,7 @@ abstract class AppLocalizations {
   /// What deleting the account actually removes
   ///
   /// In en, this message translates to:
-  /// **'Your account, the films and series you have liked, and everything else stored against it will be removed permanently. This cannot be undone.'**
+  /// **'Your account, the films and series you have liked, your watchlists, and everything else stored against it will be removed permanently. This cannot be undone.'**
   String get deleteAccountBody;
 
   /// Line above the password field in the delete-account dialog
@@ -820,7 +868,7 @@ abstract class AppLocalizations {
   /// Body of the data collection section
   ///
   /// In en, this message translates to:
-  /// **'When you create an account we store your e-mail address, the display name you choose, and which of the app\'s built-in avatars you pick. As you use the app we store the films and series you like, against an account identifier issued by Firebase Authentication. That is everything. Filmio asks for no access to your location, contacts, photos, camera, or microphone, and contains no analytics or advertising software.'**
+  /// **'When you create an account we store your e-mail address, the display name you choose, and which of the app\'s built-in avatars you pick. As you use the app we store the films and series you like and the ones you add to a watchlist, against an account identifier issued by Firebase Authentication. That is everything. Filmio asks for no access to your location, contacts, photos, camera, or microphone, and contains no analytics or advertising software.'**
   String get privacyCollectBody;
 
   /// Heading of the data use section
@@ -832,7 +880,7 @@ abstract class AppLocalizations {
   /// Body of the data use section
   ///
   /// In en, this message translates to:
-  /// **'Your e-mail address and password identify you when you sign in. Your name and avatar appear on your own account screen. Your liked titles fill your lists and feed the recommendations on the home screen. None of it is used for advertising, profiling, or sold to anyone.'**
+  /// **'Your e-mail address and password identify you when you sign in. Your name and avatar appear on your own account screen. Your liked titles fill your lists and feed the recommendations on the home screen, and your watchlists hold what you mean to watch. None of it is used for advertising, profiling, or sold to anyone.'**
   String get privacyUseBody;
 
   /// Heading of the data sharing section

@@ -21,6 +21,7 @@ import '../../../video/presentation/cubit/trailer_cubit.dart';
 import '../../../video/presentation/widgets/trailer_section.dart';
 import '../../domain/entities/series_entity.dart';
 import '../cubit/series_details_cubit.dart';
+import '../cubit/series_watchlist_cubit.dart';
 import '../widgets/series_poster_card.dart';
 
 @RoutePage()
@@ -46,6 +47,13 @@ class SeriesDetailsPage extends StatelessWidget {
             getIt(),
           ),
         ),
+        // The bookmark gets a cubit of its own rather than another three
+        // dependencies on the one above: whether this series is on the
+        // watchlist is independent of everything that screen's cubit already
+        // tracks.
+        BlocProvider(
+          create: (context) => SeriesWatchlistCubit(getIt(), getIt(), getIt(), series),
+        ),
         BlocProvider(
           create: (context) => ReviewsCubit(getIt(), mediaId: series.id, mediaType: MediaType.series),
         ),
@@ -61,9 +69,9 @@ class SeriesDetailsPage extends StatelessWidget {
   }
 }
 
-/// The shared details screen with the two things a title carries beyond its
-/// own record: the heart in the bar, and the row of similar titles under the
-/// synopsis. The same shape a film's details page has.
+/// The shared details screen with the things a title carries beyond its own
+/// record: the heart and the bookmark in the bar, and the row of similar
+/// titles under the synopsis. The same shape a film's details page has.
 class _DetailsView extends StatelessWidget {
   final SeriesEntity series;
   final String heroTag;
@@ -85,7 +93,14 @@ class _DetailsView extends StatelessWidget {
       genreIds: series.genreIds,
       isSeries: true,
       overview: series.overview,
-      action: _LikeButton(series: series),
+      action: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _WatchlistButton(series: series),
+          AppGap.horizontal(AppSpacing.sm),
+          _LikeButton(series: series),
+        ],
+      ),
       extras: [
         // The trailer sits directly under the synopsis: it is the one thing on
         // this page you can actually watch.
@@ -122,6 +137,34 @@ class _LikeButton extends StatelessWidget {
               : isLiked
                   ? context.read<SeriesDetailsCubit>().dislikeSeries(series: series)
                   : context.read<SeriesDetailsCubit>().likeSeries(series: series),
+        );
+      },
+    );
+  }
+}
+
+/// Puts the series on the watchlist, or takes it back off. The same
+/// distinction from the heart as a film's — see the films' details page.
+class _WatchlistButton extends StatelessWidget {
+  final SeriesEntity series;
+
+  const _WatchlistButton({required this.series});
+
+  @override
+  Widget build(BuildContext context) {
+    final isGuest = context.select((SessionCubit cubit) => cubit.state.isGuest);
+
+    return BlocBuilder<SeriesWatchlistCubit, bool>(
+      builder: (context, isOnWatchlist) {
+        return CircleIconButton(
+          icon: isOnWatchlist ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+          label: isOnWatchlist ? context.l10n.watchlistRemoveAction : context.l10n.watchlistAddAction,
+          iconColor: context.palette.accentSoft,
+          onPressed: () => isGuest
+              ? showGuestPrompt(context, title: context.l10n.guestWatchlistTitle, body: context.l10n.guestWatchlistBody)
+              : isOnWatchlist
+                  ? context.read<SeriesWatchlistCubit>().remove()
+                  : context.read<SeriesWatchlistCubit>().add(),
         );
       },
     );

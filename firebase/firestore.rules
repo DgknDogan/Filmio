@@ -38,7 +38,10 @@ service cloud.firestore {
       // with the move to one document per title, where the shape is small
       // enough to describe.
       function validUser(data) {
-        return validTitleArray(data, 'liked_movies') && validTitleArray(data, 'liked_series');
+        return validTitleArray(data, 'liked_movies')
+          && validTitleArray(data, 'liked_series')
+          && validTitleArray(data, 'watchlist_movies')
+          && validTitleArray(data, 'watchlist_series');
       }
 
       // 2000 titles is far past anything a person likes by hand, and it is

@@ -126,6 +126,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guestLikeBody => 'Liking a title needs an account — it is where your list lives, and what the recommendations are built from.';
 
   @override
+  String get guestWatchlistTitle => 'Save it for later?';
+
+  @override
+  String get guestWatchlistBody =>
+      'A watchlist needs an account — it is where the titles you mean to watch are kept, on whichever device you sign in on.';
+
+  @override
   String get seriesTitle => 'Series';
 
   @override
@@ -320,6 +327,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unlikeAction => 'Remove from liked';
 
   @override
+  String get watchlistAddAction => 'Add to watchlist';
+
+  @override
+  String get watchlistRemoveAction => 'Remove from watchlist';
+
+  @override
   String get backAction => 'Back';
 
   @override
@@ -332,7 +345,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get likedSeries => 'Liked Series';
 
   @override
-  String likedMoviesCount(int count) {
+  String titleListCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
@@ -348,6 +361,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get likedSeriesEmpty => 'No liked series yet.';
+
+  @override
+  String get watchlistMovies => 'Films to Watch';
+
+  @override
+  String get watchlistSeries => 'Series to Watch';
+
+  @override
+  String get watchlistMoviesEmpty => 'Nothing on your film watchlist yet.';
+
+  @override
+  String get watchlistSeriesEmpty => 'Nothing on your series watchlist yet.';
 
   @override
   String get settingsTitle => 'Settings';
@@ -395,7 +420,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountBody =>
-      'Your account, the films and series you have liked, and everything else stored against it will be removed permanently. This cannot be undone.';
+      'Your account, the films and series you have liked, your watchlists, and everything else stored against it will be removed permanently. This cannot be undone.';
 
   @override
   String get deleteAccountPasswordPrompt => 'Enter your password to confirm.';
@@ -424,14 +449,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyCollectBody =>
-      'When you create an account we store your e-mail address, the display name you choose, and which of the app\'s built-in avatars you pick. As you use the app we store the films and series you like, against an account identifier issued by Firebase Authentication. That is everything. Filmio asks for no access to your location, contacts, photos, camera, or microphone, and contains no analytics or advertising software.';
+      'When you create an account we store your e-mail address, the display name you choose, and which of the app\'s built-in avatars you pick. As you use the app we store the films and series you like and the ones you add to a watchlist, against an account identifier issued by Firebase Authentication. That is everything. Filmio asks for no access to your location, contacts, photos, camera, or microphone, and contains no analytics or advertising software.';
 
   @override
   String get privacyUseTitle => 'What it is used for';
 
   @override
   String get privacyUseBody =>
-      'Your e-mail address and password identify you when you sign in. Your name and avatar appear on your own account screen. Your liked titles fill your lists and feed the recommendations on the home screen. None of it is used for advertising, profiling, or sold to anyone.';
+      'Your e-mail address and password identify you when you sign in. Your name and avatar appear on your own account screen. Your liked titles fill your lists and feed the recommendations on the home screen, and your watchlists hold what you mean to watch. None of it is used for advertising, profiling, or sold to anyone.';
 
   @override
   String get privacyShareTitle => 'Who else sees it';
