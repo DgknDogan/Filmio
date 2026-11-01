@@ -138,9 +138,10 @@ jobs:
       # added from the console. Indexes are deployed by hand, after exporting
       # what is actually there; docs/firebase-environments.md has the command.
       #
-      # The service account needs the Firebase Rules Admin role. It is the
-      # same secret the Android job distributes with, which does not imply it
-      # has that role — if this step fails on a permission, that is why.
+      # The service account needs the Firebase Rules Admin role. This secret
+      # was added for App Distribution, which this pipeline no longer does, so
+      # it was never granted that role on purpose — if this step fails on a
+      # permission, that is why.
       - name: Deploy
         if: steps.credentials.outputs.ready == 'true'
         env:
@@ -154,6 +155,11 @@ jobs:
     name: Android APK
     needs: verify
     if: github.event_name == 'push'
+    # Nothing is shipped from here — the app is on the App Store only, and
+    # TestFlight is the one delivery leg. This builds the release APK because a
+    # release build is the only thing that catches a Gradle, flavor or
+    # shrinking problem that a test run cannot, and leaves it as an artifact
+    # for anyone who wants to install it by hand.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -212,34 +218,6 @@ jobs:
           name: filmio-apk
           path: build/app/outputs/flutter-apk/app-prod-release.apk
           retention-days: 14
-
-      # The distribution step below is skipped until the credentials exist, so
-      # the pipeline is useful from the first run and gains a delivery leg the
-      # moment FIREBASE_SERVICE_ACCOUNT is added to the repository secrets.
-      - name: Are distribution credentials set?
-        id: distribution
-        env:
-          CREDENTIALS: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: |
-          if [ -n "$CREDENTIALS" ]; then
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "::warning::FIREBASE_SERVICE_ACCOUNT is not set — the build was not distributed."
-          fi
-
-      - name: Firebase App Distribution
-        if: steps.distribution.outputs.ready == 'true'
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          # Not a secret — it is already in the committed google-services.json.
-          # This is the com.dogukan.filmio client; the com.example.filmio one
-          # that used to be here is the placeholder app, and distributing to it
-          # now fails on a package name mismatch.
-          appId: 1:640047605009:android:9e5d537869c831b10d18b0
-          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          groups: testers
-          releaseNotes: ${{ github.event.head_commit.message }}
-          file: build/app/outputs/flutter-apk/app-prod-release.apk
 
   ios:
     name: iOS TestFlight
