@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../config/theme/app_spacing.dart';
 import '../enums/movie_type.dart';
 import '../enums/series_type.dart';
-import '../extensions/context_extension.dart';
+import 'app_tag.dart';
 
 /// A title's genres, as chips.
 ///
@@ -32,7 +32,7 @@ class GenreTags extends StatelessWidget {
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,
       children: [
-        for (final (index, name) in names.indexed) _Tag(name: name, isPrimary: index == 0),
+        for (final (index, name) in names.indexed) AppTag(name: name, isPrimary: index == 0),
       ],
     );
   }
@@ -45,29 +45,5 @@ class GenreTags extends StatelessWidget {
     } on StateError {
       return null;
     }
-  }
-}
-
-class _Tag extends StatelessWidget {
-  final String name;
-  final bool isPrimary;
-
-  const _Tag({required this.name, required this.isPrimary});
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.xsAll,
-        color: isPrimary ? palette.tagAccentBackground : palette.tagNeutralBackground,
-      ),
-      child: Text(
-        name,
-        style: context.styles.tag.copyWith(color: isPrimary ? palette.onTagAccent : palette.onTagNeutral),
-      ),
-    );
   }
 }

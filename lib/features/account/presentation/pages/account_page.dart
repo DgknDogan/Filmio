@@ -10,8 +10,13 @@ import '../../../../core/cubit/session_cubit.dart';
 import '../../../../core/custom/circle_icon_button.dart';
 import '../../../../core/custom/custom_button.dart';
 import '../../../../core/custom/guest_prompt.dart';
+import '../../../../core/custom/poster_card.dart';
 import '../../../../core/extensions/context_extension.dart';
+import '../../../../core/extensions/string_extension.dart';
+import '../../../../injection_container.dart';
 import '../cubit/account_cubit.dart';
+import '../cubit/account_lists_cubit.dart';
+import '../widgets/taste_profile_card.dart';
 
 @RoutePage()
 class AccountPage extends StatelessWidget {
@@ -20,28 +25,56 @@ class AccountPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        padding: AppInsets.tabBody,
-        children: [
-          const _Identity(),
-          AppGap.vertical(AppSpacing.sm),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-            // A guest has no lists to open — the rows would lead to two empty
-            // screens and no explanation. What goes there instead is the
-            // reason they are empty.
-            child: BlocSelector<SessionCubit, SessionState, bool>(
-              selector: (state) => state.isGuest,
-              builder: (context, isGuest) => isGuest ? const _GuestInvitation() : const _Lists(),
+      // The bloom of accent is the page's ground rather than a block inside
+      // the scroll view. It used to sit on `_Identity`, which scrolled with
+      // everything else — and a gradient sliding up behind the panels reads as
+      // a second layer moving over the background rather than as the
+      // background itself. Out here it does not move.
+      body: DecoratedBox(
+        decoration: AppDecorations(context.palette).accountHero,
+        // A guest reaches this too: the session is read asynchronously and
+        // starts out saying "not a guest", so `_Lists` builds for a frame
+        // before the answer arrives. It costs nothing — with no signed-in user
+        // the reads fail without reaching Firestore at all — and the state it
+        // lands in is the one that draws the rows bare.
+        child: BlocProvider(
+          create: (context) => AccountListsCubit(getIt(), getIt(), getIt(), getIt()),
+          child: SafeArea(
+            bottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Who is signed in stays put, the way every other screen in
+                // the app keeps its header out of the scroll.
+                const _Identity(),
+                Expanded(
+                  child: ListView(
+                    padding: AppInsets.tabBody,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+                        // A guest has no lists to open — the rows would lead
+                        // to two empty screens and no explanation. What goes
+                        // there instead is the reason they are empty.
+                        child: BlocSelector<SessionCubit, SessionState, bool>(
+                          selector: (state) => state.isGuest,
+                          builder: (context, isGuest) => isGuest ? const _GuestInvitation() : const _Lists(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-/// The lists an account keeps: what it liked, and what it means to watch.
+/// What the account holds: the profile its lists add up to, and the four rows
+/// that open them.
 ///
 /// The liked pair first, because that is the list the recommendations are
 /// built from and the one the heart on every details screen fills. The
@@ -53,32 +86,49 @@ class _Lists extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _AccountRow(
-          icon: Icons.favorite_border_rounded,
-          label: context.l10n.likedMovies,
-          onTap: () => context.router.push(const LikedMoviesRoute()),
-        ),
-        AppGap.vertical(AppSpacing.md),
-        _AccountRow(
-          icon: Icons.tv_outlined,
-          label: context.l10n.likedSeries,
-          onTap: () => context.router.push(const LikedSeriesRoute()),
-        ),
-        AppGap.vertical(AppSpacing.md),
-        _AccountRow(
-          icon: Icons.bookmark_border_rounded,
-          label: context.l10n.watchlistMovies,
-          onTap: () => context.router.push(const WatchlistMoviesRoute()),
-        ),
-        AppGap.vertical(AppSpacing.md),
-        _AccountRow(
-          icon: Icons.bookmark_added_outlined,
-          label: context.l10n.watchlistSeries,
-          onTap: () => context.router.push(const WatchlistSeriesRoute()),
-        ),
-      ],
+    return BlocBuilder<AccountListsCubit, AccountListsState>(
+      builder: (context, state) {
+        final loaded = state is AccountListsLoaded ? state : null;
+
+        return Column(
+          children: [
+            // Absent until the lists are read, and absent again if a read did
+            // not come back: a profile built on half the lists would describe
+            // somebody else, and the rows below still work without it.
+            if (loaded != null) ...[
+              TasteProfileCard(profile: loaded.profile),
+              AppGap.vertical(AppSpacing.lg),
+            ],
+            _AccountRow(
+              icon: Icons.favorite_border_rounded,
+              label: context.l10n.likedMovies,
+              posterPaths: loaded?.likedMovies.map((movie) => movie.posterPath).toList(),
+              onTap: () => context.router.push(const LikedMoviesRoute()),
+            ),
+            AppGap.vertical(AppSpacing.md),
+            _AccountRow(
+              icon: Icons.tv_outlined,
+              label: context.l10n.likedSeries,
+              posterPaths: loaded?.likedSeries.map((series) => series.posterPath).toList(),
+              onTap: () => context.router.push(const LikedSeriesRoute()),
+            ),
+            AppGap.vertical(AppSpacing.md),
+            _AccountRow(
+              icon: Icons.bookmark_border_rounded,
+              label: context.l10n.watchlistMovies,
+              posterPaths: loaded?.watchlistMovies.map((movie) => movie.posterPath).toList(),
+              onTap: () => context.router.push(const WatchlistMoviesRoute()),
+            ),
+            AppGap.vertical(AppSpacing.md),
+            _AccountRow(
+              icon: Icons.bookmark_added_outlined,
+              label: context.l10n.watchlistSeries,
+              posterPaths: loaded?.watchlistSeries.map((series) => series.posterPath).toList(),
+              onTap: () => context.router.push(const WatchlistSeriesRoute()),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -113,40 +163,34 @@ class _GuestInvitation extends StatelessWidget {
   }
 }
 
-/// Who is signed in, over a bloom of accent anchored off the top-left corner
-/// — the one place on this screen the brand colour appears at any size.
+/// Who is signed in. The brand colour behind it belongs to the page now, so
+/// this is only the row of who you are.
 class _Identity extends StatelessWidget {
   const _Identity();
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: AppDecorations(context.palette).accountHero,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.md, AppSpacing.lg, AppSpacing.xl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.md, AppSpacing.lg, AppSpacing.xl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(context.l10n.accountTitle.toUpperCase(), style: context.styles.sectionLabel),
-                  CircleIconButton(
-                    icon: Icons.settings_outlined,
-                    label: context.l10n.settingsTitle,
-                    isFilled: false,
-                    iconColor: context.palette.textSecondary,
-                    onPressed: () => context.router.push(const SettingsRoute()),
-                  ),
-                ],
+              Text(context.l10n.accountTitle.toUpperCase(), style: context.styles.sectionLabel),
+              CircleIconButton(
+                icon: Icons.settings_outlined,
+                label: context.l10n.settingsTitle,
+                isFilled: false,
+                iconColor: context.palette.textSecondary,
+                onPressed: () => context.router.push(const SettingsRoute()),
               ),
-              AppGap.vertical(AppSpacing.lg),
-              const _Profile(),
             ],
           ),
-        ),
+          AppGap.vertical(AppSpacing.lg),
+          const _Profile(),
+        ],
       ),
     );
   }
@@ -216,20 +260,39 @@ class _Profile extends StatelessWidget {
   }
 }
 
-/// One way out of this screen: an icon, what it opens, and a chevron.
+/// One way out of this screen: an icon, what it opens, how much is in it, and
+/// a few of its covers.
 class _AccountRow extends StatelessWidget {
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
 
-  const _AccountRow({required this.icon, required this.label, required this.onTap});
+  /// The list's titles in order, or null until it has been read. The covers
+  /// are what makes a row of these read as content rather than as a menu.
+  final List<String?>? posterPaths;
+
+  /// Returns the pushed screen's future, so the row knows when it has been
+  /// closed and the lists are worth reading again.
+  final Future<void> Function() onTap;
+
+  /// How many covers fit beside the label without crowding it.
+  static const _previewCount = 3;
+
+  const _AccountRow({required this.icon, required this.label, required this.posterPaths, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final count = posterPaths?.length;
 
     return InkWell(
-      onTap: onTap,
+      // The list may be changed on the screen this opens — a like taken back,
+      // a title off the watchlist — so the covers and the profile are read
+      // again once it closes.
+      onTap: () async {
+        final cubit = context.read<AccountListsCubit>();
+        await onTap();
+        await cubit.load();
+      },
       borderRadius: AppRadius.smAll,
       child: Container(
         padding: EdgeInsets.all(AppSpacing.lg),
@@ -238,11 +301,56 @@ class _AccountRow extends StatelessWidget {
           children: [
             Icon(icon, size: AppSpacing.xl, color: palette.accentSoft),
             AppGap.horizontal(AppSpacing.lg),
-            Expanded(child: Text(label, style: context.textTheme.bodyMedium)),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: context.textTheme.bodyMedium),
+                  if (count != null) ...[
+                    AppGap.vertical(AppSpacing.xs),
+                    Text(context.l10n.titleListCount(count), style: context.styles.meta),
+                  ],
+                ],
+              ),
+            ),
+            if (posterPaths != null && posterPaths!.isNotEmpty) ...[
+              AppGap.horizontal(AppSpacing.md),
+              _Covers(posterPaths: posterPaths!, limit: _previewCount),
+            ],
+            AppGap.horizontal(AppSpacing.sm),
             Icon(Icons.chevron_right_rounded, size: AppSpacing.xl, color: palette.textSecondary),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// The first few covers of a list, at a size that says what is in it without
+/// competing with the row's own label.
+class _Covers extends StatelessWidget {
+  final List<String?> posterPaths;
+  final int limit;
+
+  const _Covers({required this.posterPaths, required this.limit});
+
+  @override
+  Widget build(BuildContext context) {
+    final shown = posterPaths.nonNulls.take(limit).toList();
+    if (shown.isEmpty) return const SizedBox.shrink();
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final (index, path) in shown.indexed) ...[
+          if (index > 0) AppGap.horizontal(AppSpacing.xs),
+          SizedBox(
+            width: 24.w,
+            // A preview this size has no business decoding a full poster.
+            child: PosterCard(imageUrl: path.coverImage, title: '', memCacheHeight: 120),
+          ),
+        ],
+      ],
     );
   }
 }

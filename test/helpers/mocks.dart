@@ -19,6 +19,7 @@ import 'package:filmio/features/movie/domain/repositories/movie_repository.dart'
 import 'package:filmio/features/movie/domain/usecases/discover_movies.dart';
 import 'package:filmio/features/movie/domain/usecases/dislike_movie.dart';
 import 'package:filmio/features/movie/domain/usecases/get_liked_movies.dart';
+import 'package:filmio/features/movie/domain/usecases/get_watchlist_movies.dart';
 import 'package:filmio/features/movie/domain/usecases/get_popular_movies.dart';
 import 'package:filmio/features/movie/domain/usecases/get_recommended_movies.dart';
 import 'package:filmio/features/movie/domain/usecases/get_similar_movies.dart';
@@ -40,6 +41,7 @@ import 'package:filmio/features/series/domain/repositories/series_repository.dar
 import 'package:filmio/features/series/domain/usecases/discover_series.dart';
 import 'package:filmio/features/series/domain/usecases/dislike_series.dart';
 import 'package:filmio/features/series/domain/usecases/get_liked_series.dart';
+import 'package:filmio/features/series/domain/usecases/get_watchlist_series.dart';
 import 'package:filmio/features/series/domain/usecases/get_popular_series.dart';
 import 'package:filmio/features/series/domain/usecases/get_recommended_series.dart';
 import 'package:filmio/features/series/domain/usecases/get_similar_series.dart';
@@ -66,6 +68,8 @@ class MockDiscoverMoviesUseCase extends Mock implements DiscoverMoviesUseCase {}
 
 class MockGetLikedMoviesUseCase extends Mock implements GetLikedMoviesUseCase {}
 
+class MockGetWatchlistMoviesUseCase extends Mock implements GetWatchlistMoviesUseCase {}
+
 class MockLikeMovieUseCase extends Mock implements LikeMovieUseCase {}
 
 class MockDislikeMovieUseCase extends Mock implements DislikeMovieUseCase {}
@@ -83,6 +87,8 @@ class MockGetSimilarSeriesUseCase extends Mock implements GetSimilarSeriesUseCas
 class MockDiscoverSeriesUseCase extends Mock implements DiscoverSeriesUseCase {}
 
 class MockGetLikedSeriesUseCase extends Mock implements GetLikedSeriesUseCase {}
+
+class MockGetWatchlistSeriesUseCase extends Mock implements GetWatchlistSeriesUseCase {}
 
 class MockLikeSeriesUseCase extends Mock implements LikeSeriesUseCase {}
 
@@ -107,6 +113,8 @@ class MockLogoutUseCase extends Mock implements LogoutUseCase {}
 class MockDeleteAccountUseCase extends Mock implements DeleteAccountUseCase {}
 
 class MockIsGuestUseCase extends Mock implements IsGuestUseCase {}
+
+class MockGetProfileUseCase extends Mock implements GetProfileUseCase {}
 
 class MockContinueAsGuestUseCase extends Mock implements ContinueAsGuestUseCase {}
 

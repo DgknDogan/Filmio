@@ -727,6 +727,54 @@ abstract class AppLocalizations {
   /// **'Nothing on your series watchlist yet.'**
   String get watchlistSeriesEmpty;
 
+  /// Heading of the profile block on the account tab
+  ///
+  /// In en, this message translates to:
+  /// **'Your taste'**
+  String get tasteTitle;
+
+  /// Label above the genres that come up most in the liked lists
+  ///
+  /// In en, this message translates to:
+  /// **'Most liked'**
+  String get tasteGenres;
+
+  /// Label above the decade most liked titles came out in
+  ///
+  /// In en, this message translates to:
+  /// **'Favourite decade'**
+  String get tasteDecade;
+
+  /// Label above what the liked titles score on TMDB on average
+  ///
+  /// In en, this message translates to:
+  /// **'Average rating'**
+  String get tasteRating;
+
+  /// Label above how many titles the account has liked in total
+  ///
+  /// In en, this message translates to:
+  /// **'Liked'**
+  String get tasteLiked;
+
+  /// Label above how many titles are on the watchlists in total
+  ///
+  /// In en, this message translates to:
+  /// **'To watch'**
+  String get tasteWatchlist;
+
+  /// Shown in the profile block before anything has been liked
+  ///
+  /// In en, this message translates to:
+  /// **'Like a few films and series, and this is where what they have in common shows up.'**
+  String get tasteEmpty;
+
+  /// Sits after the covers on an account row when the list holds more than are shown
+  ///
+  /// In en, this message translates to:
+  /// **'+{count}'**
+  String titleListPreviewMore(int count);
+
   /// Title of the settings screen
   ///
   /// In en, this message translates to:

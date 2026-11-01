@@ -242,6 +242,26 @@
   "watchlistSeriesEmpty": "Nothing on your series watchlist yet.",
   "@watchlistSeriesEmpty": { "description": "Shown when the user has added no series to watch" },
 
+  "tasteTitle": "Your taste",
+  "@tasteTitle": { "description": "Heading of the profile block on the account tab" },
+  "tasteGenres": "Most liked",
+  "@tasteGenres": { "description": "Label above the genres that come up most in the liked lists" },
+  "tasteDecade": "Favourite decade",
+  "@tasteDecade": { "description": "Label above the decade most liked titles came out in" },
+  "tasteRating": "Average rating",
+  "@tasteRating": { "description": "Label above what the liked titles score on TMDB on average" },
+  "tasteLiked": "Liked",
+  "@tasteLiked": { "description": "Label above how many titles the account has liked in total" },
+  "tasteWatchlist": "To watch",
+  "@tasteWatchlist": { "description": "Label above how many titles are on the watchlists in total" },
+  "tasteEmpty": "Like a few films and series, and this is where what they have in common shows up.",
+  "@tasteEmpty": { "description": "Shown in the profile block before anything has been liked" },
+  "titleListPreviewMore": "+{count}",
+  "@titleListPreviewMore": {
+    "description": "Sits after the covers on an account row when the list holds more than are shown",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
   "settingsTitle": "Settings",
   "@settingsTitle": { "description": "Title of the settings screen" },
   "settingsAppearance": "Appearance",

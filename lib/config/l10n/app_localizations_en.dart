@@ -375,6 +375,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get watchlistSeriesEmpty => 'Nothing on your series watchlist yet.';
 
   @override
+  String get tasteTitle => 'Your taste';
+
+  @override
+  String get tasteGenres => 'Most liked';
+
+  @override
+  String get tasteDecade => 'Favourite decade';
+
+  @override
+  String get tasteRating => 'Average rating';
+
+  @override
+  String get tasteLiked => 'Liked';
+
+  @override
+  String get tasteWatchlist => 'To watch';
+
+  @override
+  String get tasteEmpty => 'Like a few films and series, and this is where what they have in common shows up.';
+
+  @override
+  String titleListPreviewMore(int count) {
+    return '+$count';
+  }
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override
