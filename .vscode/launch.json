@@ -7,13 +7,17 @@
     // to env.json and fill in your TMDB token before running.
     //
     // A run that names no environment is a dev run on the emulators, so start
-    // them first — `firebase emulators:start --project demo-filmio` — or pick
-    // one of the configurations below. docs/firebase-environments.md has the
-    // detail.
+    // them first — `firebase emulators:start --project demo-filmio`.
+    //
+    // `--flavor` is Android-only here. Android has product flavors and will
+    // not build without one; iOS resolves the Runner scheme when no flavor is
+    // given and fails on any flavor until Xcode has a scheme of that name,
+    // which it does not yet — docs/firebase-environments.md has those steps.
+    // That is why these come in pairs.
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "filmio",
+            "name": "filmio (iOS · emulators)",
             "request": "launch",
             "type": "dart",
             "toolArgs": [
@@ -21,34 +25,42 @@
             ]
         },
         {
-            "name": "filmio (dev project, no emulators)",
+            "name": "filmio (Android · emulators)",
             "request": "launch",
             "type": "dart",
             "toolArgs": [
                 "--dart-define-from-file=env.json",
-                "--dart-define=USE_FIREBASE_EMULATOR=false",
-                "--dart-define=FLAVOR=dev",
                 "--flavor",
                 "dev"
             ]
         },
         {
-            // The production project: real accounts, real liked lists. Nothing
-            // here is reversible, so this is a deliberate choice rather than
-            // the default.
-            "name": "filmio (PRODUCTION data)",
+            // The production project: real accounts, real liked lists, real
+            // watchlists. Nothing here is reversible, so this is a deliberate
+            // choice rather than the default.
+            "name": "filmio (iOS · PRODUCTION data)",
             "request": "launch",
             "type": "dart",
             "toolArgs": [
                 "--dart-define-from-file=env.json",
-                "--dart-define=USE_FIREBASE_EMULATOR=false",
                 "--dart-define=FLAVOR=prod",
+                "--dart-define=USE_FIREBASE_EMULATOR=false"
+            ]
+        },
+        {
+            "name": "filmio (Android · PRODUCTION data)",
+            "request": "launch",
+            "type": "dart",
+            "toolArgs": [
+                "--dart-define-from-file=env.json",
+                "--dart-define=FLAVOR=prod",
+                "--dart-define=USE_FIREBASE_EMULATOR=false",
                 "--flavor",
                 "prod"
             ]
         },
         {
-            "name": "filmio (profile mode)",
+            "name": "filmio (iOS · profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile",
@@ -57,7 +69,7 @@
             ]
         },
         {
-            "name": "filmio (release mode)",
+            "name": "filmio (iOS · release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release",

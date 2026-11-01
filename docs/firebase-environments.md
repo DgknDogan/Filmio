@@ -35,12 +35,30 @@ always there and can never touch anybody's data.
 `--dart-define=USE_FIREBASE_EMULATOR=false` is how a dev build asks for the
 cloud dev project instead — and is what then needs that project to exist.
 
-iOS is the exception, and the reason `FLAVOR` exists as a dart-define:
-`--flavor` needs an Xcode scheme of that name and fails the build without
-one. Until those schemes exist (see [iOS flavors](#ios-flavors-not-done-yet)),
-an iOS build names its flavor through the define — and an iOS **dev** build
-should use the emulators, because natively it is still carrying the
-production plist.
+## Naming the environment
+
+Which argument says it depends on the platform, and the two do not currently
+agree.
+
+| | What names the environment | What breaks |
+|---|---|---|
+| Android | `--flavor dev` / `--flavor prod` | A build that names no flavor is refused: the product flavors exist, and Gradle will not pick one for you. |
+| iOS | `--dart-define=FLAVOR=prod`, and **no** `--flavor` | Any `--flavor` is refused. Flutter looks for an Xcode scheme named after it — sentence-cased, so `Dev` or `Prod` — and the project has none. With no flavor it resolves the `Runner` scheme and builds. |
+
+So an iOS build that passes `--flavor` fails with *"You must specify a
+--flavor option to select one of the available schemes"*, listing every scheme
+in the project including the ones Swift Package Manager generates for the
+plugins. That message is Flutter saying the flavor it was given matches none
+of them, not that one is missing from the command.
+
+This is why `FLAVOR` exists as a dart-define at all, and it goes away once the
+iOS schemes are created — see [iOS flavors](#ios-flavors-not-done-yet). Until
+then an iOS **dev** build should use the emulators, because natively it is
+still carrying the production plist.
+
+A default flavor in `pubspec.yaml` (`flutter: default-flavor:`) does not
+bridge the gap: Flutter applies it to both platforms, so it would fix the
+Android command by breaking every iOS one.
 
 ## Day to day: the emulators
 
@@ -52,11 +70,19 @@ first:
 firebase emulators:start --project demo-filmio
 ```
 
-Then run the app as before:
+Then run the app:
+
+```bash
+flutter run --dart-define-from-file=env.json
+```
 
 ```bash
 flutter run --flavor dev --dart-define-from-file=env.json
 ```
+
+The first is iOS, the second Android. `--flavor` is Android-only here, and
+the split is not a preference — see [Naming the
+environment](#naming-the-environment) below.
 
 The emulator UI is at <http://localhost:4000>. Emulator data is thrown away on
 shutdown unless you ask for it to be kept:
@@ -70,7 +96,7 @@ works out on its own. A physical device needs your machine's address on the
 network:
 
 ```bash
-flutter run --flavor dev --dart-define-from-file=env.json --dart-define=FIREBASE_EMULATOR_HOST=192.168.1.42
+flutter run --dart-define-from-file=env.json --dart-define=FIREBASE_EMULATOR_HOST=192.168.1.42
 ```
 
 ### Running against production on purpose
@@ -79,8 +105,14 @@ There is a VS Code configuration called **filmio (PRODUCTION data)**, or on the
 command line:
 
 ```bash
-flutter run --flavor prod --dart-define-from-file=env.json --dart-define=USE_FIREBASE_EMULATOR=false --dart-define=FLAVOR=prod
+flutter run --dart-define-from-file=env.json --dart-define=FLAVOR=prod --dart-define=USE_FIREBASE_EMULATOR=false
 ```
+
+```bash
+flutter run --flavor prod --dart-define-from-file=env.json --dart-define=FLAVOR=prod --dart-define=USE_FIREBASE_EMULATOR=false
+```
+
+iOS first, Android second.
 
 Nothing it writes is reversible. Explicit flags rather than a default is the
 point.
@@ -166,11 +198,14 @@ changes inside the Xcode project, which are not safe to make by editing
 
 1. Open `ios/Runner.xcworkspace`.
 2. Duplicate the `Debug`, `Release` and `Profile` build configurations into
-   `Debug-dev`, `Release-dev`, `Profile-dev` and `Debug-prod`, `Release-prod`,
-   `Profile-prod`.
+   `Debug-Dev`, `Release-Dev`, `Profile-Dev` and `Debug-Prod`, `Release-Prod`,
+   `Profile-Prod`.
 3. Set `PRODUCT_BUNDLE_IDENTIFIER` per configuration —
    `com.dogukan.filmio.dev` for the dev set, `com.dogukan.filmio` for prod.
-4. Create schemes named `dev` and `prod` bound to those configurations.
+4. Create schemes named `Dev` and `Prod` bound to those configurations. The
+   capitalisation matters: Flutter looks for the sentence-cased form of
+   whatever `--flavor` is given, and expects the build configurations to be
+   named `<mode>-<scheme>`, which is where step 2's names come from.
 5. Add a build phase that copies the right `GoogleService-Info.plist` for the
    configuration in effect, and move the current one to
    `ios/config/prod/GoogleService-Info.plist`.

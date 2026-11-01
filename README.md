@@ -27,15 +27,18 @@ firebase emulators:start --project demo-filmio
 ### 3. Run
 
 ```bash
-flutter run --flavor dev --dart-define-from-file=env.json
+flutter run --dart-define-from-file=env.json
 ```
 
-`--flavor` is required on Android: `dev` and `prod` each compile in their own
-Firebase configuration, and a build that names neither is refused rather than
-guessed at. A dev run talks to the emulators started above unless it is told
-otherwise, so it cannot reach anybody's real data by accident. The VS Code
-launch configurations in `.vscode/launch.json` pass the defines for you,
-including one for running against production on purpose.
+On Android that needs `--flavor dev` as well: Android has product flavors —
+`dev` and `prod` each compile in their own Firebase configuration — and will
+not build without one being named. iOS is the other way round and takes no
+`--flavor` at all until its Xcode schemes exist, which they do not yet.
+
+Either way, a run that names no environment is a dev run against the emulators
+started above, so it cannot reach anybody's real data by accident. The VS Code
+launch configurations in `.vscode/launch.json` pass the right arguments per
+platform, including a pair for running against production on purpose.
 
 Building without the define starts the app but every TMDB request will fail
 with 401; the console prints a reminder on launch.
