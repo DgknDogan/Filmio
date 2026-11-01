@@ -24,4 +24,20 @@ enum AppFlavor {
 
     return values.firstWhere((flavor) => flavor.name == name, orElse: () => dev);
   }
+
+  /// Whether a build talks to the local emulators rather than a cloud
+  /// project.
+  ///
+  /// [defined] is the `USE_FIREBASE_EMULATOR` dart-define, or null when the
+  /// build did not mention it. Unmentioned, [dev] means the emulators: there
+  /// is a cloud dev project only once somebody creates one, and until then
+  /// the alternative to the emulators is not a dev project but a crash. So a
+  /// plain `flutter run` gets the one environment that is always there and
+  /// can never touch anyone's data.
+  ///
+  /// `USE_FIREBASE_EMULATOR=false` is how a dev build asks for the cloud dev
+  /// project instead, and is what the build then needs to actually exist.
+  static bool usesEmulators({required bool? defined, required AppFlavor flavor}) {
+    return defined ?? flavor == dev;
+  }
 }

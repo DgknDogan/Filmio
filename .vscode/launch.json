@@ -6,10 +6,10 @@
     // Secrets come from env.json, which is gitignored. Copy env.example.json
     // to env.json and fill in your TMDB token before running.
     //
-    // env.json also says which Firebase project a run opens. The copied
-    // example says the emulators, so start them first — `firebase emulators:start
-    // --project demo-filmio` — or pick one of the configurations below, which
-    // override the file. docs/firebase-environments.md has the detail.
+    // A run that names no environment is a dev run on the emulators, so start
+    // them first — `firebase emulators:start --project demo-filmio` — or pick
+    // one of the configurations below. docs/firebase-environments.md has the
+    // detail.
     "version": "0.2.0",
     "configurations": [
         {

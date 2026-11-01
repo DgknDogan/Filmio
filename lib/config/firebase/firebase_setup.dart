@@ -13,6 +13,15 @@ import '../../firebase_options_dev.dart' as dev;
 /// Firestore read and write in the app lands in.
 final currentFlavor = AppFlavor.resolve(buildFlavor: appFlavor, defined: flavorName);
 
+/// Whether this build talks to the emulators on the machine that started it.
+///
+/// True for a dev build that did not say otherwise — see
+/// [AppFlavor.usesEmulators] for why that is the default.
+final usesEmulators = AppFlavor.usesEmulators(
+  defined: hasEmulatorDefine ? emulatorDefine : null,
+  flavor: currentFlavor,
+);
+
 /// The ports in `firebase.json`. Changing one there means changing it here —
 /// the emulators bind what that file says, and the app has no way to ask.
 const _firestoreEmulatorPort = 8080;
@@ -41,7 +50,7 @@ const _emulatorOptions = FirebaseOptions(
 Future<void> initializeFirebase() async {
   await Firebase.initializeApp(options: _firebaseOptions);
 
-  if (useFirebaseEmulator) {
+  if (usesEmulators) {
     final host = _emulatorHost;
 
     FirebaseFirestore.instance.useFirestoreEmulator(host, _firestoreEmulatorPort);
@@ -70,9 +79,11 @@ Future<void> initializeFirebase() async {
 ///
 /// The emulator check comes first because an emulator run has no cloud
 /// project to need options for, and that is what lets the emulators be used
-/// before a dev project exists at all.
+/// before a dev project exists at all. Reaching the dev branch below means a
+/// build asked for the cloud dev project by name, with
+/// `USE_FIREBASE_EMULATOR=false`.
 FirebaseOptions get _firebaseOptions {
-  if (useFirebaseEmulator) return _emulatorOptions;
+  if (usesEmulators) return _emulatorOptions;
 
   return switch (currentFlavor) {
     AppFlavor.dev => dev.DefaultFirebaseOptions.currentPlatform,

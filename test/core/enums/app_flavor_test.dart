@@ -30,4 +30,25 @@ void main() {
       expect(AppFlavor.resolve(buildFlavor: 'PROD'), AppFlavor.dev);
     });
   });
+
+  group('AppFlavor.usesEmulators', () {
+    test('does what the build asked for, when it asked', () {
+      expect(AppFlavor.usesEmulators(defined: true, flavor: AppFlavor.prod), isTrue);
+      expect(AppFlavor.usesEmulators(defined: false, flavor: AppFlavor.dev), isFalse);
+    });
+
+    test('a dev build that said nothing gets the emulators', () {
+      // There is a cloud dev project only once somebody creates one, so the
+      // alternative here is not a dev project but a crash on launch. A plain
+      // `flutter run` gets the environment that is always there.
+      expect(AppFlavor.usesEmulators(defined: null, flavor: AppFlavor.dev), isTrue);
+    });
+
+    test('a prod build that said nothing gets the real project', () {
+      // Never the emulators by accident: a release build is this case, and
+      // pointing it at a machine that is not there would ship an app that
+      // cannot sign anybody in.
+      expect(AppFlavor.usesEmulators(defined: null, flavor: AppFlavor.prod), isFalse);
+    });
+  });
 }

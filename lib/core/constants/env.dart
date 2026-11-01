@@ -19,10 +19,16 @@ bool get hasTmdbToken => tmdbToken.isNotEmpty;
 /// and where an unnamed build is decided.
 const flavorName = String.fromEnvironment('FLAVOR');
 
-/// Whether to talk to the local Firebase emulators instead of a cloud
-/// project. False unless a build asks for it, so no release can ship pointed
-/// at a machine that is not there.
-const useFirebaseEmulator = bool.fromEnvironment('USE_FIREBASE_EMULATOR');
+/// Whether the build said anything about the emulators at all.
+///
+/// Three-way rather than two: not mentioning them is different from saying
+/// no. `AppFlavor.usesEmulators` is where the difference is decided.
+const hasEmulatorDefine = bool.hasEnvironment('USE_FIREBASE_EMULATOR');
+
+/// What the build said, when it said anything. Read together with
+/// [hasEmulatorDefine] — on its own this is false for a build that never
+/// mentioned it.
+const emulatorDefine = bool.fromEnvironment('USE_FIREBASE_EMULATOR');
 
 /// Where those emulators answer, when they are not where the platform would
 /// assume. Empty means the default: `localhost` everywhere except the Android

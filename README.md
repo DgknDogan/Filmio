@@ -30,10 +30,12 @@ firebase emulators:start --project demo-filmio
 flutter run --flavor dev --dart-define-from-file=env.json
 ```
 
-`--flavor` is required: `dev` and `prod` each compile in their own Firebase
-configuration, and a build that names neither is refused rather than guessed
-at. The VS Code launch configurations in `.vscode/launch.json` pass the defines
-for you, including one for running against production on purpose.
+`--flavor` is required on Android: `dev` and `prod` each compile in their own
+Firebase configuration, and a build that names neither is refused rather than
+guessed at. A dev run talks to the emulators started above unless it is told
+otherwise, so it cannot reach anybody's real data by accident. The VS Code
+launch configurations in `.vscode/launch.json` pass the defines for you,
+including one for running against production on purpose.
 
 Building without the define starts the app but every TMDB request will fail
 with 401; the console prints a reminder on launch.

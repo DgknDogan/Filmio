@@ -1,6 +1,5 @@
 import 'package:filmio/config/firebase/firebase_setup.dart';
 import 'package:filmio/config/routes/app_router.dart';
-import 'package:filmio/core/constants/env.dart';
 import 'package:filmio/core/custom/custom_button.dart';
 import 'package:filmio/core/enums/app_flavor.dart';
 import 'package:filmio/features/auth/presentation/pages/login_page.dart';
@@ -99,7 +98,7 @@ Future<T?> waitFor<T>(PatrolIntegrationTester $, T? Function() read) async {
 /// compiled out of a profile or release build, and a release run is exactly
 /// the one nobody is watching.
 void assertNotProduction() {
-  if (useFirebaseEmulator) return;
+  if (usesEmulators) return;
 
   if (currentFlavor == AppFlavor.prod) {
     fail(

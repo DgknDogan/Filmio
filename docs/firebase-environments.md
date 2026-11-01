@@ -27,6 +27,14 @@ not something to rely on. So the flavor drives both:
   `AppFlavor.resolve` reads, which is what picks between
   `lib/firebase_options.dart` and `lib/firebase_options_dev.dart`.
 
+**A dev build uses the emulators unless it says otherwise.** There is a cloud
+dev project only once somebody creates one, so for a build that names no
+environment the alternative to the emulators is not a dev project but a crash
+on launch. A plain `flutter run` therefore gets the one environment that is
+always there and can never touch anybody's data.
+`--dart-define=USE_FIREBASE_EMULATOR=false` is how a dev build asks for the
+cloud dev project instead — and is what then needs that project to exist.
+
 iOS is the exception, and the reason `FLAVOR` exists as a dart-define:
 `--flavor` needs an Xcode scheme of that name and fails the build without
 one. Until those schemes exist (see [iOS flavors](#ios-flavors-not-done-yet)),
@@ -36,7 +44,7 @@ production plist.
 
 ## Day to day: the emulators
 
-`env.example.json` copies to an `env.json` that says emulators and dev, so the
+A build that names no environment is a dev build on the emulators, so the
 default for a working copy is a run that cannot touch anyone's data. Start them
 first:
 
@@ -138,8 +146,9 @@ Nothing below has been done — it needs console access.
 
    This overwrites the placeholder `lib/firebase_options_dev.dart` — which
    exists only so the dev flavor compiles before this step, and which throws
-   on launch with these instructions — and writes
-   `android/app/src/dev/google-services.json` over the placeholder there.
+   with these instructions if a build asks for the cloud dev project before it
+   exists — and writes `android/app/src/dev/google-services.json` over the
+   placeholder there.
 5. Push the rules to it:
 
    ```bash
