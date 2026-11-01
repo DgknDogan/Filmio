@@ -37,6 +37,11 @@ migrate_working_dir/
 # and fill in your own TMDB token.
 /env.json
 
+# What `firebase emulators:start --export-on-exit` writes. It is a dump of
+# whatever was in the emulators — test accounts and all — and belongs to one
+# machine, not to the repository.
+/.emulator-data/
+
 # Symbolication related
 app.*.symbols
 
