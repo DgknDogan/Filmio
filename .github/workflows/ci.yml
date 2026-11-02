@@ -76,74 +76,6 @@ jobs:
             $(git ls-files '*.dart' | grep -E '\.(g|gr|gen)\.dart$|app_localizations')
           git diff --exit-code
 
-  android:
-    name: Android APK
-    needs: verify
-    if: github.event_name == 'push'
-    # Nothing is shipped from here — the app is on the App Store only, and
-    # TestFlight is the one delivery leg. This builds the release APK because a
-    # release build is the only thing that catches a Gradle, flavor or
-    # shrinking problem that a test run cannot, and leaves it as an artifact
-    # for anyone who wants to install it by hand.
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
-
-      # flutter-action caches the SDK, not Gradle. Without this the runner
-      # downloads the whole Gradle distribution and every dependency again on
-      # each build.
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
-          restore-keys: gradle-
-
-      - name: Dependencies
-        run: flutter pub get
-
-      # env.json is gitignored, so the build writes the same file locally from
-      # the repository secret. Never echoed — the heredoc keeps it out of the
-      # command line and the log.
-      #
-      # `FLAVOR` is in here as well as on the build command below. On Android
-      # `--flavor` is what counts — it picks both the product flavor and the
-      # `google-services.json` that goes with it — but stating it here too
-      # means the file says which project the build is for, rather than
-      # leaving it to be inferred from a flag further down.
-      - name: Write env.json
-        env:
-          TMDB_TOKEN: ${{ secrets.TMDB_TOKEN }}
-        run: |
-          cat > env.json <<JSON
-          {"TMDB_TOKEN": "$TMDB_TOKEN", "FLAVOR": "prod", "USE_FIREBASE_EMULATOR": false}
-          JSON
-
-      # `--flavor prod` is not optional now that the flavors exist: a build
-      # without it fails, which is the intended behaviour — it is also what
-      # compiles in the production `google-services.json` from
-      # `android/app/src/prod/`.
-      - name: Build
-        run: flutter build apk --release --flavor prod --dart-define-from-file=env.json
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: filmio-apk
-          path: build/app/outputs/flutter-apk/app-prod-release.apk
-          retention-days: 14
-
   ios:
     name: iOS TestFlight
     needs: verify
@@ -228,6 +160,15 @@ jobs:
       # The build number is the run number: TestFlight rejects a second upload
       # carrying a build number it has already seen, and pubspec's `+1` would
       # only ever work once.
+      #
+      # The version *name* is not overridden — it is whatever is left of
+      # pubspec's `version:`, and it has to be bumped past the last version
+      # released on the App Store before a push to master can reach
+      # TestFlight. A marketing version that is already out closes its own
+      # train, and the upload is refused with `Invalid Pre-Release Train. The
+      # train version '<x.y.z>' is closed for new build submissions`. Nothing
+      # earlier in this job can see that coming: the archive and the export
+      # succeed, and it fails at the last step of the longest job.
       - name: Compile
         if: steps.appstore.outputs.ready == 'true'
         run: |
@@ -295,17 +236,28 @@ jobs:
       # Uploading is what puts the build in TestFlight. Processing takes a few
       # minutes after this step goes green, and the build appears in App Store
       # Connect on its own.
+      #
+      # altool's exit code cannot be trusted on its own: a rejected upload has
+      # come back as a success here, which is how a green run left nothing in
+      # TestFlight. So its output is kept and read, and the step fails on
+      # altool's own error markers rather than on its status alone.
       - name: Upload to TestFlight
         if: steps.appstore.outputs.ready == 'true'
         env:
           KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
           ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
         run: |
+          set -o pipefail
           xcrun altool --upload-app \
             --type ios \
             --file "$RUNNER_TEMP"/ipa/*.ipa \
             --apiKey "$KEY_ID" \
-            --apiIssuer "$ISSUER_ID"
+            --apiIssuer "$ISSUER_ID" 2>&1 | tee "$RUNNER_TEMP/altool.log"
+
+          if grep -qE 'ERROR: \[altool|Failed to upload package' "$RUNNER_TEMP/altool.log"; then
+            echo "::error::altool reported an error, so nothing reached TestFlight. See the log above."
+            exit 1
+          fi
 
       - uses: actions/upload-artifact@v4
         if: steps.appstore.outputs.ready == 'true'
